@@ -1,0 +1,78 @@
+'use strict';
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('poke', {
+  addView: () => ipcRenderer.invoke('addView'),
+  getBrowserState: () => ipcRenderer.invoke('getBrowserState'),
+  addSiteTab: (url) => ipcRenderer.invoke('addSiteTab', url),
+  closeSiteTab: (tabId) => ipcRenderer.invoke('closeSiteTab', tabId),
+  selectSiteTab: (tabId) => ipcRenderer.invoke('selectSiteTab', tabId),
+  reorderTabs: (order) => ipcRenderer.invoke('reorderTabs', order),
+  setTabDialogOpen: (open) => ipcRenderer.invoke('setTabDialogOpen', open),
+  navigateSite: (action, value) => ipcRenderer.invoke('navigateSite', action, value),
+  removeView: (slot) => ipcRenderer.invoke('removeView', slot),
+  reloadGame: (slot) => ipcRenderer.invoke('reloadGame', slot),
+  selectAccount: (slot) => ipcRenderer.invoke('selectAccount', slot),
+  reorderViews: (order) => ipcRenderer.invoke('reorderViews', order),
+  setGameMode: (mode) => ipcRenderer.invoke('setGameMode', mode),
+  winMinimize: () => ipcRenderer.invoke('winMinimize'),
+  winMaximize: () => ipcRenderer.invoke('winMaximize'),
+  winClose: () => ipcRenderer.invoke('winClose'),
+  toggleConfig: () => ipcRenderer.invoke('toggleConfig'),
+  closeConfig: () => ipcRenderer.invoke('closeConfig'),
+  toggleXpPanel: () => ipcRenderer.invoke('toggleXpPanel'),
+  getXpHud: () => ipcRenderer.invoke('getXpHud'),
+  setXpHud: (on) => ipcRenderer.invoke('setXpHud', on),
+  openDiscord: () => ipcRenderer.invoke('openDiscord'),
+  setSidebar: (hidden) => ipcRenderer.invoke('setSidebar', hidden),
+  setBoxOpen: (open) => ipcRenderer.invoke('setBoxOpen', open),
+  getBox: () => ipcRenderer.invoke('getBox'),
+  getBags: () => ipcRenderer.invoke('getBags'),
+  getHuntLog: (species) => ipcRenderer.invoke('getHuntLog', species),
+  getHuntPerformance: (species) => ipcRenderer.invoke('getHuntPerformance', species),
+  getPokedexHubCatalog: () => ipcRenderer.invoke('getPokedexHubCatalog'),
+  getPokemonHub: (species) => ipcRenderer.invoke('getPokemonHub', species),
+  getShareStats: () => ipcRenderer.invoke('getShareStats'),
+  forceCommunitySync: () => ipcRenderer.invoke('forceCommunitySync'),
+  getDiag: () => ipcRenderer.invoke('getDiag'),
+  setDiag: (on) => ipcRenderer.invoke('setDiag', on),
+  isDev: () => ipcRenderer.invoke('isDev'),
+  getSoundSettings: () => ipcRenderer.invoke('getSoundSettings'),
+  setSoundEnabled: (on) => ipcRenderer.invoke('setSoundEnabled', on),
+  setSoundVolume: (v) => ipcRenderer.invoke('setSoundVolume', v),
+  pickSoundFile: () => ipcRenderer.invoke('pickSoundFile'),
+  resetSound: () => ipcRenderer.invoke('resetSound'),
+  testSound: () => ipcRenderer.invoke('testSound'),
+  getDiscordNotifications: () => ipcRenderer.invoke('getDiscordNotifications'),
+  setDiscordNotifications: (value) => ipcRenderer.invoke('setDiscordNotifications', value),
+  testDiscordNotifications: () => ipcRenderer.invoke('testDiscordNotifications'),
+  getKillWatchSettings: () => ipcRenderer.invoke('getKillWatchSettings'),
+  setKillWatchTimeout: (seconds) => ipcRenderer.invoke('setKillWatchTimeout', seconds),
+  getItemVis: () => ipcRenderer.invoke('getItemVis'),
+  setItemVis: (key, on) => ipcRenderer.invoke('setItemVis', key, on),
+  getItemAlert: () => ipcRenderer.invoke('getItemAlert'),
+  setItemAlert: (key, val) => ipcRenderer.invoke('setItemAlert', key, val),
+  onItemConfig: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('item-config', h); return () => ipcRenderer.removeListener('item-config', h); },
+  onShinyCaught: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('shiny-caught', h); return () => ipcRenderer.removeListener('shiny-caught', h); },
+  onSoundConfig: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('sound-config', h); return () => ipcRenderer.removeListener('sound-config', h); },
+  onPlaySound: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('play-sound', h); return () => ipcRenderer.removeListener('play-sound', h); },
+  onBrowserState: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('browser-state', h); return () => ipcRenderer.removeListener('browser-state', h); },
+  onConfigContext: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('config-context', h); return () => ipcRenderer.removeListener('config-context', h); },
+  onXpPanelState: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('xp-panel-state', h); return () => ipcRenderer.removeListener('xp-panel-state', h); },
+  onOpenPokeDataDetails: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('open-pokedata-details', h); return () => ipcRenderer.removeListener('open-pokedata-details', h); },
+  openDumpFolder: () => ipcRenderer.invoke('openDumpFolder'),
+  getVersion: () => ipcRenderer.invoke('getVersion'),
+  checkForUpdate: () => ipcRenderer.invoke('checkForUpdate'),
+  installUpdate: () => ipcRenderer.invoke('installUpdate'),
+  onAccounts: (cb) => {
+    const h = (_e, payload) => { try { cb(payload); } catch {} };
+    ipcRenderer.on('accounts', h);
+    return () => ipcRenderer.removeListener('accounts', h);
+  },
+  onUpdateStatus: (cb) => {
+    const h = (_e, payload) => { try { cb(payload); } catch {} };
+    ipcRenderer.on('update-status', h);
+    return () => ipcRenderer.removeListener('update-status', h);
+  },
+});

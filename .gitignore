@@ -1,0 +1,19 @@
+node_modules/
+dist*/
+*.tmp
+.superdesign/
+.claude/
+.codex/
+
+# logs de build
+*.log
+
+# chaves e segredos — nunca commitar
+.env
+.env.*
+
+# documento de trabalho do backend (contem detalhes de infra)
+SUPABASE-SETUP.md
+
+# documento de trabalho do broke (detalhes de infra)
+BROKE-CHANGES.md

@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Config</title>
+<style>
+  /* Poke Dream UI 2.0 — tokens e primitivas compartilhadas pela área de preferências. */
+  :root{
+    --bg:#070a0f; --shell:#0b1018; --surface:#101722; --surface-2:#151e2c; --surface-3:#1b2636;
+    --line:#202c3b; --line-strong:#304158; --text:#edf3f8; --text-2:#b9c5d2; --muted:#7f8da0;
+    --accent:#59d8c4; --accent-soft:#102925; --accent-line:#255d55;
+    --gold:#f5c85d; --gold-soft:#2d2511; --danger:#f06a73; --danger-soft:#2c1419;
+    --good:#61d692; --warn:#f0aa5f; --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --shadow:0 22px 60px rgba(0,0,0,.48); --ease:cubic-bezier(.22,.61,.36,1);
+    /* aliases mantidos para os handlers e componentes antigos */
+    --panel2:var(--surface-2); --line2:var(--line-strong); --txt:var(--text); --mut:var(--muted);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; }
+  body{ background:var(--bg); color:var(--text); font-family:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:13px; color-scheme:dark; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  button,input{ font:inherit; }
+  button{ cursor:pointer; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-thumb{ background:#2a384b; border:2px solid transparent; background-clip:padding-box; border-radius:10px; }
+
+  .settings-shell{ height:100%; display:flex; flex-direction:column; border:1px solid var(--line-strong); border-radius:var(--r-lg);
+    overflow:hidden; background:linear-gradient(155deg,rgba(89,216,196,.025),transparent 34%),var(--shell); box-shadow:var(--shadow); }
+  .settings-header{ height:64px; flex:0 0 64px; display:flex; align-items:center; gap:14px; padding:0 18px;
+    border-bottom:1px solid var(--line); background:rgba(8,12,18,.92); }
+  .settings-mark{ width:32px; height:32px; border-radius:50%; position:relative; flex:0 0 32px;
+    background:linear-gradient(#e85f6d 0 46%,#111722 46% 55%,#eef4f8 55%); box-shadow:0 0 0 2px #05080c,0 0 20px rgba(232,95,109,.15); }
+  .settings-mark:after{ content:""; position:absolute; width:8px; height:8px; border:3px solid #111722; border-radius:50%; background:#eef4f8; inset:9px; }
+  .settings-title{ min-width:0; }
+  .settings-title .eyebrow{ display:block; color:var(--accent); font-size:9px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+  .settings-title .t{ display:block; margin-top:2px; font-size:16px; font-weight:750; letter-spacing:-.01em; }
+  .scope-pill{ margin-left:auto; padding:5px 10px; border:1px solid var(--accent-line); border-radius:999px; color:var(--accent);
+    background:var(--accent-soft); font-size:10px; font-weight:700; white-space:nowrap; }
+  .x{ width:32px; height:32px; padding:0; border:1px solid var(--line); border-radius:var(--r-sm); background:transparent; color:var(--muted); }
+  .x:hover{ color:#fff; background:var(--danger-soft); border-color:#69303a; }
+
+  .settings-layout{ flex:1; min-height:0; display:grid; grid-template-columns:220px minmax(0,1fr); }
+  .settings-nav{ min-height:0; padding:14px 10px; overflow-y:auto; border-right:1px solid var(--line); background:#090e15; }
+  .nav-label{ padding:8px 10px 5px; color:#5f6e81; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+  .nav-item{ width:100%; min-height:38px; margin:2px 0; padding:7px 10px; display:flex; align-items:center; gap:10px; border:1px solid transparent;
+    border-radius:10px; background:transparent; color:var(--text-2); text-align:left; font-size:12px; font-weight:650; }
+  .nav-item .ni{ width:22px; color:var(--muted); text-align:center; font-size:14px; }
+  .nav-item:hover{ color:var(--text); background:var(--surface); }
+  .nav-item.active{ color:var(--accent); background:var(--accent-soft); border-color:var(--accent-line); }
+  .nav-item:disabled{ opacity:.36; cursor:not-allowed; }
+  .nav-meta{ margin:14px 8px 0; padding:11px; border:1px solid var(--line); border-radius:var(--r-md); color:var(--muted); font-size:10.5px; line-height:1.5; }
+  .nav-meta b{ color:var(--text-2); }
+
+  .settings-content{ min-width:0; min-height:0; position:relative; overflow:hidden; background:
+    radial-gradient(600px 260px at 100% 0,rgba(89,216,196,.045),transparent 65%),var(--bg); }
+  .settings-home,.cl-panel{ position:absolute; inset:0; padding:24px 28px 30px; overflow-y:auto; }
+  .cl-panel{ display:none; background:transparent; }
+  .cl-panel.show{ display:block; animation:page-in .16s var(--ease); }
+  .settings-home.hidden{ display:none; }
+  @keyframes page-in{ from{ opacity:0; transform:translateY(5px); } to{ opacity:1; transform:none; } }
+  .page-head{ display:flex; align-items:flex-start; gap:12px; margin-bottom:20px; }
+  .page-head .x{ display:none; }
+  .page-head > .t,.page-copy > .t{ display:block; margin:0; color:var(--text); font-size:22px; font-weight:750; letter-spacing:-.025em; }
+  .page-copy h1{ margin:0; font-size:22px; letter-spacing:-.025em; }
+  .page-copy p{ max-width:640px; margin:5px 0 0; color:var(--muted); line-height:1.55; }
+  .scope-note{ margin-left:auto; padding:4px 9px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:9.5px; white-space:nowrap; }
+  .settings-card{ margin-bottom:12px; padding:16px; border:1px solid var(--line); border-radius:var(--r-md); background:rgba(16,23,34,.84); }
+  .settings-card.warn{ border-color:#654923; background:#21180d; }
+  .settings-card h2{ margin:0 0 5px; font-size:13px; }
+  .settings-card p{ margin:0; color:var(--muted); line-height:1.55; }
+  .settings-card > .btn{ margin:6px 6px 0 0; }
+  .settings-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .settings-grid .settings-card{ margin:0; }
+  .setting-row{ min-height:56px; display:flex; align-items:center; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .setting-row:last-child{ border-bottom:0; }
+  .setting-copy{ min-width:0; flex:1; }
+  .setting-copy b{ display:block; font-size:12.5px; }
+  .setting-copy span{ display:block; margin-top:3px; color:var(--muted); font-size:10.5px; line-height:1.4; }
+  .row{ color:var(--muted); margin:0 0 11px; line-height:1.5; } .row b{ color:var(--text); }
+  .btn{ min-height:36px; padding:0 13px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:var(--surface-2);
+    color:var(--text); font-size:11.5px; font-weight:650; transition:.14s var(--ease); }
+  .btn:hover{ background:var(--surface-3); border-color:#405671; }
+  .btn.on{ border-color:var(--accent-line); color:var(--accent); background:var(--accent-soft); }
+  .btn-block{ width:100%; margin-top:8px; }
+  .discord-btn{ display:flex; align-items:center; justify-content:center; gap:8px; border-color:#5865f2; color:#cbd0ff; }
+  .discord-btn:hover{ background:#202852; border-color:#7480ff; }
+  .discord-btn svg{ width:17px; height:17px; fill:currentColor; }
+  .status{ color:var(--muted); min-height:16px; font-size:10.5px; line-height:1.5; }
+  .save-state{ position:absolute; right:20px; bottom:18px; z-index:20; padding:8px 12px; border:1px solid var(--accent-line); border-radius:999px;
+    background:#0d211e; color:var(--accent); font-size:10.5px; font-weight:700; opacity:0; transform:translateY(8px); pointer-events:none; transition:.18s var(--ease); }
+  .save-state.show{ opacity:1; transform:none; }
+  .sep{ border-top:1px solid var(--line); margin:16px 0; }
+  .chk{ display:flex; align-items:center; gap:9px; color:var(--text); cursor:pointer; }
+  .chk input{ width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
+  .toggle{ position:relative; width:42px; height:24px; flex:0 0 42px; cursor:pointer; }
+  .toggle input{ position:absolute; opacity:0; pointer-events:none; }
+  .toggle span{ position:absolute; inset:0; border:1px solid var(--line-strong); border-radius:999px; background:#0a1018; transition:.16s var(--ease); }
+  .toggle span:after{ content:""; position:absolute; width:16px; height:16px; left:3px; top:3px; border-radius:50%; background:#718095; transition:.16s var(--ease); }
+  .toggle input:checked + span{ border-color:var(--accent-line); background:var(--accent-soft); }
+  .toggle input:checked + span:after{ transform:translateX(18px); background:var(--accent); box-shadow:0 0 10px rgba(89,216,196,.35); }
+  .toggle input:focus-visible + span{ outline:2px solid var(--accent); outline-offset:2px; }
+  input[type=range]{ accent-color:var(--accent); }
+  .alr-row{ min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid var(--line); color:var(--text-2); }
+  .alr-row:last-child{ border-bottom:0; }
+  .alr-row small{ margin-left:5px; color:var(--muted); font-size:8.5px; font-weight:500; }
+  .alr-row input{ width:108px; height:32px; padding:0 9px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:#0a1018; color:var(--text); outline:none; text-align:right; }
+  .alr-row input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(89,216,196,.1); }
+  .text-field{ width:100%; height:38px; margin-top:9px; padding:0 11px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:#0a1018; color:var(--text); outline:none; }
+  .text-field:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(89,216,196,.1); }
+  .text-field::placeholder{ color:#596779; }
+  .auto-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .auto-card{ margin:0; padding:14px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+  .auto-card:has([data-auto-enabled]:checked){ border-color:var(--accent-line); background:linear-gradient(145deg,rgba(89,216,196,.08),var(--surface)); }
+  .auto-card .chk{ margin-bottom:8px; font-weight:750; }
+  .auto-card input:disabled{ opacity:.45; cursor:not-allowed; }
+  .auto-card .alr-row{ display:block; padding:8px 0; }
+  .auto-card .alr-row > span:first-child{ display:block; margin-bottom:6px; }
+  .auto-range{ width:100%; display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:6px; color:var(--muted); font-size:9px; }
+  .alr-row .auto-range input{ width:100%; min-width:0; }
+  .cl-body{ min-height:0; }
+  .cl-v{ margin-bottom:13px; padding:14px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+  .cl-ver{ color:var(--accent); font-size:13px; font-weight:800; }
+  .cl-date{ color:var(--muted); font-size:9.5px; font-weight:400; }
+  .cl-body ul{ margin:8px 0 0; padding-left:18px; }
+  .cl-body li{ margin-bottom:5px; color:var(--text-2); font-size:11px; line-height:1.4; }
+  .cl-empty{ color:var(--muted); }
+  .share-state{ margin:12px 0; padding:11px 12px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--muted); font-size:10.5px; line-height:1.5; }
+  .share-state.ok{ border-color:#2e6850; color:#9ad9b6; }
+  .share-state.warn{ border-color:#6d5029; color:#dfbd82; }
+  .share-state.off{ color:#758499; }
+  .generic-config-only{ display:none; }
+  body.generic-config .dream-only{ display:none !important; }
+  body.generic-config .generic-config-only{ display:block; }
+  body.generic-config .settings-layout{ grid-template-columns:190px minmax(0,1fr); }
+  @media(max-width:680px){
+    .settings-layout{ grid-template-columns:168px minmax(0,1fr); }
+    .settings-home,.cl-panel{ padding:20px; }
+    .settings-grid,.auto-grid{ grid-template-columns:1fr; }
+    .scope-pill{ display:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="h"><span class="t" id="config-title">Poke Dream Launcher</span><button class="x" id="x" title="Fechar">✕</button></div>
+  <div class="row">Versao instalada: <b id="ver">—</b></div>
+  <div class="generic-config-only" id="generic-config"><div class="row"><b id="generic-title">Site</b></div><div class="status" id="generic-url"></div><div class="status" id="generic-views" style="margin-top:7px"></div></div>
+  <button class="btn dream-only" id="sound-btn">🔊 Som</button>
+  <button class="btn dream-only" id="notifications-btn">🔔 Notificações</button>
+  <button class="btn dream-only" id="items-btn">🎒 Itens</button>
+  <button class="btn dream-only" id="share-btn">📡 Estatísticas comunitárias</button>
+  <button class="btn dream-only" id="failsafe-btn">🛡 Failsafe</button>
+  <button class="btn discord-btn dream-only" id="discord-btn" title="Entre no Discord do Poke Dream Launcher">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.51c-.21.38-.46.89-.63 1.29a18.3 18.3 0 0 0-5.58 0 13.5 13.5 0 0 0-.64-1.29 19.7 19.7 0 0 0-4.89 1.52C.6 8.96-.24 13.43.18 17.83a19.9 19.9 0 0 0 6 3.03c.48-.66.91-1.36 1.28-2.1-.7-.26-1.37-.59-2-.97l.49-.38c3.86 1.79 8.04 1.79 11.86 0l.49.38c-.63.38-1.3.71-2 .97.37.74.8 1.44 1.28 2.1a19.9 19.9 0 0 0 6-3.03c.5-5.1-.86-9.53-3.26-13.46ZM8.02 15.12c-1.16 0-2.11-1.06-2.11-2.36s.93-2.36 2.11-2.36c1.18 0 2.13 1.07 2.11 2.36 0 1.3-.93 2.36-2.11 2.36Zm7.97 0c-1.16 0-2.11-1.06-2.11-2.36s.93-2.36 2.11-2.36c1.18 0 2.13 1.07 2.11 2.36 0 1.3-.93 2.36-2.11 2.36Z"/></svg>
+    <span>Discord — sugestões e suporte</span>
+  </button>
+  <button class="btn" id="check">🔄 Verificar atualizacao</button>
+  <button class="btn on" id="install" style="display:none">↻ Reiniciar e instalar</button>
+  <div class="status" id="status"></div>
+
+  <div class="dream-only" id="dev-section" style="display:none">
+    <div class="sep"></div>
+    <label class="chk" title="Grava os frames de rede (WebSocket + respostas /api/) num arquivo, pra analisar o que o jogo manda."><input type="checkbox" id="diag"> 🛠 Gravar dump de diagnostico</label>
+    <button class="btn" id="dumpfolder">📂 Abrir pasta do dump</button>
+    <div class="status" id="diag-status"></div>
+  </div>
+
+  <div class="cl-panel" id="sound">
+    <div class="h"><button class="x" id="snd-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🔊 Som</span></div>
+    <div class="cl-body">
+      <label class="chk" style="margin-top:2px"><input type="checkbox" id="snd-enabled"> 🌟 Tocar som ao capturar shiny</label>
+      <div class="row" style="margin-bottom:6px">Volume</div>
+      <input type="range" id="snd-volume" min="0" max="100" step="1" style="width:100%;accent-color:var(--gold);cursor:pointer;margin-bottom:12px">
+      <div class="row">Som atual: <b id="snd-name">—</b></div>
+      <button class="btn" id="snd-test">▶ Testar</button>
+      <button class="btn" id="snd-pick">📂 Escolher áudio do PC…</button>
+      <button class="btn" id="snd-reset">↺ Restaurar som padrão</button>
+      <div class="status">Aceita mp3, wav, ogg ou m4a. O som toca quando qualquer uma das suas telas captura um shiny.</div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="notifications">
+    <div class="h"><button class="x" id="notifications-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🔔 Notificações no Discord</span></div>
+    <div class="cl-body">
+      <label class="setting-row" for="notifications-enabled">
+        <span class="setting-copy"><b>Conquistas e drops</b><span>Envia capturas e drops raros para o canal principal.</span></span>
+        <span class="toggle"><input type="checkbox" id="notifications-enabled"><span aria-hidden="true"></span></span>
+      </label>
+      <button class="btn" id="notifications-test" style="display:none">Testar webhook</button>
+      <label class="setting-row" for="notifications-rare-drops"><span class="setting-copy"><b>Drops raros</b><span>Itens da lista rara, quantidade e Pokémon que dropou.</span></span><span class="toggle"><input type="checkbox" id="notifications-rare-drops"><span aria-hidden="true"></span></span></label>
+      <label class="setting-row" for="notifications-mythic"><span class="setting-copy"><b>Capturas Mythic</b><span>Espécie, nível, tier, potência e bola usada.</span></span><span class="toggle"><input type="checkbox" id="notifications-mythic"><span aria-hidden="true"></span></span></label>
+      <label class="setting-row" for="notifications-shiny"><span class="setting-copy"><b>Capturas shiny</b><span>Informações completas do Pokémon que entrou na Box.</span></span><span class="toggle"><input type="checkbox" id="notifications-shiny"><span aria-hidden="true"></span></span></label>
+      <div class="sep"></div>
+      <div class="row"><b>Alertas de morte e travamento</b><br>Esses alertas vão para um canal separado e nascem desligados.</div>
+      <label class="setting-row" for="notifications-discord-user">
+        <span class="setting-copy"><b>Seu usuário para a menção</b><span>Para o @ avisar de verdade, cole seu ID numérico do Discord. O apelido (por exemplo, marcos3777) sozinho não pode ser localizado por um webhook.</span></span>
+      </label>
+      <input class="text-field" id="notifications-discord-user" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="ID do Discord (17–20 números)">
+      <div class="status" style="margin-top:7px">Ative o Modo desenvolvedor no Discord e use “Copiar ID do usuário”. Você também pode colar uma menção como &lt;@123…&gt;.</div>
+      <label class="setting-row" for="notifications-critical-enabled">
+        <span class="setting-copy"><b>Ativar alertas pessoais</b><span>Só pode ser ligado depois que um ID válido for informado.</span></span>
+        <span class="toggle"><input type="checkbox" id="notifications-critical-enabled"><span aria-hidden="true"></span></span>
+      </label>
+      <label class="setting-row" for="notifications-deaths"><span class="setting-copy"><b>Mortes na party</b><span>Avisa quando o HP de um Pokémon da party chega a zero.</span></span><span class="toggle"><input type="checkbox" id="notifications-deaths"><span aria-hidden="true"></span></span></label>
+      <label class="setting-row" for="notifications-stalls"><span class="setting-copy"><b>Travamento repetido</b><span>Avisa se a mesma tela precisar de um segundo F5 seguido.</span></span><span class="toggle"><input type="checkbox" id="notifications-stalls"><span aria-hidden="true"></span></span></label>
+      <div class="row" style="margin-top:14px"><b>Destinos</b><br>Os dois canais são definidos pelo responsável do launcher e não podem ser alterados nesta tela.</div>
+      <div class="share-state off" id="notifications-status" aria-live="polite">Carregando…</div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="share">
+    <div class="h"><button class="x" id="share-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">📡 Estatísticas comunitárias</span></div>
+    <div class="cl-body">
+      <div class="row" style="margin-bottom:10px">O launcher envia automaticamente seu histórico de caçada para reunir taxas e recordes da comunidade.</div>
+      <div class="share-state" id="share-state" aria-live="polite">Carregando…</div>
+      <button class="btn" id="share-force" style="display:none">🧪 Enviar agora (dev)</button>
+      <div class="sep"></div>
+      <div class="status" style="margin-bottom:8px"><b>Envia</b> por especie: encontros, capturas, shinies, bolas jogadas e tempo de cacada. Nos rankings, também mostra publicamente o nome do treinador, Pokémon e nível usados no recorde.</div>
+      <div class="row">Seu ID anonimo: <b id="share-id" style="font-size:10px">—</b></div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="failsafe">
+    <div class="h"><button class="x" id="failsafe-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🛡 Failsafe</span></div>
+    <div class="cl-body">
+      <div class="row" style="margin-bottom:12px">Depois de detectar uma kill, o launcher recarrega somente a tela que ficar sem novas kills durante o tempo escolhido.</div>
+      <div class="auto-card">
+        <div class="alr-row"><span>Tempo sem novas kills</span><input type="number" id="failsafe-seconds" min="10" max="600" step="5"></div>
+        <div class="status" id="failsafe-status">Carregando…</div>
+      </div>
+      <div class="status">O padrão é 30 segundos. A contagem começa novamente na próxima kill depois que o valor for alterado.</div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="items">
+    <div class="h"><button class="x" id="itm-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🎒 Itens</span></div>
+    <div class="cl-body">
+      <label class="setting-row" for="xp-hud-enabled">
+        <span class="setting-copy"><b>XP/h sobre as telas</b><span>Mostra o atalho em cada conta e permite abrir o resumo flutuante conjunto.</span></span>
+        <span class="toggle"><input type="checkbox" id="xp-hud-enabled" checked><span aria-hidden="true"></span></span>
+      </label>
+      <div class="row" style="margin:12px 0">Escolha o que deseja configurar.</div>
+      <button class="btn" id="item-display-btn">👁 Itens na barra</button>
+      <button class="btn" id="item-alerts-btn">⚠ Alerta de item baixo</button>
+      <div class="status" style="margin-top:6px">Visibilidade e alertas usam configurações independentes.</div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="item-display">
+    <div class="h"><button class="x" id="item-display-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">👁 Itens na barra</span></div>
+    <div class="cl-body">
+      <div class="row" style="margin-bottom:10px">Escolha o que aparece abaixo de cada tela na barra lateral.</div>
+      <label class="chk"><input type="checkbox" data-item="poke_ball"> Poke Ball</label>
+      <label class="chk"><input type="checkbox" data-item="ultra_ball"> Ultra Ball</label>
+      <label class="chk"><input type="checkbox" data-item="premier_ball"> Premier Ball</label>
+      <label class="chk"><input type="checkbox" data-item="potion"> Potion</label>
+      <label class="chk"><input type="checkbox" data-item="revive"> Revive</label>
+      <div class="status">Todos ficam visíveis por padrão. Desmarque tudo para esconder os itens por completo.</div>
+    </div>
+  </div>
+
+  <div class="cl-panel" id="item-alerts">
+    <div class="h"><button class="x" id="item-alerts-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">⚠ Alerta de item baixo</span></div>
+    <div class="cl-body">
+      <div class="row" style="margin-bottom:10px"><b>Alerta de item baixo</b><br>Se um item (visivel) ficar abaixo do valor, a tela fica com <b style="color:#ff6b6f">borda vermelha</b>. Use 0 para desligar.</div>
+      <div class="alr-row"><span>Poke Ball <small>padrão 2.000</small></span><input type="number" min="0" step="100" data-alert="poke_ball"></div>
+      <div class="alr-row"><span>Ultra Ball <small>padrão 2.000</small></span><input type="number" min="0" step="100" data-alert="ultra_ball"></div>
+      <div class="alr-row"><span>Premier Ball <small>padrão 2.000</small></span><input type="number" min="0" step="100" data-alert="premier_ball"></div>
+      <div class="alr-row"><span>Potion <small>padrão 2.000</small></span><input type="number" min="0" step="100" data-alert="potion"></div>
+      <div class="alr-row"><span>Revive <small>padrão 500</small></span><input type="number" min="0" step="100" data-alert="revive"></div>
+    </div>
+  </div>
+
+<script>
+  const P = window.poke || null;
+  function buildSettingsShell(){
+    const body = document.body;
+    const oldHeader = body.querySelector(':scope > .h');
+    const title = document.getElementById('config-title');
+    const close = document.getElementById('x');
+    const versionRow = body.querySelector(':scope > .row');
+    const generic = document.getElementById('generic-config');
+    const discord = document.getElementById('discord-btn');
+    const check = document.getElementById('check');
+    const installButton = document.getElementById('install');
+    const updateStatus = document.getElementById('status');
+    const dev = document.getElementById('dev-section');
+    const panels = Array.from(body.querySelectorAll(':scope > .cl-panel'));
+
+    const shell = document.createElement('div'); shell.className = 'settings-shell';
+    const header = document.createElement('header'); header.className = 'settings-header';
+    const mark = document.createElement('span'); mark.className = 'settings-mark'; mark.setAttribute('aria-hidden','true');
+    const titleWrap = document.createElement('div'); titleWrap.className = 'settings-title';
+    title.className = 't';
+    titleWrap.innerHTML = '<span class="eyebrow">Preferências do launcher</span>';
+    titleWrap.appendChild(title);
+    const scope = document.createElement('span'); scope.id = 'config-scope'; scope.className = 'scope-pill'; scope.textContent = 'Global · todas as contas';
+    header.append(mark,titleWrap,scope,close);
+
+    const layout = document.createElement('div'); layout.className = 'settings-layout';
+    const nav = document.createElement('nav'); nav.className = 'settings-nav'; nav.setAttribute('aria-label','Categorias de configurações');
+    nav.innerHTML = '<div class="nav-label">Configurações</div>';
+    const homeButton = document.createElement('button');
+    homeButton.type = 'button'; homeButton.id = 'settings-home-btn'; homeButton.className = 'nav-item active';
+    homeButton.innerHTML = '<span class="ni">⌂</span><span>Geral</span>';
+    nav.appendChild(homeButton);
+    const navDefs = [
+      ['items-btn','◫','Interface e itens'], ['sound-btn','♪','Som'], ['notifications-btn','♢','Notificações'], ['failsafe-btn','◇','Failsafe'],
+      ['share-btn','◎','Estatísticas']
+    ];
+    navDefs.forEach(function(def){
+      const button = document.getElementById(def[0]); if (!button) return;
+      button.classList.remove('btn'); button.classList.add('nav-item');
+      button.innerHTML = '<span class="ni">'+def[1]+'</span><span>'+def[2]+'</span>';
+      nav.appendChild(button);
+    });
+    const inventoryLabel = document.createElement('div'); inventoryLabel.className = 'nav-label'; inventoryLabel.textContent = 'Acesso rápido'; nav.appendChild(inventoryLabel);
+    const directDefs = [
+      ['item-display-btn','◉','Itens na barra'], ['item-alerts-btn','!','Alertas']
+    ];
+    directDefs.forEach(function(def){
+      const button = document.getElementById(def[0]); if (!button) return;
+      button.classList.remove('btn'); button.classList.add('nav-item');
+      button.innerHTML = '<span class="ni">'+def[1]+'</span><span>'+def[2]+'</span>';
+      nav.appendChild(button);
+    });
+    const navMeta = document.createElement('div'); navMeta.id = 'config-nav-meta'; navMeta.className = 'nav-meta';
+    navMeta.innerHTML = '<b>Escopo global</b><br>Som, alertas e failsafe valem para todas as contas.';
+    nav.appendChild(navMeta);
+
+    const content = document.createElement('main'); content.className = 'settings-content';
+    const home = document.createElement('section'); home.id = 'settings-home'; home.className = 'settings-home';
+    home.innerHTML = '<div class="page-head"><div class="page-copy"><h1>Geral</h1><p>Atualização, suporte e informações desta instalação.</p></div><span class="scope-note">Launcher inteiro</span></div>';
+    const aboutGrid = document.createElement('div'); aboutGrid.className = 'settings-grid';
+    const versionCard = document.createElement('div'); versionCard.className = 'settings-card';
+    versionCard.innerHTML = '<h2>Aplicativo</h2><p>Versão instalada e canal de suporte.</p>';
+    versionCard.append(versionRow,discord);
+    discord.classList.add('btn-block');
+    const updateCard = document.createElement('div'); updateCard.className = 'settings-card';
+    updateCard.innerHTML = '<h2>Atualização</h2><p>Busca uma nova versão sem instalar ou reiniciar automaticamente.</p>';
+    check.classList.add('btn-block'); installButton.classList.add('btn-block');
+    updateCard.append(check,installButton,updateStatus);
+    aboutGrid.append(versionCard,updateCard);
+    home.append(generic,aboutGrid);
+    if (dev){
+      const diagCard = document.createElement('div'); diagCard.className = 'settings-card dream-only'; diagCard.style.marginTop = '12px';
+      diagCard.innerHTML = '<h2>Diagnóstico</h2><p>Ferramentas locais disponíveis apenas durante o desenvolvimento.</p>';
+      diagCard.appendChild(dev); home.appendChild(diagCard);
+    }
+
+    const panelTitles = { sound:'Som', notifications:'Notificações no Discord', share:'Estatísticas comunitárias', failsafe:'Failsafe', items:'Interface e itens', 'item-display':'Itens na barra', 'item-alerts':'Alertas' };
+    const panelDescriptions = {
+      sound:'Áudio usado quando qualquer conta captura um shiny.',
+      notifications:'Escolha quais eventos importantes chegam ao seu canal.',
+      share:'Status do envio automático e informações usadas nos rankings.',
+      failsafe:'Proteção contra telas travadas depois de uma kill observada.',
+      items:'Controle o painel de XP/h e a exibição do inventário.',
+      'item-display':'Escolha os suprimentos visíveis em cada conta da barra lateral.',
+      'item-alerts':'Defina o ponto em que cada suprimento passa a exigir atenção.',
+    };
+    panels.forEach(function(panel){
+      const panelHeader = panel.querySelector(':scope > .h');
+      if (panelHeader){
+        panelHeader.className = 'page-head'; panelHeader.querySelectorAll('[style]').forEach(function(el){ el.removeAttribute('style'); });
+        const panelTitle = panelHeader.querySelector('.t');
+        if (panelTitle){
+          panelTitle.textContent = panelTitles[panel.id] || panelTitle.textContent;
+          const copy = document.createElement('div'); copy.className = 'page-copy';
+          copy.appendChild(panelTitle);
+          const description = document.createElement('p'); description.textContent = panelDescriptions[panel.id] || '';
+          copy.appendChild(description); panelHeader.appendChild(copy);
+        }
+      }
+      const scopeNote = document.createElement('span'); scopeNote.className = 'scope-note';
+      scopeNote.textContent = panel.id === 'share' ? 'Dados comunitários' : 'Todas as contas';
+      if (panelHeader) panelHeader.appendChild(scopeNote);
+      const panelBody = panel.querySelector(':scope > .cl-body');
+      if (panelBody) panelBody.classList.add('settings-card');
+      content.appendChild(panel);
+    });
+    const itemsBody = document.querySelector('#items > .cl-body');
+    if (itemsBody){
+      itemsBody.querySelectorAll('.btn').forEach(function(button){ button.classList.add('btn-block'); });
+    }
+
+    content.prepend(home);
+    const saved = document.createElement('div'); saved.id = 'save-state'; saved.className = 'save-state'; saved.setAttribute('aria-live','polite'); saved.textContent = '✓ Configuração salva';
+    content.appendChild(saved);
+    layout.append(nav,content); shell.append(header,layout);
+    body.replaceChildren(shell);
+    if (oldHeader) oldHeader.remove();
+  }
+  buildSettingsShell();
+
+  const settingsHome = document.getElementById('settings-home');
+  const configPanels = Array.from(document.querySelectorAll('.cl-panel'));
+  const navByPanel = { items:'items-btn', sound:'sound-btn', notifications:'notifications-btn', failsafe:'failsafe-btn', share:'share-btn',
+    'item-display':'item-display-btn', 'item-alerts':'item-alerts-btn' };
+  let saveToastTimer = null;
+  function savedFeedback(message){
+    const toast = document.getElementById('save-state'); if (!toast) return;
+    toast.textContent = message || '✓ Configuração salva'; toast.classList.add('show');
+    if (saveToastTimer) clearTimeout(saveToastTimer);
+    saveToastTimer = setTimeout(function(){ toast.classList.remove('show'); },1800);
+  }
+  function openConfigPanel(id){
+    configPanels.forEach(function(panel){ panel.classList.toggle('show',panel.id === id); });
+    settingsHome.classList.toggle('hidden',!!id);
+    document.querySelectorAll('.settings-nav .nav-item').forEach(function(button){
+      const active = button.id === (id ? navByPanel[id] : 'settings-home-btn');
+      button.classList.toggle('active',active);
+      if (active) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
+    });
+  }
+  document.getElementById('settings-home-btn').onclick = function(){ openConfigPanel(null); };
+  const statusEl = document.getElementById('status');
+  const install = document.getElementById('install');
+  function setStatus(t){ statusEl.textContent = t || ''; }
+
+  function applyConfigContext(context){
+    const generic = context && context.mode === 'generic';
+    document.body.classList.toggle('generic-config', generic);
+    document.getElementById('config-title').textContent = generic ? 'Navegador' : 'Poke Dream Launcher';
+    document.getElementById('config-scope').textContent = generic
+      ? 'Esta aba · ' + (Number(context && context.views) || 0) + ' sessões'
+      : 'Global · todas as contas';
+    const navMeta = document.getElementById('config-nav-meta');
+    if (navMeta) navMeta.innerHTML = generic
+      ? '<b>Escopo da aba</b><br>Estas informações descrevem apenas as sessões deste site.'
+      : '<b>Escopo global</b><br>Som, alertas e failsafe valem para todas as contas.';
+    if (generic) {
+      openConfigPanel(null);
+      document.getElementById('generic-title').textContent = context.title || 'Site';
+      document.getElementById('generic-url').textContent = context.url || '';
+      const count = Number(context.views) || 0;
+      document.getElementById('generic-views').textContent = count + (count === 1 ? ' sessão independente aberta.' : ' sessões independentes abertas.') + ' Cada tela mantém seu próprio login.';
+    }
+  }
+  if (P && P.onConfigContext) P.onConfigContext(applyConfigContext);
+
+  document.getElementById('x').onclick = function(){ if (P && P.closeConfig) P.closeConfig(); };
+  document.getElementById('discord-btn').onclick = function(){ if (P && P.openDiscord) P.openDiscord(); };
+  if (P && P.getVersion) P.getVersion().then(function(v){ document.getElementById('ver').textContent = v; });
+
+  document.getElementById('check').onclick = function(){
+    if (!P || !P.checkForUpdate) return;
+    install.style.display = 'none';
+    setStatus('Verificando atualizacao…');
+    P.checkForUpdate();
+  };
+  install.onclick = function(){ if (P && P.installUpdate) P.installUpdate(); };
+
+  // ---- diagnostico (dump) — só local (dev), escondido na versao publicada ----
+  if (P && P.isDev) P.isDev().then(function(dev){
+    if (!dev) return;
+    const sec = document.getElementById('dev-section'); if (sec) sec.style.display = '';
+    const force = document.getElementById('share-force'); if (force) force.style.display = '';
+    const diag = document.getElementById('diag');
+    const diagStatus = document.getElementById('diag-status');
+    if (P.getDiag) P.getDiag().then(function(on){ diag.checked = !!on; });
+    diag.onchange = function(){
+      if (!P.setDiag) return;
+      P.setDiag(diag.checked);
+      diagStatus.textContent = diag.checked
+        ? 'Gravando… abra/jogue o que quer capturar, depois desligue e abra a pasta.'
+        : 'Parado. Clique em "Abrir pasta do dump" pra pegar o arquivo.';
+    };
+    document.getElementById('dumpfolder').onclick = function(){ if (P.openDumpFolder) P.openDumpFolder(); };
+  });
+
+  // ---- som ----
+  const sound = document.getElementById('sound');
+  const sndEnabled = document.getElementById('snd-enabled');
+  const sndVolume = document.getElementById('snd-volume');
+  const sndName = document.getElementById('snd-name');
+  function refreshSound() {
+    if (!P || !P.getSoundSettings) return;
+    P.getSoundSettings().then(function(s){
+      if (!s) return;
+      sndEnabled.checked = s.enabled !== false;
+      sndVolume.value = Math.round((s.volume != null ? s.volume : 0.8) * 100);
+      sndName.textContent = s.name || 'Padrão';
+    });
+  }
+  document.getElementById('sound-btn').onclick = function(){ openConfigPanel('sound'); refreshSound(); };
+  document.getElementById('snd-back').onclick = function(){ openConfigPanel(null); };
+  sndEnabled.onchange = function(){ if (P && P.setSoundEnabled) P.setSoundEnabled(sndEnabled.checked).then(function(){ savedFeedback(); }); };
+  sndVolume.oninput = function(){ if (P && P.setSoundVolume) P.setSoundVolume((parseInt(sndVolume.value, 10) || 0) / 100); };
+  sndVolume.onchange = function(){ savedFeedback(); };
+  document.getElementById('snd-test').onclick = function(){ if (P && P.testSound) P.testSound(); };
+  document.getElementById('snd-pick').onclick = function(){ if (P && P.pickSoundFile) P.pickSoundFile().then(function(r){ if (r) { sndName.textContent = r.name; savedFeedback('✓ Áudio atualizado'); } }); };
+  document.getElementById('snd-reset').onclick = function(){ if (P && P.resetSound) P.resetSound().then(function(r){ if (r) { sndName.textContent = r.name; savedFeedback('✓ Som padrão restaurado'); } }); };
+
+  // ---- notificações no Discord ----
+  const notificationInputs = {
+    enabled:document.getElementById('notifications-enabled'),
+    rareDrops:document.getElementById('notifications-rare-drops'),
+    mythicCaptures:document.getElementById('notifications-mythic'),
+    shinyCaptures:document.getElementById('notifications-shiny'),
+    criticalAlertsEnabled:document.getElementById('notifications-critical-enabled'),
+    partyDeaths:document.getElementById('notifications-deaths'),
+    repeatedStalls:document.getElementById('notifications-stalls'),
+  };
+  const notificationUserId = document.getElementById('notifications-discord-user');
+  const notificationTest = document.getElementById('notifications-test');
+  const notificationStatus = document.getElementById('notifications-status');
+  let notificationSnapshot = null;
+  function normalizedDiscordUserId(value){
+    const text = String(value || '').trim();
+    if (/^\d{17,20}$/.test(text)) return text;
+    const mention = text.match(/^<@!?(\d{17,20})>$/);
+    return mention ? mention[1] : '';
+  }
+  function syncCriticalNotificationControls(){
+    const hasUser = !!normalizedDiscordUserId(notificationUserId.value);
+    notificationInputs.criticalAlertsEnabled.disabled = !hasUser;
+    if (!hasUser) notificationInputs.criticalAlertsEnabled.checked = false;
+    const enabled = hasUser && notificationInputs.criticalAlertsEnabled.checked;
+    notificationInputs.partyDeaths.disabled = !enabled;
+    notificationInputs.repeatedStalls.disabled = !enabled;
+  }
+  function notificationTime(value){
+    const date = new Date(value || 0);
+    return Number.isFinite(date.getTime()) && date.getTime() > 0 ? date.toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' }) : '';
+  }
+  function renderNotifications(value){
+    if (!value) { notificationStatus.textContent = 'Configuração indisponível nesta versão.'; notificationStatus.className = 'share-state warn'; return; }
+    notificationSnapshot = value;
+    Object.keys(notificationInputs).forEach(function(key){ notificationInputs[key].checked = value[key] === true; });
+    notificationUserId.value = value.discordUserId || '';
+    syncCriticalNotificationControls();
+    notificationTest.style.display = value.canTest === true ? '' : 'none';
+    const lastSuccess = notificationTime(value.lastSuccessAt);
+    notificationStatus.className = 'share-state ' + (value.lastError ? 'warn' : 'ok');
+    notificationStatus.textContent = value.lastError
+      ? value.lastError
+      : ('Canal principal configurado. Alertas pessoais ' + (value.criticalAlertsEnabled && value.criticalConfigured ? 'ativados' : 'desligados') + '.' + (lastSuccess ? ' Último envio: ' + lastSuccess + '.' : ''));
+  }
+  function readNotifications(){
+    const value = {};
+    Object.keys(notificationInputs).forEach(function(key){ value[key] = notificationInputs[key].checked; });
+    value.discordUserId = normalizedDiscordUserId(notificationUserId.value);
+    if (!value.discordUserId) value.criticalAlertsEnabled = false;
+    return value;
+  }
+  function saveNotifications(){
+    if (!P || !P.setDiscordNotifications) return Promise.resolve(null);
+    const invalidUser = notificationUserId.value.trim() && !normalizedDiscordUserId(notificationUserId.value);
+    notificationStatus.className = 'share-state off'; notificationStatus.textContent = 'Salvando…';
+    return P.setDiscordNotifications(readNotifications()).then(function(value){
+      renderNotifications(value);
+      if (invalidUser) { notificationStatus.className = 'share-state warn'; notificationStatus.textContent = 'Alertas desligados: use o ID numérico do Discord; o apelido sozinho não cria uma menção.'; }
+      savedFeedback(); return value;
+    }).catch(function(error){
+      notificationStatus.className = 'share-state warn'; notificationStatus.textContent = error && error.message ? error.message : 'Não foi possível salvar.'; return null;
+    });
+  }
+  function refreshNotifications(){
+    if (!P || !P.getDiscordNotifications) { renderNotifications(null); return; }
+    P.getDiscordNotifications().then(renderNotifications).catch(function(){ renderNotifications(null); });
+  }
+  document.getElementById('notifications-btn').onclick = function(){ openConfigPanel('notifications'); refreshNotifications(); };
+  document.getElementById('notifications-back').onclick = function(){ openConfigPanel(null); };
+  notificationTest.onclick = function(){
+    if (!P || !P.testDiscordNotifications) return;
+    notificationStatus.className = 'share-state off'; notificationStatus.textContent = 'Enviando teste…';
+    P.testDiscordNotifications().then(function(result){
+      if (result && result.settings) renderNotifications(result.settings);
+      notificationStatus.className = 'share-state ' + (result && result.ok ? 'ok' : 'warn');
+      notificationStatus.textContent = result && result.ok ? 'Mensagem de teste enviada.' : (result && result.error ? result.error : 'Não foi possível enviar o teste.');
+    }).catch(function(error){ notificationStatus.className = 'share-state warn'; notificationStatus.textContent = error && error.message ? error.message : 'Não foi possível enviar o teste.'; });
+  };
+  Object.keys(notificationInputs).forEach(function(key){ notificationInputs[key].onchange = function(){ syncCriticalNotificationControls(); if (notificationSnapshot) saveNotifications(); }; });
+  notificationUserId.oninput = syncCriticalNotificationControls;
+  notificationUserId.onchange = function(){ if (notificationSnapshot) saveNotifications(); };
+
+  // ---- failsafe de tela sem novas kills ----
+  const failsafe = document.getElementById('failsafe');
+  const failsafeSeconds = document.getElementById('failsafe-seconds');
+  const failsafeStatus = document.getElementById('failsafe-status');
+  function renderFailsafe(s){
+    if (!s) { failsafeStatus.textContent = 'Configuracao indisponivel nesta versao.'; return; }
+    failsafeSeconds.min = s.minSeconds != null ? s.minSeconds : 10;
+    failsafeSeconds.max = s.maxSeconds != null ? s.maxSeconds : 600;
+    failsafeSeconds.value = s.timeoutSeconds != null ? s.timeoutSeconds : 30;
+    failsafeStatus.textContent = 'A tela sera recarregada apos ' + failsafeSeconds.value + ' segundos sem novas kills.';
+  }
+  function refreshFailsafe(){
+    if (!P || !P.getKillWatchSettings) { renderFailsafe(null); return; }
+    P.getKillWatchSettings().then(renderFailsafe).catch(function(){ renderFailsafe(null); });
+  }
+  document.getElementById('failsafe-btn').onclick = function(){ openConfigPanel('failsafe'); refreshFailsafe(); };
+  document.getElementById('failsafe-back').onclick = function(){ openConfigPanel(null); };
+  failsafeSeconds.onchange = function(){
+    if (!P || !P.setKillWatchTimeout) return;
+    failsafeStatus.textContent = 'Salvando…';
+    P.setKillWatchTimeout(failsafeSeconds.value).then(function(value){ renderFailsafe(value); savedFeedback(); }).catch(function(){
+      failsafeStatus.textContent = 'Nao foi possivel salvar agora.';
+    });
+  };
+
+  // ---- compartilhar estatisticas ----
+  const shareState = document.getElementById('share-state');
+  const shareForce = document.getElementById('share-force');
+  const shareId = document.getElementById('share-id');
+  let shareSnapshot = null;
+  function setShareState(text, kind){
+    shareState.textContent = text || '';
+    shareState.className = 'share-state' + (kind ? ' ' + kind : '');
+  }
+  function shareTime(value){
+    if (value == null || value === '') return '';
+    let raw = value;
+    if (typeof raw === 'number' && raw > 0 && raw < 1e12) raw *= 1000;
+    const date = new Date(raw);
+    if (!Number.isFinite(date.getTime())) return '';
+    return date.toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' });
+  }
+  function renderShareState(s){
+    if (!s || typeof s !== 'object') {
+      shareSnapshot = null;
+      shareId.textContent = '—';
+      setShareState('Não foi possível consultar o último envio nesta versão.', 'warn');
+      return;
+    }
+    shareSnapshot = s;
+    const available = s.available !== false;
+    const lastSuccess = shareTime(s.lastSuccessAt);
+    const nextSync = shareTime(s.nextSyncAt);
+    shareForce.disabled = !available;
+    shareId.textContent = s.clientId || '—';
+    if (!available) {
+      setShareState('Compartilhamento indisponível no momento. Seus dados continuam somente neste computador.', 'off');
+    } else if (s.lastError) {
+      setShareState(String(s.lastError) + (lastSuccess ? ' Último envio bem-sucedido: ' + lastSuccess + '.' : ' O launcher tentará novamente automaticamente.'), 'warn');
+    } else if (lastSuccess) {
+      setShareState('Último envio: ' + lastSuccess + '.' + (nextSync ? ' Próxima atualização: ' + nextSync + '.' : ''), 'ok');
+    } else {
+      setShareState('Envio comunitário ativo.' + (nextSync ? ' Primeiro envio programado para ' + nextSync + '.' : ' Preparando o primeiro envio.'), 'off');
+    }
+  }
+  function refreshShareState(){
+    setShareState('Carregando estado do compartilhamento…', 'off');
+    if (!P || !P.getShareStats) { renderShareState(null); return Promise.resolve(); }
+    return P.getShareStats().then(function(s){ renderShareState(s); }).catch(function(){
+      setShareState('Não foi possível consultar o último envio agora. Tente novamente mais tarde.', 'warn');
+    });
+  }
+  document.getElementById('share-btn').onclick = function(){
+    openConfigPanel('share');
+    refreshShareState();
+  };
+  document.getElementById('share-back').onclick = function(){ openConfigPanel(null); };
+  shareForce.onclick = function(){
+    if (!P || !P.forceCommunitySync || shareForce.disabled) return;
+    shareForce.disabled = true;
+    setShareState('Enviando agora…', 'off');
+    P.forceCommunitySync().then(function(result){
+      const status = result && result.status ? result.status : result;
+      renderShareState(status);
+      const saved = result && Number.isFinite(Number(result.saved)) ? Number(result.saved) : 0;
+      setShareState('Envio manual concluído: ' + saved + (saved === 1 ? ' espécie enviada.' : ' espécies enviadas.'), 'ok');
+    }).catch(function(error){
+      refreshShareState().then(function(){
+        if (!shareSnapshot || !shareSnapshot.lastError) setShareState(error && error.message ? error.message : 'Não foi possível enviar agora.', 'warn');
+      });
+    });
+  };
+
+  // ---- itens na barra (mostrar/esconder cada um) ----
+  const itemChks = document.querySelectorAll('#item-display input[data-item]');
+  const alrInputs = document.querySelectorAll('#item-alerts input[data-alert]');
+  const xpHudToggle = document.getElementById('xp-hud-enabled');
+
+  document.getElementById('items-btn').onclick = function(){
+    openConfigPanel('items');
+    if (P && P.getXpHud) P.getXpHud().then(function(value){ xpHudToggle.checked = !value || value.enabled !== false; });
+    if (P && P.getItemVis) P.getItemVis().then(function(value){ value = value || {}; itemChks.forEach(function(input){ input.checked = value[input.dataset.item] !== false; }); });
+    if (P && P.getItemAlert) P.getItemAlert().then(function(value){ value = value || {}; alrInputs.forEach(function(input){ input.value = value[input.dataset.alert] != null ? value[input.dataset.alert] : 2000; }); });
+  };
+  document.getElementById('itm-back').onclick = function(){ openConfigPanel(null); };
+  document.getElementById('item-display-btn').onclick = function(){ document.getElementById('items-btn').onclick(); openConfigPanel('item-display'); };
+  document.getElementById('item-alerts-btn').onclick = function(){ document.getElementById('items-btn').onclick(); openConfigPanel('item-alerts'); };
+  document.getElementById('item-display-back').onclick = function(){ openConfigPanel('items'); };
+  document.getElementById('item-alerts-back').onclick = function(){ openConfigPanel('items'); };
+  itemChks.forEach(function(input){ input.onchange = function(){ if (P && P.setItemVis) P.setItemVis(input.dataset.item,input.checked).then(function(){ savedFeedback(); }); }; });
+  xpHudToggle.onchange = function(){
+    const requested = xpHudToggle.checked;
+    if (!P || !P.setXpHud) return;
+    P.setXpHud(requested).then(function(value){ xpHudToggle.checked = !value || value.enabled !== false; savedFeedback(); }).catch(function(){ xpHudToggle.checked = !requested; });
+  };
+  alrInputs.forEach(function(input){ input.onchange = function(){ const value = Math.max(0,parseInt(input.value,10) || 0); input.value = value; if (P && P.setItemAlert) P.setItemAlert(input.dataset.alert,value).then(function(){ savedFeedback(); }); }; });
+
+  if (P && P.onUpdateStatus) P.onUpdateStatus(function(s){
+    if (!s) return;
+    if (s.state === 'checking') setStatus('Verificando atualizacao…');
+    else if (s.state === 'none') { setStatus('✅ Voce ja esta na versao mais recente.'); install.style.display = 'none'; }
+    else if (s.state === 'available') setStatus('Versao ' + (s.version || '') + ' encontrada — baixando…');
+    else if (s.state === 'downloading') setStatus('Baixando atualizacao… ' + (s.percent || 0) + '%');
+    else if (s.state === 'downloaded') { setStatus('✅ Versao ' + (s.version || '') + ' baixada!'); install.style.display = 'block'; }
+    else if (s.state === 'error') { setStatus('❌ ' + (s.message || 'erro ao verificar')); install.style.display = 'none'; }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XP por hora</title>
+<style>
+  :root{
+    --bg:#0a1017; --surface:#101923; --surface2:#15212d; --line:#263646; --line2:#355064;
+    --text:#edf6f4; --muted:#80909f; --text2:#b8c7cf; --accent:#59d8c4; --accent-soft:#102925;
+    --gold:#f2c75c; --shadow:0 18px 50px rgba(0,0,0,.52);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ width:100%; height:100%; margin:0; overflow:hidden; background:transparent; color:var(--text); }
+  body{ padding:5px; font-family:"Segoe UI Variable","Segoe UI",system-ui,sans-serif; color-scheme:dark; user-select:none; }
+  button{ font:inherit; }
+  .panel{ position:relative; height:100%; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line2); border-radius:16px;
+    background:linear-gradient(150deg,rgba(89,216,196,.045),transparent 38%),rgba(10,16,23,.97); box-shadow:var(--shadow); }
+  .head{ height:44px; flex:0 0 44px; display:flex; align-items:center; gap:10px; padding:0 10px 0 15px; cursor:move;
+    border-bottom:1px solid var(--line); background:rgba(7,12,18,.84); touch-action:none; }
+  .mark{ width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px rgba(89,216,196,.55); }
+  .title{ min-width:0; flex:1; }
+  .title b{ display:block; font-size:12.5px; letter-spacing:.02em; }
+  .count{ padding:3px 7px; border:1px solid var(--line); border-radius:999px; color:var(--text2); font-size:9px; }
+  .close,.reset{ width:28px; height:28px; padding:0; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--muted); cursor:pointer; }
+  .reset:hover{ border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent); }
+  .close:hover{ border-color:#63313a; background:#28141a; color:#f27b83; }
+  .rows{ min-height:0; flex:1; overflow:auto; padding:7px; }
+  .row{ min-height:66px; display:grid; grid-template-columns:minmax(0,1fr) 94px 30px; align-items:center; gap:9px; padding:8px 9px;
+    border:1px solid transparent; border-radius:11px; background:rgba(21,33,45,.7); }
+  .row + .row{ margin-top:6px; }
+  .row:hover{ border-color:var(--line); background:var(--surface2); }
+  .account{ min-width:0; }
+  .name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-size:11.5px; font-weight:750; }
+  .hunt{ margin-top:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--accent); font-size:9.5px; }
+  .mobs{ margin-left:7px; color:var(--muted); }
+  .mobs b{ color:var(--text2); font-variant-numeric:tabular-nums; }
+  .rate{ text-align:right; }
+  .rate small{ display:block; color:var(--accent); font-size:8px; font-weight:800; letter-spacing:.11em; }
+  .rate b{ display:block; margin-top:4px; color:var(--text); font-size:14px; font-variant-numeric:tabular-nums; }
+  .details{ width:28px; height:28px; padding:0; border:1px solid var(--line2); border-radius:8px; background:var(--surface); color:var(--gold);
+    font-size:17px; line-height:1; cursor:pointer; }
+  .details:hover{ border-color:#765f28; background:#2a2312; }
+  .empty{ padding:28px 14px; color:var(--muted); text-align:center; font-size:11px; line-height:1.5; }
+  .resize{ position:absolute; right:3px; bottom:3px; z-index:5; width:18px; height:18px; cursor:nwse-resize; touch-action:none; opacity:.55; }
+  .resize:before,.resize:after{ content:""; position:absolute; right:2px; bottom:2px; width:9px; height:1px; background:var(--accent); transform:rotate(-45deg); transform-origin:right center; }
+  .resize:after{ width:5px; right:2px; bottom:6px; }
+  .resize:hover{ opacity:1; }
+  ::-webkit-scrollbar{ width:8px; } ::-webkit-scrollbar-thumb{ border:2px solid transparent; border-radius:9px; background:#344657; background-clip:padding-box; }
+</style>
+</head>
+<body>
+<section class="panel" aria-label="Resumo de experiência por hora">
+  <header class="head" id="drag-handle">
+    <span class="mark" aria-hidden="true"></span>
+    <span class="title"><b>Stats ao vivo</b></span>
+    <span class="count" id="count">0 contas</span>
+    <button class="reset" id="reset" type="button" title="Recomeçar XP/h e mobs/h" aria-label="Recomeçar estatísticas">↻</button>
+    <button class="close" id="close" type="button" title="Fechar" aria-label="Fechar">✕</button>
+  </header>
+  <main class="rows" id="rows"><div class="empty">Carregando telas…</div></main>
+  <span class="resize" id="resize-handle" role="separator" aria-label="Redimensionar painel"></span>
+</section>
+<script>
+  const P = window.xpPanel || null;
+  let snapshot = { accounts:[] };
+  function esc(value){ return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmt(value){ const n = Number(value); return Number.isFinite(n) ? Math.max(0,Math.round(n)).toLocaleString('pt-BR') : '—'; }
+  function rate(account){
+    const xp = Number(account && account.xp) || 0;
+    const startedAt = Number(account && account.startedAt) || Date.now();
+    const elapsed = Date.now() - startedAt;
+    return xp > 0 && elapsed >= 5000 ? Math.max(0,Math.round(xp * 3600000 / elapsed)) : null;
+  }
+  function mobsRate(account){
+    const kills = Number(account && account.kills) || 0;
+    const startedAt = Number(account && account.huntStartedAt) || Date.now();
+    const elapsed = Date.now() - startedAt;
+    return kills > 0 && elapsed >= 5000 ? Math.max(0,Math.round(kills * 3600000 / elapsed)) : null;
+  }
+  function huntName(account){ return account && account.hunt ? String(account.hunt) : 'Sem hunt detectada'; }
+  function render(){
+    const accounts = Array.isArray(snapshot.accounts) ? snapshot.accounts : [];
+    document.getElementById('count').textContent = accounts.length + (accounts.length === 1 ? ' conta' : ' contas');
+    document.getElementById('rows').innerHTML = accounts.length ? accounts.map(function(account){
+      return '<article class="row">'
+        + '<div class="account"><div class="name">'+esc(account.name || 'Conta')+'</div>'
+        + '<div class="hunt">🗺 '+esc(huntName(account))+' <span class="mobs"><b data-mobs-slot="'+Number(account.slot)+'">'+fmt(mobsRate(account))+'</b> mobs/h</span></div></div>'
+        + '<div class="rate"><small>XP/H</small><b data-rate-slot="'+Number(account.slot)+'">'+fmt(rate(account))+'</b></div>'
+        + '<button class="details" type="button" data-details="'+Number(account.slot)+'" title="Abrir Pokémon no PokéData" aria-label="Abrir Pokémon de '+esc(account.name || ('Tela '+account.slot))+' no PokéData">+</button>'
+      + '</article>';
+    }).join('') : '<div class="empty">Nenhuma tela do PokeDream está aberta.</div>';
+  }
+  function refreshRates(){
+    const accounts = Array.isArray(snapshot.accounts) ? snapshot.accounts : [];
+    accounts.forEach(function(account){
+      const xpNode=document.querySelector('[data-rate-slot="'+Number(account.slot)+'"]'); if(xpNode)xpNode.textContent=fmt(rate(account));
+      const mobsNode=document.querySelector('[data-mobs-slot="'+Number(account.slot)+'"]'); if(mobsNode)mobsNode.textContent=fmt(mobsRate(account));
+    });
+  }
+  document.getElementById('rows').addEventListener('click',function(event){
+    const button=event.target.closest&&event.target.closest('[data-details]');
+    if(button&&P&&P.openPokeData)P.openPokeData(Number(button.dataset.details));
+  });
+  document.getElementById('reset').onclick=function(){ if(P&&P.reset)P.reset(); };
+  document.getElementById('close').onclick=function(){ if(P&&P.close)P.close(); };
+  document.addEventListener('keydown',function(event){ if(event.key==='Escape'&&P&&P.close)P.close(); });
+
+  const handle=document.getElementById('drag-handle');
+  let dragging=false,lastX=0,lastY=0;
+  handle.addEventListener('pointerdown',function(event){
+    if(event.target.closest&&event.target.closest('button'))return;
+    dragging=true; lastX=event.screenX; lastY=event.screenY; handle.setPointerCapture(event.pointerId); event.preventDefault();
+  });
+  handle.addEventListener('pointermove',function(event){
+    if(!dragging||!P||!P.move)return;
+    const dx=event.screenX-lastX,dy=event.screenY-lastY; lastX=event.screenX; lastY=event.screenY;
+    if(dx||dy)P.move(dx,dy);
+  });
+  handle.addEventListener('pointerup',function(event){ dragging=false; try{handle.releasePointerCapture(event.pointerId);}catch{} });
+  handle.addEventListener('pointercancel',function(){ dragging=false; });
+
+  const resizeHandle=document.getElementById('resize-handle');
+  let resizing=false,resizeX=0,resizeY=0;
+  resizeHandle.addEventListener('pointerdown',function(event){
+    resizing=true; resizeX=event.screenX; resizeY=event.screenY; resizeHandle.setPointerCapture(event.pointerId); event.preventDefault();
+  });
+  resizeHandle.addEventListener('pointermove',function(event){
+    if(!resizing||!P||!P.resize)return;
+    const dw=event.screenX-resizeX,dh=event.screenY-resizeY; resizeX=event.screenX; resizeY=event.screenY;
+    if(dw||dh)P.resize(dw,dh);
+  });
+  resizeHandle.addEventListener('pointerup',function(event){ resizing=false; try{resizeHandle.releasePointerCapture(event.pointerId);}catch{} });
+  resizeHandle.addEventListener('pointercancel',function(){ resizing=false; });
+
+  if(P&&P.onData)P.onData(function(data){ snapshot=data||{accounts:[]}; render(); });
+  if(P&&P.getData)P.getData().then(function(data){ snapshot=data||{accounts:[]}; render(); }).catch(render);
+  setInterval(refreshRates,1000);
+</script>
+</body>
+</html>

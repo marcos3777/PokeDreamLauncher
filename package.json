@@ -1,0 +1,78 @@
+{
+  "name": "poke-dream-launcher",
+  "version": "2.0.10",
+  "description": "Navegador multitela (Electron) para PokeDream e outros sites — até 4 abas com 4 sessões",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.js && node --check preload.js && node --check game-preload.js && node --check xp-panel-preload.js && node --check world-frame.js && node --check loot-sources.js && node --check pokemon-hub.js && node --check rare-items.js && node --check discord-notifications.js && node --check discord-relay.js && node --check task-catalog.js && node --check kill-watch.js && node --check site-tabs.js && node --check xp-rate.js && node --check hunt-performance.js",
+    "test": "node --test test/community.test.js test/diagnostics.test.js test/discord-notifications.test.js test/discord-relay.test.js test/hunt-metrics.test.js test/hunt-hub.test.js test/hunt-performance.test.js test/kill-watch.test.js test/loot-sources.test.js test/pokemon-hub.test.js test/rare-items.test.js test/site-tabs.test.js test/task-catalog.test.js test/ui-contract.test.js test/world-frame.test.js test/xp-rate.test.js",
+    "dist": "electron-builder --win nsis --publish never",
+    "release": "electron-builder --win nsis --publish always",
+    "dist:linux": "electron-builder --linux AppImage --publish never"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.pokedream.launcher",
+    "productName": "Poke Dream Launcher",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "marcos3777",
+        "repo": "PokeDreamLauncher",
+        "releaseType": "release"
+      }
+    ],
+    "files": [
+      "main.js",
+      "kill-watch.js",
+      "site-tabs.js",
+      "community.js",
+      "hunt-metrics.js",
+      "hunt-performance.js",
+      "world-frame.js",
+      "xp-rate.js",
+      "loot-sources.js",
+      "task-catalog.js",
+      "pokemon-hub.js",
+      "rare-items.js",
+      "discord-notifications.js",
+      "discord-relay.js",
+      "preload.js",
+      "game-preload.js",
+      "xp-panel-preload.js",
+      "app.html",
+      "config.html",
+      "xp-panel.html",
+      "sounds/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "Poke-Dream-Launcher-Windows-${arch}.${ext}"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "artifactName": "Poke-Dream-Launcher-Linux-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Poke Dream Launcher"
+    }
+  }
+}
