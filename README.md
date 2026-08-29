@@ -16,6 +16,8 @@ Navegador multitela leve (Electron) para [PokeDream](https://pokedream.com.br/) 
 - Recarregar telas individualmente (botaozinho ↻)
 - Janela sem moldura com barra arrastavel
 - **Pokédex em formato de hub**: cada card mostra XP/h, mobs/h, captura, shiny e nível da task; o detalhe lateral reúne broke normal/shiny, recordes, tasks e drops observados
+- **Painel de Tasks por conta e trilha**, com progresso, objetivos e conclusão acompanhados ao vivo
+- **Avisos pessoais por webhook do Discord** para conclusão de Tasks, mortes na party e travamentos repetidos
 - Dados comunitários de captura e performance passam por uma leitura agregada por espécie; as tabelas e contas brutas não são expostas ao aplicativo
 
 ---

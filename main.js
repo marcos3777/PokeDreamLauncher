@@ -8,7 +8,7 @@ const { autoUpdater } = require('electron-updater');
 const { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, createCommunityClient, huntLogToAccountStats } = require('./community');
 const { describeBroke, describeSequences, huntBaseline, huntDelta, huntSpeciesFromId, recordObservation } = require('./hunt-metrics');
 const { acceptWorldFrame, activeUidFromParty, applyActiveProgress, applyKeyedDelta, applyObjectDelta, applyPartyDelta, parseWorldFrame, parseWorldMessage } = require('./world-frame');
-const { collectRareDrops, normalizeDiscordNotifications } = require('./discord-notifications');
+const { collectRareDrops, createDiscordNotifier, isDiscordWebhookUrl, normalizeDiscordNotifications } = require('./discord-notifications');
 const { createDiscordRelayNotifier } = require('./discord-relay');
 const { KILL_STALL_MAX_SECONDS, KILL_STALL_MIN_SECONDS, KILL_STALL_TIMEOUT_MS, createKillWatchState, normalizeKillStallTimeoutSeconds, observeKill, resetKillWatch, shouldReloadForKillStall } = require('./kill-watch');
 const { learnLootSourcesFromDump, normalizeLootSources, observeLootSources } = require('./loot-sources');
@@ -17,7 +17,7 @@ const { isRareItem } = require('./rare-items');
 const { DREAM_TAB_ID, MAX_TABS, MAX_VIEWS_PER_TAB, normalizeSiteUrl, restoreWorkspaceState, sitePartition } = require('./site-tabs');
 const { buildXpOverlayScript, createXpRate, observeKillXp, resetXpRate, xpPerHour } = require('./xp-rate');
 const { HUNT_PERFORMANCE_FIRST_MS, HUNT_PERFORMANCE_INTERVAL_MS, HUNT_PERFORMANCE_V, activeXpBuffs, backfillTrainerNameForAccount, communityPerformanceRecords, createPerformanceBaseline, markCommunityPerformanceRecordsSynced, normalizeHuntPerformance, performanceDelta, updatePerformanceRecords } = require('./hunt-performance');
-const { applyTaskDelta, completedTaskTrackCount, taskMapFromState } = require('./task-catalog');
+const { TASK_TRACKS, applyTaskDelta, completedTaskTrackCount, taskEntriesForTrack, taskMapFromState } = require('./task-catalog');
 
 const GAME_URL = 'https://pokedream.com.br/';
 const GAME_DOMAIN = 'pokedream.com.br';
@@ -33,6 +33,8 @@ const COMMUNITY_SEND_INTERVAL_MS = 5 * 60 * 1000 + 5000;
 const COMMUNITY_QUIT_TIMEOUT_MS = 3000;
 const COMMUNITY_HUB_WAIT_MS = 1500;
 const XP_PANEL_WIDTH = 430;
+const CRITICAL_DISCORD_EVENTS = new Set(['party_death', 'repeated_stall', 'task_completed']);
+const TASK_DEFINITION_BY_ID = new Map(Object.values(TASK_TRACKS).flatMap((track) => track.tasks.map((definition) => [definition.id, { track, definition }])));
 
 // userData persistente (nao some ao fechar)
 app.setPath('userData', path.join(app.getPath('appData'), 'poke-dream-launcher'));
@@ -78,7 +80,6 @@ let xpHudEnabled = true; // selo XP/h por tela + painel conjunto
 let killWatchTimer = null;
 let killStallTimeoutSeconds = KILL_STALL_TIMEOUT_MS / 1000;
 let discordNotifications = normalizeDiscordNotifications(null);
-let allowDiscordTest = false;
 let clientId = null;        // id anônimo e aleatório; só serve pra deduplicar o envio ao banco comunitário
 let communityToken = null;  // segredo aleatório desta instalação; nunca é exposto à interface
 let communityRevision = 0;  // ordem monotônica dos snapshots (evita um envio antigo sobrescrever o novo)
@@ -97,11 +98,12 @@ let persistentStateLoaded = false;
 let communityQuitPending = false;
 let communityQuitFlushed = false;
 const communityClient = createCommunityClient();
-const discordNotifier = createDiscordRelayNotifier(
+const discordRelayNotifier = createDiscordRelayNotifier(
   () => discordNotifications,
   () => ({ clientId, clientToken:communityToken, appVersion:app.getVersion() }),
   { baseUrl:SUPABASE_URL, publishableKey:SUPABASE_PUBLISHABLE_KEY },
 );
+const criticalDiscordNotifier = createDiscordNotifier(() => discordNotifications);
 let diagLines = 0;
 
 // ---- diagnóstico: captura de rede (só grava quando diagOn) ----
@@ -218,11 +220,13 @@ function rebuildBox(g, boxArr) {
   g._freshShinyBatch = checkShinyCaptures(g);
 }
 function discordEvent(g, event) {
-  discordNotifier.notify(Object.assign({
+  const notification = Object.assign({
     characterName: g && g.charName,
     slot: g && g.slot,
     at: Date.now(),
-  }, event));
+  }, event);
+  const notifier = CRITICAL_DISCORD_EVENTS.has(notification.kind) ? criticalDiscordNotifier : discordRelayNotifier;
+  notifier.notify(notification);
 }
 function checkShinyCaptures(g) {
   const known = g._boxUids || (g._boxUids = new Set());
@@ -263,6 +267,45 @@ function observePartyDeaths(g, before) {
       discordEvent(g, { kind:'party_death', pokemon:Object.assign({}, pokemon) });
     }
   }
+}
+
+function notifyTaskCompletions(g, completions) {
+  for (const completion of (Array.isArray(completions) ? completions : [])) {
+    const found = TASK_DEFINITION_BY_ID.get(completion.id);
+    if (!found) continue;
+    discordEvent(g, {
+      kind:'task_completed',
+      taskId:found.definition.id,
+      species:found.definition.species,
+      trackId:found.track.id,
+      trackLabel:found.track.label,
+      target:found.definition.target,
+      completed:completion.completed,
+    });
+  }
+}
+
+function taskOverviewPayload() {
+  return {
+    notificationsEnabled: discordNotifications.taskCompletions === true,
+    notificationsConfigured: !!discordNotifications.criticalWebhookUrl,
+    accounts:games.map((g) => ({
+      slot:g.slot,
+      name:g.charName || ('Tela ' + g.slot),
+      hunt:g.hunt == null ? null : String(g.hunt),
+      ready:!!g._charId && Object.keys(g._tasks || {}).length > 0,
+      tracks:Object.fromEntries(Object.values(TASK_TRACKS).map((track) => [track.id, {
+        id:track.id,
+        label:track.label,
+        icon:track.icon,
+        tasks:taskEntriesForTrack(track.id, g._tasks),
+      }])),
+    })),
+  };
+}
+
+function pushTaskOverview() {
+  if (dashView) send(dashView, 'task-overview', taskOverviewPayload());
 }
 // estatísticas: guarda o estado-base de /offline e os deltas recebidos em world:frame
 // + um baseline com timestamp, pra calcular as taxas da sessão (por hora).
@@ -555,6 +598,8 @@ function applyWorldFrame(g, frame) {
   const taskResult = applyTaskDelta(g._tasks || (g._tasks = {}), gameDelta.t);
   if (taskResult.changed) {
     syncXpBuffWindow(g, Number(frame.t));
+    notifyTaskCompletions(g, taskResult.completions);
+    changed = true;
   }
   const partyHpBefore = partyHpSnapshot(g);
 
@@ -679,6 +724,7 @@ function prepareTrainerNameBackfill(g) {
 }
 function pushAccounts() {
   if (dashView) send(dashView, 'accounts', buildAccountsPayload());
+  pushTaskOverview();
   pushXpPanel();
 }
 
@@ -1557,10 +1603,30 @@ function writeJsonAtomic(file, value) {
     return false;
   }
 }
+function encodeDiscordWebhook(value) {
+  if (!isDiscordWebhookUrl(value)) return null;
+  try {
+    if (safeStorage.isEncryptionAvailable()) return 'safe:' + safeStorage.encryptString(value).toString('base64');
+  } catch {}
+  return 'plain:' + Buffer.from(value, 'utf8').toString('base64');
+}
+function decodeDiscordWebhook(value) {
+  if (typeof value !== 'string' || !value) return '';
+  try {
+    if (value.startsWith('safe:')) return safeStorage.decryptString(Buffer.from(value.slice(5), 'base64'));
+    if (value.startsWith('plain:')) return Buffer.from(value.slice(6), 'base64').toString('utf8');
+  } catch {}
+  return '';
+}
 function fixedDiscordSettings(value) {
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  const { webhookUrl: _ignoredWebhook, criticalWebhookUrl: _ignoredCriticalWebhook, clearWebhook: _ignoredClear, allowTest: _ignoredTest, ...preferences } = source;
-  return normalizeDiscordNotifications(preferences);
+  const currentCriticalWebhook = discordNotifications && discordNotifications.criticalWebhookUrl || '';
+  let criticalWebhookUrl = currentCriticalWebhook;
+  if (source.clearCriticalWebhook === true) criticalWebhookUrl = '';
+  else if (isDiscordWebhookUrl(source.criticalWebhookUrl)) criticalWebhookUrl = String(source.criticalWebhookUrl).trim();
+  const { webhookUrl: _ignoredWebhook, criticalWebhookUrl: _submittedCriticalWebhook, clearCriticalWebhook: _ignoredClear, ...preferences } = source;
+  if (!Object.prototype.hasOwnProperty.call(preferences, 'taskCompletions')) preferences.taskCompletions = discordNotifications.taskCompletions === true;
+  return normalizeDiscordNotifications(Object.assign(preferences, { criticalWebhookUrl }), '', criticalWebhookUrl);
 }
 function loadHuntPerformance() {
   huntPerformance = normalizeHuntPerformance(readJsonWithBackup(HUNT_PERFORMANCE_FILE));
@@ -1651,8 +1717,8 @@ function loadSettings() {
     if (j.itemAlert && typeof j.itemAlert === 'object') for (const k in itemAlert) { const n = Number(j.itemAlert[k]); if (Number.isFinite(n) && n >= 0) itemAlert[k] = Math.round(n); }
     killStallTimeoutSeconds = normalizeKillStallTimeoutSeconds(j.killStallTimeoutSeconds);
     const storedDiscord = readJsonWithBackup(DISCORD_FILE) || j.discordNotifications || {};
-    allowDiscordTest = storedDiscord.allowTest === true;
-    discordNotifications = fixedDiscordSettings(storedDiscord);
+    const storedCriticalWebhook = decodeDiscordWebhook(storedDiscord.criticalWebhookSecret) || storedDiscord.criticalWebhookUrl || '';
+    discordNotifications = fixedDiscordSettings(Object.assign({}, storedDiscord, { criticalWebhookUrl:storedCriticalWebhook }));
   } catch { soundEnabled = true; soundVolume = 0.8; soundPath = null; xpHudEnabled = true; }
 
   const storedCommunity = readJsonWithBackup(COMMUNITY_FILE);
@@ -1676,17 +1742,17 @@ function loadSettings() {
 function saveSettings() { return writeJsonAtomic(SETTINGS_FILE, { soundEnabled, soundVolume, soundPath, xpHudEnabled, itemVis, itemAlert, killStallTimeoutSeconds, clientId, communityToken, communityRevision, communityLastSuccessAt }); }
 function saveDiscordSettings() {
   const { webhookUrl: _secret, criticalWebhookUrl: _criticalSecret, ...preferences } = discordNotifications;
-  return writeJsonAtomic(DISCORD_FILE, Object.assign(preferences, { allowTest:allowDiscordTest }));
+  return writeJsonAtomic(DISCORD_FILE, Object.assign(preferences, { criticalWebhookSecret:encodeDiscordWebhook(discordNotifications.criticalWebhookUrl) }));
 }
 function discordSettingsPayload() {
-  const status = discordNotifier.status();
+  const relayStatus = discordRelayNotifier.status();
+  const criticalStatus = criticalDiscordNotifier.status();
   const { webhookUrl: _secret, criticalWebhookUrl: _criticalSecret, ...publicSettings } = discordNotifications;
   return Object.assign({}, publicSettings, {
     configured: true,
-    criticalConfigured: !!discordNotifications.discordUserId,
-    canTest: allowDiscordTest,
-    lastError: status.lastError,
-    lastSuccessAt: status.lastSuccessAt,
+    criticalConfigured: !!discordNotifications.criticalWebhookUrl,
+    lastError: criticalStatus.lastError || relayStatus.lastError,
+    lastSuccessAt: Math.max(Number(criticalStatus.lastSuccessAt) || 0, Number(relayStatus.lastSuccessAt) || 0) || null,
   });
 }
 function pushItemConfig() { if (dashView) send(dashView, 'item-config', { vis: itemVis, alert: itemAlert }); }
@@ -2162,14 +2228,21 @@ ipcMain.handle('pickSoundFile', async () => {
 ipcMain.handle('resetSound', () => { soundPath = null; saveSettings(); pushSoundConfig(); return { name: soundName(), custom: false }; });
 ipcMain.handle('getDiscordNotifications', () => discordSettingsPayload());
 ipcMain.handle('setDiscordNotifications', (_e, value) => {
+  const submittedWebhook = value && typeof value.criticalWebhookUrl === 'string' ? value.criticalWebhookUrl.trim() : '';
+  if (submittedWebhook && !isDiscordWebhookUrl(submittedWebhook)) throw new Error('Use um webhook válido do Discord.');
   discordNotifications = fixedDiscordSettings(value);
   if (!saveDiscordSettings()) throw new Error('Não foi possível salvar as notificações.');
+  pushTaskOverview();
   return discordSettingsPayload();
 });
-ipcMain.handle('testDiscordNotifications', async () => {
-  if (!allowDiscordTest) return { ok:false, error:'Teste não autorizado nesta instalação.' };
-  const result = await discordNotifier.notify({ kind:'test', at:Date.now() });
-  return Object.assign({}, result, { settings:discordSettingsPayload() });
+ipcMain.handle('getTaskOverview', () => taskOverviewPayload());
+ipcMain.handle('setTaskCompletionNotifications', (_e, on) => {
+  if (on && !discordNotifications.criticalWebhookUrl) throw new Error('Configure o webhook de alertas nas notificações do Discord.');
+  discordNotifications = normalizeDiscordNotifications(Object.assign({}, discordNotifications, { taskCompletions:!!on }), '', discordNotifications.criticalWebhookUrl);
+  if (!saveDiscordSettings()) throw new Error('Não foi possível salvar a preferência de Tasks.');
+  const payload = taskOverviewPayload();
+  pushTaskOverview();
+  return payload;
 });
 ipcMain.handle('getKillWatchSettings', () => ({
   timeoutSeconds: killStallTimeoutSeconds,

@@ -71,7 +71,7 @@ test('canais de ação dos overlays possuem listeners no processo principal', ()
 });
 
 test('shell e configurações preservam os pontos de integração essenciais', () => {
-  const requiredAppIds = ['tabs','btn-cfg','btn-grid','btn-box','btn-bag','btn-dex','btn-stats','btn-add','side','main'];
+  const requiredAppIds = ['tabs','btn-cfg','btn-grid','btn-box','btn-bag','btn-dex','btn-tasks','btn-stats','btn-add','side','main'];
   const requiredConfigIds = ['settings-home-btn','config-scope','sound-btn','items-btn','share-btn','failsafe-btn','xp-hud-enabled','item-display','item-alerts'];
   requiredAppIds.forEach((id) => assert.match(app, new RegExp(`id=["']${id}["']`), `id ${id} ausente em app.html`));
   requiredConfigIds.forEach((id) => assert.ok(
@@ -84,6 +84,25 @@ test('shell e configurações preservam os pontos de integração essenciais', (
   assert.doesNotMatch(config + preload + main, /share-on|setShareStats|getChangelog|changelog-btn|Novidades/);
   ['drag-handle','resize-handle','reset','count','rows','close'].forEach((id) => assert.match(xpPanel, new RegExp(`id=["']${id}["']`), `id ${id} ausente em xp-panel.html`));
   assert.doesNotMatch(xpPanel, /XP\/h desde o início/);
+});
+
+test('painel de Tasks acompanha as contas e controla o aviso geral', () => {
+  const taskPanel = app.slice(app.indexOf('// ---- Tasks:'), app.indexOf('function openDexSpecies'));
+  assert.match(app, /function renderTasks\(value\)/);
+  assert.match(app, /Notificar conclusões/);
+  assert.match(app, /P\.getTaskOverview/);
+  assert.match(app, /P\.setTaskCompletionNotifications/);
+  assert.match(preload, /onTaskOverview[\s\S]*task-overview/);
+  assert.match(main, /ipcMain\.handle\('getTaskOverview'/);
+  assert.match(main, /notifyTaskCompletions\(g, taskResult\.completions\)/);
+  assert.ok(taskPanel.length > 0);
+  assert.doesNotMatch(taskPanel, /automa[cç][aã]o|autom[aá]tic/i);
+});
+
+test('alertas pessoais usam webhook próprio sem ID nem botão de teste', () => {
+  assert.match(config, /id="notifications-critical-webhook"/);
+  assert.match(config, /Webhook do seu canal/);
+  assert.doesNotMatch(config + preload + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
 });
 
 test('bolsa usa os sprites do jogo sem piscar nem destacar itens configurados em vermelho', () => {

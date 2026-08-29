@@ -227,6 +227,20 @@ function applyTaskDelta(current, delta) {
   return { tasks, completions, changed };
 }
 
+function taskEntriesForTrack(trackId, states) {
+  const track = TASK_TRACKS[trackId];
+  if (!track) return [];
+  const tasks = states && typeof states === 'object' ? states : {};
+  return track.tasks.map((definition) => {
+    const state = tasks[definition.id];
+    return Object.assign({}, definition, {
+      progress: state ? state.progress : null,
+      completed: state ? state.completed : 0,
+      status: state ? (state.completed > 0 ? 'completed' : 'active') : 'locked',
+    });
+  });
+}
+
 function completedTaskTrackCount(states) {
   const tasks = states && typeof states === 'object' ? states : {};
   return Object.values(TASK_TRACKS).filter((track) => track.tasks.every((definition) => {
@@ -241,5 +255,6 @@ module.exports = {
   applyTaskDelta,
   completedTaskTrackCount,
   normalizedTaskRecord,
+  taskEntriesForTrack,
   taskMapFromState,
 };

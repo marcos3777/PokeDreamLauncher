@@ -7,6 +7,7 @@ const {
   TASK_TRACKS,
   applyTaskDelta,
   completedTaskTrackCount,
+  taskEntriesForTrack,
   taskMapFromState,
 } = require('../task-catalog');
 
@@ -25,6 +26,17 @@ test('estado completo e deltas mantêm o progresso observado', () => {
   assert.equal(result.changed, true);
   assert.deepEqual(result.completions, [{ id:'poison_venonat', previousCompleted:0, completed:1 }]);
   assert.deepEqual(tasks.poison_venonat, { id:'poison_venonat', progress:null, completed:1 });
+});
+
+test('painel de Tasks distingue progresso, conclusão e bloqueio', () => {
+  const entries = taskEntriesForTrack('fire', {
+    fire_charmander:{ id:'fire_charmander', progress:320, completed:0 },
+    fire_slugma:{ id:'fire_slugma', progress:null, completed:1 },
+  });
+  assert.equal(entries[0].status, 'active');
+  assert.equal(entries[0].progress, 320);
+  assert.equal(entries[1].status, 'completed');
+  assert.equal(entries[2].status, 'locked');
 });
 
 test('bônus conta somente trilhas de tipo inteiramente concluídas', () => {

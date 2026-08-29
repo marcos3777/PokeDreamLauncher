@@ -11,13 +11,11 @@ const {
   isDiscordWebhookUrl,
   isMythicPokemon,
   normalizeDiscordNotifications,
-  normalizeDiscordUserId,
   webhookForEvent,
 } = require('../discord-notifications');
 
 const WEBHOOK = 'https://discord.com/api/webhooks/1234567890/valid_token-ABC.def';
 const CRITICAL_WEBHOOK = 'https://discord.com/api/webhooks/9876543210/critical_token-XYZ';
-const DISCORD_USER_ID = '123456789012345678';
 
 test('aceita somente endpoints oficiais de webhook do Discord', () => {
   assert.equal(isDiscordWebhookUrl(WEBHOOK), true);
@@ -38,21 +36,23 @@ test('preferências nascem ligadas e preservam o webhook local ao alterar os tog
   assert.equal(changed.partyDeaths, false);
 });
 
-test('alertas pessoais usam outro webhook e exigem um ID numérico do Discord', () => {
+test('alertas de morte, travamento e Tasks usam o webhook configurado pela pessoa', () => {
   const settings = normalizeDiscordNotifications({
     webhookUrl:WEBHOOK,
     criticalWebhookUrl:CRITICAL_WEBHOOK,
     criticalAlertsEnabled:true,
-    discordUserId:`<@${DISCORD_USER_ID}>`,
+    taskCompletions:true,
   });
-  assert.equal(settings.discordUserId, DISCORD_USER_ID);
   assert.equal(webhookForEvent({ kind:'rare_drop' }, settings), WEBHOOK);
   assert.equal(webhookForEvent({ kind:'party_death' }, settings), CRITICAL_WEBHOOK);
+  assert.equal(webhookForEvent({ kind:'task_completed' }, settings), CRITICAL_WEBHOOK);
   assert.equal(eventEnabled({ kind:'party_death' }, settings), true);
-  assert.equal(eventEnabled({ kind:'repeated_stall' }, Object.assign({}, settings, { discordUserId:'' })), false);
+  assert.equal(eventEnabled({ kind:'task_completed' }, settings), true);
+  assert.equal(eventEnabled({ kind:'repeated_stall' }, Object.assign({}, settings, { criticalWebhookUrl:'' })), false);
   assert.equal(eventEnabled({ kind:'party_death' }, Object.assign({}, settings, { criticalAlertsEnabled:false })), false);
-  assert.equal(normalizeDiscordUserId('marcos3777'), '');
-  assert.equal(normalizeDiscordNotifications({ criticalAlertsEnabled:true, discordUserId:'marcos3777' }).criticalAlertsEnabled, false);
+  assert.equal(eventEnabled({ kind:'task_completed' }, Object.assign({}, settings, { taskCompletions:false })), false);
+  assert.equal(normalizeDiscordNotifications({ criticalAlertsEnabled:true, taskCompletions:true }).criticalAlertsEnabled, false);
+  assert.equal(normalizeDiscordNotifications({ criticalAlertsEnabled:true, taskCompletions:true }).taskCompletions, false);
 });
 
 test('detecta item raro e associa o Pokémon morto na mesma posição', () => {
@@ -84,26 +84,38 @@ test('respeita controles independentes de shiny e Mythic', () => {
   assert.doesNotMatch(mythic.embeds[0].title, /Shiny/);
 });
 
-test('mensagem de morte e travamento repetido inclui contexto útil', () => {
-  const settings = normalizeDiscordNotifications({ webhookUrl:WEBHOOK, discordUserId:DISCORD_USER_ID });
+test('mensagem de morte e travamento repetido inclui contexto útil sem exigir menção', () => {
+  const settings = normalizeDiscordNotifications({ criticalWebhookUrl:CRITICAL_WEBHOOK });
   const death = buildDiscordPayload({ kind:'party_death', characterName:'Misty', pokemon:{ species:'Starmie', level:50, potential:88 } }, settings);
   const stall = buildDiscordPayload({ kind:'repeated_stall', characterName:'Brock', attempts:2, timeoutSeconds:30 }, settings);
   assert.match(death.embeds[0].description, /Starmie.*Misty/);
-  assert.equal(death.content, `<@${DISCORD_USER_ID}>`);
-  assert.deepEqual(death.allowed_mentions, { parse:[], users:[DISCORD_USER_ID] });
+  assert.equal(death.content, undefined);
+  assert.deepEqual(death.allowed_mentions, { parse:[] });
   assert.match(stall.embeds[0].description, /2ª vez/);
   assert.equal(stall.embeds[0].fields[0].value, '30 segundos');
 });
 
-test('launcher usa destino fixo e esconde o teste fora da instalação autorizada', () => {
+test('conclusão de Task gera aviso no webhook de alertas', () => {
+  const settings = normalizeDiscordNotifications({ criticalWebhookUrl:CRITICAL_WEBHOOK, taskCompletions:true });
+  const payload = buildDiscordPayload({
+    kind:'task_completed', characterName:'Misty', species:'Starmie', trackLabel:'Água', target:4000, completed:1,
+  }, settings);
+  assert.match(payload.embeds[0].title, /Task concluída/);
+  assert.match(payload.embeds[0].description, /Starmie.*Misty/);
+  assert.equal(payload.embeds[0].fields[0].value, 'Água');
+  assert.equal(payload.embeds[0].fields[1].value, '4.000 abates');
+});
+
+test('launcher preserva o canal principal e aceita webhook local apenas para alertas', () => {
   const root = path.join(__dirname, '..');
   const main = fs.readFileSync(path.join(root, 'main.js'), 'utf8');
   const config = fs.readFileSync(path.join(root, 'config.html'), 'utf8');
   assert.match(main, /createDiscordRelayNotifier/);
+  assert.match(main, /createDiscordNotifier/);
+  assert.match(main, /CRITICAL_DISCORD_EVENTS = new Set\(\['party_death', 'repeated_stall', 'task_completed'\]\)/);
+  assert.match(main, /hasOwnProperty\.call\(preferences, 'taskCompletions'\)/);
   assert.doesNotMatch(main, /discord\.com\/api\/webhooks/);
-  assert.match(main, /if \(!allowDiscordTest\) return/);
-  assert.match(config, /id="notifications-test" style="display:none"/);
-  assert.match(config, /id="notifications-discord-user"/);
+  assert.match(config, /id="notifications-critical-webhook"/);
   assert.match(config, /id="notifications-critical-enabled"/);
-  assert.doesNotMatch(config, /id="notifications-webhook"|id="notifications-clear"|id="notifications-save"/);
+  assert.doesNotMatch(config + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
 });

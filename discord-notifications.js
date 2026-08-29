@@ -8,6 +8,7 @@ const DEFAULT_DISCORD_NOTIFICATIONS = Object.freeze({
   rareDrops: true,
   mythicCaptures: true,
   shinyCaptures: true,
+  taskCompletions: false,
   criticalAlertsEnabled: false,
   partyDeaths: true,
   repeatedStalls: true,
@@ -15,11 +16,12 @@ const DEFAULT_DISCORD_NOTIFICATIONS = Object.freeze({
 
 const EVENT_SETTING = Object.freeze({
   rare_drop: 'rareDrops',
+  task_completed: 'taskCompletions',
   party_death: 'partyDeaths',
   repeated_stall: 'repeatedStalls',
 });
 
-const CRITICAL_EVENTS = new Set(['party_death', 'repeated_stall']);
+const CRITICAL_EVENTS = new Set(['party_death', 'repeated_stall', 'task_completed']);
 
 function isDiscordWebhookUrl(value) {
   try {
@@ -29,13 +31,6 @@ function isDiscordWebhookUrl(value) {
       && ['discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com'].includes(host)
       && /^\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+\/?$/.test(url.pathname);
   } catch { return false; }
-}
-
-function normalizeDiscordUserId(value) {
-  const text = String(value == null ? '' : value).trim();
-  if (/^\d{17,20}$/.test(text)) return text;
-  const mention = text.match(/^<@!?(\d{17,20})>$/);
-  return mention ? mention[1] : '';
 }
 
 function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCriticalWebhookUrl = '') {
@@ -52,8 +47,10 @@ function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCri
   result.criticalWebhookUrl = isDiscordWebhookUrl(requestedCriticalUrl)
     ? requestedCriticalUrl
     : (isDiscordWebhookUrl(currentCriticalWebhookUrl) ? currentCriticalWebhookUrl : '');
-  result.discordUserId = normalizeDiscordUserId(source.discordUserId);
-  if (!result.discordUserId) result.criticalAlertsEnabled = false;
+  if (!result.criticalWebhookUrl) {
+    result.criticalAlertsEnabled = false;
+    result.taskCompletions = false;
+  }
   return result;
 }
 
@@ -138,6 +135,16 @@ function buildDiscordPayload(event, settings) {
       description: `**${shortText(pokemon.species || 'Pokémon', 200)}** foi capturado por **${who}**.`,
       fields: pokemonFields(pokemon),
     };
+  } else if (event.kind === 'task_completed') {
+    embed = {
+      title: '✅ Task concluída',
+      color: 0x61D692,
+      description: `**${shortText(event.species || 'Task', 200)}** foi concluída por **${who}**.`,
+      fields: [
+        { name:'Trilha', value:shortText(event.trackLabel || event.trackId || 'Não identificada', 100), inline:true },
+        { name:'Objetivo', value:`${Math.max(1, Math.round(Number(event.target) || 1)).toLocaleString('pt-BR')} abates`, inline:true },
+      ],
+    };
   } else if (event.kind === 'party_death') {
     const pokemon = event.pokemon || {};
     embed = {
@@ -163,21 +170,20 @@ function buildDiscordPayload(event, settings) {
   if (!embed) return null;
   embed.timestamp = new Date(event.at || Date.now()).toISOString();
   embed.footer = { text:'Poke Dream Launcher' };
-  const discordUserId = CRITICAL_EVENTS.has(event.kind) ? normalizeDiscordUserId(settings && settings.discordUserId) : '';
-  return Object.assign({
+  return {
     username:'Poke Dream Launcher',
-    allowed_mentions:discordUserId ? { parse:[], users:[discordUserId] } : { parse:[] },
+    allowed_mentions:{ parse:[] },
     embeds:[embed],
-  }, discordUserId ? { content:`<@${discordUserId}>` } : {});
+  };
 }
 
 function eventEnabled(event, settings) {
   if (event.kind === 'test') return !!settings.webhookUrl;
+  if (event.kind === 'task_completed') return settings.taskCompletions === true && !!settings.criticalWebhookUrl;
   if (CRITICAL_EVENTS.has(event.kind)) {
     const key = EVENT_SETTING[event.kind];
     return settings.criticalAlertsEnabled === true
       && !!settings.criticalWebhookUrl
-      && !!normalizeDiscordUserId(settings.discordUserId)
       && !!key
       && settings[key] === true;
   }
@@ -247,7 +253,6 @@ module.exports = {
   isDiscordWebhookUrl,
   isMythicPokemon,
   normalizeDiscordNotifications,
-  normalizeDiscordUserId,
   postDiscordWebhook,
   webhookForEvent,
 };

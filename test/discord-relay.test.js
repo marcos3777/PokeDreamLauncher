@@ -7,18 +7,15 @@ const { createDiscordRelayNotifier, relayEventEnabled, serializeRelayEvent } = r
 const IDENTITY = {
   clientId:'123e4567-e89b-42d3-a456-426614174000',
   clientToken:'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ',
-  appVersion:'2.0.10',
+  appVersion:'2.0.11',
 };
 
 test('relay respeita as preferências sem precisar conhecer o webhook', () => {
   assert.equal(relayEventEnabled({ kind:'rare_drop' }, { enabled:true, rareDrops:true }), true);
   assert.equal(relayEventEnabled({ kind:'rare_drop' }, { enabled:false, rareDrops:true }), false);
-  assert.equal(relayEventEnabled({ kind:'party_death' }, {
-    criticalAlertsEnabled:true, partyDeaths:true, discordUserId:'123456789012345678',
-  }), true);
-  assert.equal(relayEventEnabled({ kind:'party_death' }, {
-    criticalAlertsEnabled:true, partyDeaths:true, discordUserId:'',
-  }), false);
+  assert.equal(relayEventEnabled({ kind:'party_death' }, { criticalAlertsEnabled:true, partyDeaths:true }), false);
+  assert.equal(relayEventEnabled({ kind:'task_completed' }, { taskCompletions:true }), false);
+  assert.equal(serializeRelayEvent({ kind:'task_completed' }, { taskCompletions:true }), null);
 });
 
 test('relay envia somente o evento estruturado para a Edge Function', async () => {

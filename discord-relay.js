@@ -1,10 +1,9 @@
 'use strict';
 
-const { buildDiscordPayload, normalizeDiscordNotifications, normalizeDiscordUserId } = require('./discord-notifications');
+const { buildDiscordPayload, normalizeDiscordNotifications } = require('./discord-notifications');
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
-const CRITICAL_EVENTS = new Set(['party_death', 'repeated_stall']);
 
 function captureReasons(pokemon, settings) {
   const reasons = [];
@@ -16,12 +15,6 @@ function captureReasons(pokemon, settings) {
 function relayEventEnabled(event, settings) {
   if (!event || typeof event !== 'object') return false;
   if (event.kind === 'test') return true;
-  if (CRITICAL_EVENTS.has(event.kind)) {
-    const setting = event.kind === 'party_death' ? 'partyDeaths' : 'repeatedStalls';
-    return settings.criticalAlertsEnabled === true
-      && settings[setting] === true
-      && !!normalizeDiscordUserId(settings.discordUserId);
-  }
   if (settings.enabled !== true) return false;
   if (event.kind === 'pokemon_capture') return captureReasons(event.pokemon, settings).length > 0;
   return event.kind === 'rare_drop' && settings.rareDrops === true;
@@ -67,11 +60,6 @@ function serializeRelayEvent(event, settings) {
     pokemon: relayPokemon(event.pokemon),
     reasons: captureReasons(event.pokemon, settings),
   });
-  if (event.kind === 'party_death') return Object.assign(common, { pokemon:relayPokemon(event.pokemon) });
-  if (event.kind === 'repeated_stall') return Object.assign(common, {
-    attempts: Math.max(2, Math.min(1000, Math.round(Number(event.attempts) || 2))),
-    timeoutSeconds: safeNumber(event.timeoutSeconds, 1, 3600),
-  });
   if (event.kind === 'test') return { kind:'test', at:common.at };
   return null;
 }
@@ -108,7 +96,7 @@ function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
           app_version:String(identity.appVersion || '0.0.0'),
           client_id:identity.clientId,
           client_token:identity.clientToken,
-          discord_user_id:CRITICAL_EVENTS.has(event.kind) ? normalizeDiscordUserId(settings.discordUserId) : null,
+          discord_user_id:null,
           event:serialized,
         }),
         signal:controller.signal,

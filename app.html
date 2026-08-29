@@ -389,6 +389,39 @@
   .dex-detail-actions .tbtn{ flex:1; justify-content:center; border-color:var(--line2); background:#0a1118; }
   .dex-detail-actions .tbtn:hover{ color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft); }
 
+  /* ---------- Tasks ---------- */
+  .task-wrap{ height:100%; display:flex; flex-direction:column; padding:18px 20px 0; overflow:hidden; }
+  .task-head{ flex:0 0 auto; display:flex; align-items:center; gap:10px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+  .task-head b{ display:flex; align-items:center; gap:8px; font-size:15px; }
+  .task-head .sp{ flex:1; }
+  .task-notify{ min-height:34px; padding:0 13px; border:1px solid var(--line2); border-radius:var(--r-sm); background:#0a0e16; color:var(--mut); font-family:inherit; font-size:10px; font-weight:700; cursor:pointer; }
+  .task-notify:hover{ color:var(--txt); border-color:var(--line3); }
+  .task-notify.on{ color:var(--good); border-color:var(--good-line); background:var(--good-soft); }
+  .task-notify:disabled{ opacity:.46; cursor:not-allowed; }
+  .task-scroll{ flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding:12px 2px 18px 0; }
+  .task-account-tabs,.task-track-tabs{ display:flex; flex-wrap:wrap; gap:6px; }
+  .task-account-tabs{ margin-bottom:10px; }
+  .task-track-tabs{ margin-bottom:12px; }
+  .task-pill{ min-height:30px; padding:0 11px; border:1px solid var(--line2); border-radius:var(--r-pill); background:#0a0e16; color:var(--mut); font-family:inherit; font-size:10px; font-weight:750; cursor:pointer; }
+  .task-pill:hover{ color:var(--txt); border-color:var(--line3); }
+  .task-pill.on{ border-color:var(--gold-line); background:var(--gold-soft); color:var(--gold); }
+  .task-element-icon{ display:inline-flex; width:18px; margin-right:4px; align-items:center; justify-content:center; font-size:13px; line-height:1; }
+  .task-summary{ display:flex; flex-wrap:wrap; align-items:center; gap:7px 16px; margin-bottom:10px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-md); background:#0a0e16; color:var(--mut); font-size:10.5px; line-height:1.5; }
+  .task-summary b{ color:var(--txt); }
+  .task-list{ display:grid; gap:6px; }
+  .task-row{ min-height:50px; display:grid; grid-template-columns:30px minmax(0,1fr) auto auto; align-items:center; gap:10px; padding:8px 11px; border:1px solid var(--line); border-radius:var(--r-md); background:linear-gradient(155deg,var(--panel),#0b1018); }
+  .task-row.is-hunt{ border-color:var(--gold-line); background:linear-gradient(120deg,rgba(255,206,86,.09),var(--panel)); }
+  .task-index{ color:var(--dim); font-size:9.5px; font-weight:850; text-align:center; font-variant-numeric:tabular-nums; }
+  .task-name{ min-width:0; }
+  .task-name b{ display:block; font-size:11.5px; }
+  .task-name span{ display:block; margin-top:2px; color:var(--dim); font-size:9px; }
+  .task-level{ min-width:42px; padding:3px 7px; border:1px solid var(--info-line); border-radius:var(--r-pill); background:var(--info-soft); color:var(--info); font-size:8.5px; font-weight:850; text-align:center; white-space:nowrap; }
+  .task-progress{ color:var(--mut); font-size:9.5px; font-weight:750; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .task-progress.completed{ color:var(--good); }
+  .task-progress.active{ color:var(--gold); }
+  .task-progress.locked{ color:var(--dim); }
+  .task-note{ margin-top:10px; padding:10px 12px; border:1px dashed var(--line2); border-radius:var(--r-md); color:var(--dim); font-size:9.5px; line-height:1.5; }
+
   /* ---------- botão "+" (hub da espécie) ---------- */
   .hl-btn{ position:absolute; top:2px; right:3px; width:16px; height:16px; border-radius:6px; border:1px solid var(--line2);
     background:rgba(10,14,22,.92); color:var(--mut); font-size:11px; line-height:14px; text-align:center; font-weight:800;
@@ -819,7 +852,9 @@
     .hl-story-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
     .hl-now-grid{ grid-template-columns:1fr; }
     .hl-story-number{ font-size:45px; }
-    .task-action{ width:100%; }
+    .task-head{ align-items:stretch; flex-direction:column; }
+    .task-head .sp{ display:none; }
+    .task-notify{ width:100%; }
   }
 </style>
 </head>
@@ -850,6 +885,7 @@
       <button class="tbtn" id="btn-dex" title="Abrir PokéData" aria-pressed="false"><span aria-hidden="true">◫</span><span class="tool-label">PokéData</span></button>
       <button class="tbtn" id="btn-box" title="Abrir Box" aria-pressed="false"><span aria-hidden="true">▦</span><span class="tool-label">Box</span></button>
       <button class="tbtn" id="btn-bag" title="Abrir Bolsa" aria-pressed="false"><span aria-hidden="true">◇</span><span class="tool-label">Bolsa</span></button>
+      <button class="tbtn" id="btn-tasks" title="Abrir Tasks" aria-pressed="false"><span aria-hidden="true">✓</span><span class="tool-label">Tasks</span></button>
       <button class="tbtn" id="btn-stats" title="Abrir estatísticas" aria-pressed="false"><span aria-hidden="true">⌁</span><span class="tool-label">Stats</span></button>
     </div>
     <button class="tbtn" id="btn-add">+ Adicionar tela</button>
@@ -1063,6 +1099,7 @@
     setToolState('btn-box', boxOpen);
     if (boxOpen && bagOpen) closeBagState();
     if (boxOpen && dexOpen) { dexOpen = false; setToolState('btn-dex', false); }
+    if (boxOpen && tasksOpen) closeTasksState();
     if (P && P.setBoxOpen) P.setBoxOpen(boxOpen);
     if (boxOpen) loadBox(); else { hideTip(); renderSidebar(); }
   }
@@ -1163,6 +1200,7 @@
     if (bagOpen){
       if (boxOpen){ boxOpen = false; setToolState('btn-box',false); }
       if (dexOpen){ dexOpen = false; setToolState('btn-dex',false); }
+      if (tasksOpen) closeTasksState();
     }
     if (bagTimer){ clearInterval(bagTimer); bagTimer = null; }
     if (P && P.setBoxOpen) P.setBoxOpen(bagOpen);
@@ -1419,9 +1457,97 @@
     setToolState('btn-dex', dexOpen);
     if (dexOpen && bagOpen) closeBagState();
     if (dexOpen && boxOpen) { boxOpen = false; setToolState('btn-box', false); }
+    if (dexOpen && tasksOpen) closeTasksState();
     if (P && P.setBoxOpen) P.setBoxOpen(dexOpen);   // reusa o mesmo mecanismo da box (esconde as telas do jogo)
     if (dexOpen) loadDex(); else { hideTip(); renderSidebar(); }
   }
+
+  // ---- Tasks: trilhas e progresso por personagem ----
+  let tasksOpen = false;
+  let taskSnapshot = { accounts:[], notificationsEnabled:false, notificationsConfigured:false };
+  let selectedTaskSlot = null;
+  let selectedTaskTrack = null;
+  function taskNumber(value){ return Number(value || 0).toLocaleString('pt-BR'); }
+  function selectedTaskAccount(){
+    return (taskSnapshot.accounts || []).find(function(account){ return account.slot === selectedTaskSlot; }) || null;
+  }
+  function taskPanelBody(account, track){
+    if (!account) return panelState('✓','Nenhuma conta disponível','Abra uma tela e entre em um personagem para acompanhar as Tasks.','');
+    if (!account.ready) return panelState('◌','Aguardando dados','O progresso aparece assim que o personagem terminar de carregar.','loading');
+    if (!track) return panelState('✓','Selecione uma trilha','Escolha um tipo acima para consultar as Tasks.','');
+    const tasks = Array.isArray(track.tasks) ? track.tasks : [];
+    const rows = tasks.map(function(entry,index){
+      const state = entry.status || 'locked';
+      const isHunt = String(account.hunt || '').toLowerCase() === String(entry.huntId || '').toLowerCase();
+      const progress = Number.isFinite(Number(entry.progress)) ? Math.max(0,Number(entry.progress)) : 0;
+      const label = state === 'completed' ? 'Concluída ✓' : (state === 'active' ? taskNumber(progress)+' / '+taskNumber(entry.target) : 'Não iniciada');
+      const detail = isHunt ? 'Hunt atual' : (state === 'completed' ? 'Finalizada' : (state === 'active' ? 'Em andamento' : 'Aguardando início'));
+      return '<div class="task-row'+(isHunt ? ' is-hunt' : '')+'"><span class="task-index">'+String(index+1).padStart(2,'0')+'</span>'
+        + '<span class="task-name"><b>'+esc(entry.species)+'</b><span>'+detail+'</span></span>'
+        + '<span class="task-level">Lv '+taskNumber(entry.requiredLevel)+'</span>'
+        + '<span class="task-progress '+state+'">'+label+'</span></div>';
+    }).join('');
+    const completed = tasks.filter(function(entry){ return entry.status === 'completed'; }).length;
+    return '<div class="task-summary"><span>Personagem: <b>'+esc(account.name)+'</b></span><span>Hunt atual: <b>'+esc(account.hunt || 'não identificada')+'</b></span><span>Concluídas: <b>'+completed+' / '+tasks.length+'</b></span></div>'
+      + '<div class="task-list">'+rows+'</div>';
+  }
+  function renderTasks(value){
+    if (value && Array.isArray(value.accounts)) taskSnapshot = value;
+    if (!tasksOpen) return;
+    const taskAccounts = taskSnapshot.accounts || [];
+    if (!taskAccounts.some(function(account){ return account.slot === selectedTaskSlot; })) {
+      selectedTaskSlot = taskAccounts.some(function(account){ return account.slot === selected; }) ? selected : (taskAccounts.length ? taskAccounts[0].slot : null);
+    }
+    const account = selectedTaskAccount();
+    const trackIds = account && account.tracks ? Object.keys(account.tracks) : [];
+    if (!trackIds.includes(selectedTaskTrack)) selectedTaskTrack = trackIds[0] || null;
+    const track = account && account.tracks ? account.tracks[selectedTaskTrack] : null;
+    const accountsHtml = taskAccounts.map(function(item){
+      return '<button type="button" class="task-pill'+(item.slot === selectedTaskSlot ? ' on' : '')+'" data-task-account="'+item.slot+'">'+esc(item.name || ('Tela '+item.slot))+'</button>';
+    }).join('');
+    const tracksHtml = trackIds.map(function(trackId){
+      const item = account.tracks[trackId] || {};
+      return '<button type="button" class="task-pill'+(selectedTaskTrack === trackId ? ' on' : '')+'" data-task-track="'+esc(trackId)+'"><span class="task-element-icon" aria-hidden="true">'+esc(item.icon || '•')+'</span>'+esc(item.label || trackId)+'</button>';
+    }).join('');
+    const notifying = taskSnapshot.notificationsEnabled === true;
+    const configured = taskSnapshot.notificationsConfigured === true;
+    const main = document.getElementById('main');
+    main.innerHTML = '<div class="task-wrap"><div class="task-head"><b><span class="panel-icon" aria-hidden="true">✓</span>Tasks</b><span class="sp"></span>'
+      + '<button type="button" class="task-notify'+(notifying ? ' on' : '')+'" id="task-notify" aria-pressed="'+(notifying ? 'true' : 'false')+'" title="'+(configured ? 'Ativar ou desativar avisos de conclusão' : 'Configure o webhook em Notificações no Discord')+'">🔔 Notificar conclusões: '+(notifying ? 'ligado' : 'desligado')+'</button></div>'
+      + '<div class="task-scroll"><div class="task-account-tabs">'+(accountsHtml || '<span class="panel-hint">Nenhuma conta disponível</span>')+'</div>'
+      + '<div class="task-track-tabs">'+tracksHtml+'</div>'+taskPanelBody(account,track)
+      + (!configured ? '<div class="task-note">Configure o webhook em Notificações no Discord para ativar os avisos de conclusão.</div>' : '')+'</div></div>';
+    main.querySelectorAll('[data-task-account]').forEach(function(button){ button.onclick = function(){ selectedTaskSlot = Number(button.dataset.taskAccount); selectedTaskTrack = null; renderTasks(); }; });
+    main.querySelectorAll('[data-task-track]').forEach(function(button){ button.onclick = function(){ selectedTaskTrack = button.dataset.taskTrack; renderTasks(); }; });
+    const notify = document.getElementById('task-notify');
+    if (notify) notify.onclick = function(){
+      if (!configured) { appFeedback('Configure o webhook nas Notificações do Discord',true); if (P && P.toggleConfig) P.toggleConfig(); return; }
+      if (!P || !P.setTaskCompletionNotifications) return;
+      notify.disabled = true;
+      P.setTaskCompletionNotifications(!notifying).then(function(next){ renderTasks(next); appFeedback(!notifying ? '✓ Avisos de Tasks ativados' : '✓ Avisos de Tasks desativados'); })
+        .catch(function(error){ notify.disabled = false; appFeedback(error && error.message ? error.message : 'Não foi possível salvar',true); });
+    };
+  }
+  function refreshTasks(first){
+    if (!P || !P.getTaskOverview) { taskSnapshot = { accounts:[] }; renderTasks(); return; }
+    if (first) document.getElementById('main').innerHTML = panelState('◌','Carregando Tasks','Lendo as trilhas e o progresso das contas abertas.','loading');
+    P.getTaskOverview().then(function(value){ if (tasksOpen) renderTasks(value); })
+      .catch(function(){ if (tasksOpen) document.getElementById('main').innerHTML = panelState('!','Tasks indisponíveis','Não foi possível consultar as Tasks agora.','error'); });
+  }
+  function closeTasksState(){ tasksOpen = false; setToolState('btn-tasks',false); }
+  function toggleTasks(open){
+    tasksOpen = open == null ? !tasksOpen : !!open;
+    setToolState('btn-tasks',tasksOpen);
+    if (tasksOpen){
+      if (bagOpen) closeBagState();
+      if (boxOpen){ boxOpen = false; setToolState('btn-box',false); }
+      if (dexOpen){ dexOpen = false; setToolState('btn-dex',false); }
+      if (selectedTaskSlot == null && selected != null) selectedTaskSlot = selected;
+    }
+    if (P && P.setBoxOpen) P.setBoxOpen(tasksOpen);
+    if (tasksOpen) refreshTasks(true); else renderSidebar();
+  }
+  if (P && P.onTaskOverview) P.onTaskOverview(function(value){ taskSnapshot = value || { accounts:[] }; if (tasksOpen) renderTasks(); });
 
   function openDexSpecies(species){
     const wanted = String(species || '').trim().toLowerCase();
@@ -1933,6 +2059,7 @@
   function applyBrowserState(next){
     if(next&&next.tabs)browserState=next;
     const generic=!isDreamTab(); document.body.classList.toggle('generic-active',generic);
+    if (generic && tasksOpen){ closeTasksState(); if (P && P.setBoxOpen) P.setBoxOpen(false); }
     renderTabs();
     document.getElementById('btn-add').textContent=generic?'+ Adicionar sessão':'+ Adicionar tela';
     const active=browserState.active||{};
@@ -1990,7 +2117,7 @@
     side.innerHTML = html;
 
     // fiação por addEventListener (sem onclick inline no HTML)
-    side.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => { if (boxOpen) toggleBox(false); if (bagOpen) toggleBag(false); if (dexOpen) toggleDex(false); if (P) P.selectAccount(+b.dataset.slot); }));
+    side.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => { if (boxOpen) toggleBox(false); if (bagOpen) toggleBag(false); if (dexOpen) toggleDex(false); if (tasksOpen) toggleTasks(false); if (P) P.selectAccount(+b.dataset.slot); }));
     side.querySelectorAll('[data-reload]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); if (P) P.reloadGame(+b.dataset.reload); }));
 
     // arrastar os cards pra reordenar as contas (reordena as telas do jogo junto)
@@ -2027,7 +2154,7 @@
     }
 
     // enquanto um painel principal está aberto ele ocupa o #main — não mexer
-    if (!boxOpen && !bagOpen && !dexOpen) {
+    if (!boxOpen && !bagOpen && !dexOpen && !tasksOpen) {
       document.getElementById('main').innerHTML = accounts.length
         ? ''
         : '<div class="empty">Nenhuma tela aberta.<br>Clique em <b>+ Adicionar tela</b> para começar.</div>';
@@ -2050,17 +2177,19 @@
   document.getElementById('btn-box').onclick = function() { toggleBox(); };
   document.getElementById('btn-bag').onclick = function() { toggleBag(); };
   document.getElementById('btn-dex').onclick = function() { toggleDex(); };
+  document.getElementById('btn-tasks').onclick = function() { toggleTasks(); };
   document.getElementById('btn-stats').onclick = function() {
     if (bagOpen) closeBagState();
     if (boxOpen){ boxOpen = false; setToolState('btn-box', false); }
     if (dexOpen){ dexOpen = false; setToolState('btn-dex', false); }
+    if (tasksOpen) closeTasksState();
     if (!P || !P.toggleXpPanel) return;
     const ready = P.setBoxOpen ? P.setBoxOpen(false) : Promise.resolve();
     Promise.resolve(ready).then(function(){ return P.toggleXpPanel(); }).then(function(state){
       setToolState('btn-stats', !!(state && state.open));
     });
   };
-  document.getElementById('btn-grid').onclick = function() { if (boxOpen) toggleBox(false); if (bagOpen) toggleBag(false); if (dexOpen) toggleDex(false); if (P) P.setGameMode('grid'); };
+  document.getElementById('btn-grid').onclick = function() { if (boxOpen) toggleBox(false); if (bagOpen) toggleBag(false); if (dexOpen) toggleDex(false); if (tasksOpen) toggleTasks(false); if (P) P.setGameMode('grid'); };
   document.getElementById('btn-min').onclick = function() { if (P) P.winMinimize(); };
   document.getElementById('btn-max').onclick = function() { if (P) P.winMaximize(); };
   document.getElementById('btn-close').onclick = function() { if (P) P.winClose(); };
