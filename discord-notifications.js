@@ -9,10 +9,11 @@ const DEFAULT_DISCORD_NOTIFICATIONS = Object.freeze({
   mythicCaptures: true,
   shinyCaptures: true,
   taskCompletions: false,
-  criticalAlertsEnabled: false,
-  partyDeaths: true,
-  repeatedStalls: true,
+  partyDeaths: false,
+  repeatedStalls: false,
 });
+
+const COMMUNITY_CHANNEL_SETTINGS = new Set(['enabled', 'rareDrops', 'mythicCaptures', 'shinyCaptures']);
 
 const EVENT_SETTING = Object.freeze({
   rare_drop: 'rareDrops',
@@ -37,7 +38,9 @@ function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCri
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   const result = {};
   for (const [key, fallback] of Object.entries(DEFAULT_DISCORD_NOTIFICATIONS)) {
-    result[key] = Object.prototype.hasOwnProperty.call(source, key) ? source[key] !== false : fallback;
+    result[key] = COMMUNITY_CHANNEL_SETTINGS.has(key)
+      ? true
+      : (Object.prototype.hasOwnProperty.call(source, key) ? source[key] === true : fallback);
   }
   const requestedUrl = typeof source.webhookUrl === 'string' ? source.webhookUrl.trim() : '';
   result.webhookUrl = isDiscordWebhookUrl(requestedUrl)
@@ -48,8 +51,14 @@ function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCri
     ? requestedCriticalUrl
     : (isDiscordWebhookUrl(currentCriticalWebhookUrl) ? currentCriticalWebhookUrl : '');
   if (!result.criticalWebhookUrl) {
-    result.criticalAlertsEnabled = false;
     result.taskCompletions = false;
+    result.partyDeaths = false;
+    result.repeatedStalls = false;
+  } else if (Object.prototype.hasOwnProperty.call(source, 'criticalAlertsEnabled') && source.criticalAlertsEnabled !== true) {
+    // Migração do controle geral antigo: se ele estava desligado, os alertas
+    // pessoais também começam desligados na nova tela.
+    result.partyDeaths = false;
+    result.repeatedStalls = false;
   }
   return result;
 }
@@ -182,8 +191,7 @@ function eventEnabled(event, settings) {
   if (event.kind === 'task_completed') return settings.taskCompletions === true && !!settings.criticalWebhookUrl;
   if (CRITICAL_EVENTS.has(event.kind)) {
     const key = EVENT_SETTING[event.kind];
-    return settings.criticalAlertsEnabled === true
-      && !!settings.criticalWebhookUrl
+    return !!settings.criticalWebhookUrl
       && !!key
       && settings[key] === true;
   }

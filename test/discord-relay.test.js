@@ -10,10 +10,10 @@ const IDENTITY = {
   appVersion:'2.0.11',
 };
 
-test('relay respeita as preferências sem precisar conhecer o webhook', () => {
+test('relay mantém conquistas e drops sempre ativos sem precisar conhecer o webhook', () => {
   assert.equal(relayEventEnabled({ kind:'rare_drop' }, { enabled:true, rareDrops:true }), true);
-  assert.equal(relayEventEnabled({ kind:'rare_drop' }, { enabled:false, rareDrops:true }), false);
-  assert.equal(relayEventEnabled({ kind:'party_death' }, { criticalAlertsEnabled:true, partyDeaths:true }), false);
+  assert.equal(relayEventEnabled({ kind:'rare_drop' }, { enabled:false, rareDrops:false }), true);
+  assert.equal(relayEventEnabled({ kind:'party_death' }, { partyDeaths:true }), false);
   assert.equal(relayEventEnabled({ kind:'task_completed' }, { taskCompletions:true }), false);
   assert.equal(serializeRelayEvent({ kind:'task_completed' }, { taskCompletions:true }), null);
 });
@@ -42,13 +42,13 @@ test('relay envia somente o evento estruturado para a Edge Function', async () =
   assert.equal(JSON.stringify(request.body).includes('discord.com/api/webhooks'), false);
 });
 
-test('serialização limita os campos e calcula os motivos da captura', () => {
+test('serialização limita os campos e inclui todos os motivos da captura', () => {
   const event = serializeRelayEvent({
     kind:'pokemon_capture', characterName:'Misty', slot:2,
     pokemon:{ species:'Starmie', shiny:true, essence:'Mythic', level:50, ignored:'secret' },
     ignored:'secret',
   }, { shinyCaptures:false, mythicCaptures:true });
-  assert.deepEqual(event.reasons, ['Mythic']);
+  assert.deepEqual(event.reasons, ['Shiny', 'Mythic']);
   assert.equal(Object.hasOwn(event, 'ignored'), false);
   assert.equal(Object.hasOwn(event.pokemon, 'ignored'), false);
 });

@@ -7,17 +7,16 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
 
 function captureReasons(pokemon, settings) {
   const reasons = [];
-  if (pokemon && pokemon.shiny === true && settings.shinyCaptures) reasons.push('Shiny');
-  if (pokemon && /^mythic$/i.test(String(pokemon.essence || pokemon.tier || '').trim()) && settings.mythicCaptures) reasons.push('Mythic');
+  if (pokemon && pokemon.shiny === true) reasons.push('Shiny');
+  if (pokemon && /^mythic$/i.test(String(pokemon.essence || pokemon.tier || '').trim())) reasons.push('Mythic');
   return reasons;
 }
 
 function relayEventEnabled(event, settings) {
   if (!event || typeof event !== 'object') return false;
   if (event.kind === 'test') return true;
-  if (settings.enabled !== true) return false;
   if (event.kind === 'pokemon_capture') return captureReasons(event.pokemon, settings).length > 0;
-  return event.kind === 'rare_drop' && settings.rareDrops === true;
+  return event.kind === 'rare_drop';
 }
 
 function shortText(value, max) {

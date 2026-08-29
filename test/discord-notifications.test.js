@@ -24,23 +24,28 @@ test('aceita somente endpoints oficiais de webhook do Discord', () => {
   assert.equal(isDiscordWebhookUrl('https://discord.com/channels/1/2'), false);
 });
 
-test('preferências nascem ligadas e preservam o webhook local ao alterar os toggles', () => {
+test('conquistas e drops ficam sempre ativos e alertas pessoais nascem desligados', () => {
   const initial = normalizeDiscordNotifications({ webhookUrl:WEBHOOK });
   assert.equal(initial.enabled, true);
   assert.equal(initial.rareDrops, true);
   assert.equal(initial.mythicCaptures, true);
-  assert.equal(initial.criticalAlertsEnabled, false);
-  const changed = normalizeDiscordNotifications({ shinyCaptures:false, partyDeaths:false }, initial.webhookUrl);
+  assert.equal(initial.shinyCaptures, true);
+  assert.equal(initial.partyDeaths, false);
+  assert.equal(initial.repeatedStalls, false);
+  assert.equal(initial.taskCompletions, false);
+  const changed = normalizeDiscordNotifications({ enabled:false, rareDrops:false, shinyCaptures:false }, initial.webhookUrl);
   assert.equal(changed.webhookUrl, WEBHOOK);
-  assert.equal(changed.shinyCaptures, false);
-  assert.equal(changed.partyDeaths, false);
+  assert.equal(changed.enabled, true);
+  assert.equal(changed.rareDrops, true);
+  assert.equal(changed.shinyCaptures, true);
 });
 
 test('alertas de morte, travamento e Tasks usam o webhook configurado pela pessoa', () => {
   const settings = normalizeDiscordNotifications({
     webhookUrl:WEBHOOK,
     criticalWebhookUrl:CRITICAL_WEBHOOK,
-    criticalAlertsEnabled:true,
+    partyDeaths:true,
+    repeatedStalls:true,
     taskCompletions:true,
   });
   assert.equal(webhookForEvent({ kind:'rare_drop' }, settings), WEBHOOK);
@@ -49,10 +54,23 @@ test('alertas de morte, travamento e Tasks usam o webhook configurado pela pesso
   assert.equal(eventEnabled({ kind:'party_death' }, settings), true);
   assert.equal(eventEnabled({ kind:'task_completed' }, settings), true);
   assert.equal(eventEnabled({ kind:'repeated_stall' }, Object.assign({}, settings, { criticalWebhookUrl:'' })), false);
-  assert.equal(eventEnabled({ kind:'party_death' }, Object.assign({}, settings, { criticalAlertsEnabled:false })), false);
+  assert.equal(eventEnabled({ kind:'party_death' }, Object.assign({}, settings, { partyDeaths:false })), false);
   assert.equal(eventEnabled({ kind:'task_completed' }, Object.assign({}, settings, { taskCompletions:false })), false);
-  assert.equal(normalizeDiscordNotifications({ criticalAlertsEnabled:true, taskCompletions:true }).criticalAlertsEnabled, false);
-  assert.equal(normalizeDiscordNotifications({ criticalAlertsEnabled:true, taskCompletions:true }).taskCompletions, false);
+  const withoutWebhook = normalizeDiscordNotifications({ partyDeaths:true, repeatedStalls:true, taskCompletions:true });
+  assert.equal(withoutWebhook.partyDeaths, false);
+  assert.equal(withoutWebhook.repeatedStalls, false);
+  assert.equal(withoutWebhook.taskCompletions, false);
+});
+
+test('migração do controle geral antigo mantém alertas pessoais desligados', () => {
+  const migrated = normalizeDiscordNotifications({
+    criticalWebhookUrl:CRITICAL_WEBHOOK,
+    criticalAlertsEnabled:false,
+    partyDeaths:true,
+    repeatedStalls:true,
+  });
+  assert.equal(migrated.partyDeaths, false);
+  assert.equal(migrated.repeatedStalls, false);
 });
 
 test('detecta item raro e associa o Pokémon morto na mesma posição', () => {
@@ -75,13 +93,12 @@ test('captura shiny e Mythic vira um único embed com tier, potência e personag
   assert.deepEqual(payload.embeds[0].fields.map((field) => field.name), ['Nível', 'Potência', 'Tier', 'Capturado com']);
 });
 
-test('respeita controles independentes de shiny e Mythic', () => {
-  const settings = normalizeDiscordNotifications({ webhookUrl:WEBHOOK, shinyCaptures:false, mythicCaptures:true });
+test('capturas shiny e Mythic continuam ativas mesmo com preferências antigas desligadas', () => {
+  const settings = normalizeDiscordNotifications({ webhookUrl:WEBHOOK, shinyCaptures:false, mythicCaptures:false });
   const shinyOnly = buildDiscordPayload({ kind:'pokemon_capture', pokemon:{ species:'Gastly', shiny:true } }, settings);
   const mythic = buildDiscordPayload({ kind:'pokemon_capture', pokemon:{ species:'Grimer', shiny:true, essence:'Mythic' } }, settings);
-  assert.equal(shinyOnly, null);
-  assert.match(mythic.embeds[0].title, /Mythic/);
-  assert.doesNotMatch(mythic.embeds[0].title, /Shiny/);
+  assert.match(shinyOnly.embeds[0].title, /Shiny/);
+  assert.match(mythic.embeds[0].title, /Shiny \+ Mythic/);
 });
 
 test('mensagem de morte e travamento repetido inclui contexto útil sem exigir menção', () => {
@@ -116,6 +133,7 @@ test('launcher preserva o canal principal e aceita webhook local apenas para ale
   assert.match(main, /hasOwnProperty\.call\(preferences, 'taskCompletions'\)/);
   assert.doesNotMatch(main, /discord\.com\/api\/webhooks/);
   assert.match(config, /id="notifications-critical-webhook"/);
-  assert.match(config, /id="notifications-critical-enabled"/);
+  assert.match(config, /id="notifications-tasks"/);
+  assert.doesNotMatch(config, /id="notifications-critical-enabled"|id="notifications-enabled"|id="notifications-rare-drops"|id="notifications-mythic"|id="notifications-shiny"/);
   assert.doesNotMatch(config + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
 });

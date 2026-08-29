@@ -100,6 +100,9 @@
   .toggle input:checked + span{ border-color:var(--accent-line); background:var(--accent-soft); }
   .toggle input:checked + span:after{ transform:translateX(18px); background:var(--accent); box-shadow:0 0 10px rgba(89,216,196,.35); }
   .toggle input:focus-visible + span{ outline:2px solid var(--accent); outline-offset:2px; }
+  .toggle:has(input:disabled){ cursor:not-allowed; }
+  .toggle input:disabled + span{ opacity:.35; }
+  .setting-row:has(.toggle input:disabled) .setting-copy{ opacity:.55; }
   input[type=range]{ accent-color:var(--accent); }
   .alr-row{ min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid var(--line); color:var(--text-2); }
   .alr-row:last-child{ border-bottom:0; }
@@ -182,28 +185,22 @@
   <div class="cl-panel" id="notifications">
     <div class="h"><button class="x" id="notifications-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🔔 Notificações no Discord</span></div>
     <div class="cl-body">
-      <label class="setting-row" for="notifications-enabled">
-        <span class="setting-copy"><b>Conquistas e drops</b><span>Envia capturas e drops raros para o canal principal.</span></span>
-        <span class="toggle"><input type="checkbox" id="notifications-enabled"><span aria-hidden="true"></span></span>
-      </label>
-      <label class="setting-row" for="notifications-rare-drops"><span class="setting-copy"><b>Drops raros</b><span>Itens da lista rara, quantidade e Pokémon que dropou.</span></span><span class="toggle"><input type="checkbox" id="notifications-rare-drops"><span aria-hidden="true"></span></span></label>
-      <label class="setting-row" for="notifications-mythic"><span class="setting-copy"><b>Capturas Mythic</b><span>Espécie, nível, tier, potência e bola usada.</span></span><span class="toggle"><input type="checkbox" id="notifications-mythic"><span aria-hidden="true"></span></span></label>
-      <label class="setting-row" for="notifications-shiny"><span class="setting-copy"><b>Capturas shiny</b><span>Informações completas do Pokémon que entrou na Box.</span></span><span class="toggle"><input type="checkbox" id="notifications-shiny"><span aria-hidden="true"></span></span></label>
+      <div class="setting-row">
+        <span class="setting-copy"><b>Conquistas e drops</b><span>Capturas shiny, capturas Mythic e drops raros são enviados para o canal principal.</span></span>
+        <span class="status" style="color:var(--good);white-space:nowrap">Sempre ativo</span>
+      </div>
       <div class="sep"></div>
-      <div class="row"><b>Alertas de morte e travamento</b><br>Esses alertas vão para um canal separado e nascem desligados.</div>
+      <div class="row"><b>Alertas pessoais</b><br>Escolha quais avisos deseja receber no seu próprio canal. Eles começam desligados.</div>
       <label class="setting-row" for="notifications-critical-webhook">
-        <span class="setting-copy"><b>Webhook do seu canal</b><span>Crie um webhook no canal do Discord em que deseja receber mortes, travamentos e conclusões de Tasks.</span></span>
+        <span class="setting-copy"><b>Webhook do seu canal</b><span>Configure o canal do Discord em que deseja receber esses alertas.</span></span>
       </label>
       <input class="text-field" id="notifications-critical-webhook" type="password" inputmode="url" autocomplete="off" maxlength="300" placeholder="https://discord.com/api/webhooks/…">
       <div class="status" style="margin-top:7px">O endereço fica salvo neste computador e não é enviado ao canal principal.</div>
       <button class="btn" id="notifications-critical-clear" style="display:none;margin-top:8px">Remover webhook</button>
-      <label class="setting-row" for="notifications-critical-enabled">
-        <span class="setting-copy"><b>Ativar alertas do canal</b><span>Só pode ser ligado depois que um webhook válido for configurado.</span></span>
-        <span class="toggle"><input type="checkbox" id="notifications-critical-enabled"><span aria-hidden="true"></span></span>
-      </label>
       <label class="setting-row" for="notifications-deaths"><span class="setting-copy"><b>Mortes na party</b><span>Avisa quando o HP de um Pokémon da party chega a zero.</span></span><span class="toggle"><input type="checkbox" id="notifications-deaths"><span aria-hidden="true"></span></span></label>
       <label class="setting-row" for="notifications-stalls"><span class="setting-copy"><b>Travamento repetido</b><span>Avisa se a mesma tela precisar de um segundo F5 seguido.</span></span><span class="toggle"><input type="checkbox" id="notifications-stalls"><span aria-hidden="true"></span></span></label>
-      <div class="row" style="margin-top:14px"><b>Destinos</b><br>Conquistas e drops permanecem no canal principal. Os demais alertas usam o webhook configurado acima.</div>
+      <label class="setting-row" for="notifications-tasks"><span class="setting-copy"><b>Conclusões de Tasks</b><span>Avisa quando uma Task for concluída em qualquer uma das suas contas.</span></span><span class="toggle"><input type="checkbox" id="notifications-tasks"><span aria-hidden="true"></span></span></label>
+      <div class="row" style="margin-top:14px">Os controles ficam disponíveis depois que um webhook válido for configurado.</div>
       <div class="share-state off" id="notifications-status" aria-live="polite">Carregando…</div>
     </div>
   </div>
@@ -493,13 +490,9 @@
 
   // ---- notificações no Discord ----
   const notificationInputs = {
-    enabled:document.getElementById('notifications-enabled'),
-    rareDrops:document.getElementById('notifications-rare-drops'),
-    mythicCaptures:document.getElementById('notifications-mythic'),
-    shinyCaptures:document.getElementById('notifications-shiny'),
-    criticalAlertsEnabled:document.getElementById('notifications-critical-enabled'),
     partyDeaths:document.getElementById('notifications-deaths'),
     repeatedStalls:document.getElementById('notifications-stalls'),
+    taskCompletions:document.getElementById('notifications-tasks'),
   };
   const notificationWebhook = document.getElementById('notifications-critical-webhook');
   const notificationClear = document.getElementById('notifications-critical-clear');
@@ -516,11 +509,10 @@
   function syncCriticalNotificationControls(){
     const configured = !!(notificationSnapshot && notificationSnapshot.criticalConfigured);
     const hasWebhook = configured || validDiscordWebhook(notificationWebhook.value);
-    notificationInputs.criticalAlertsEnabled.disabled = !hasWebhook;
-    if (!hasWebhook) notificationInputs.criticalAlertsEnabled.checked = false;
-    const enabled = hasWebhook && notificationInputs.criticalAlertsEnabled.checked;
-    notificationInputs.partyDeaths.disabled = !enabled;
-    notificationInputs.repeatedStalls.disabled = !enabled;
+    Object.keys(notificationInputs).forEach(function(key){
+      notificationInputs[key].disabled = !hasWebhook;
+      if (!hasWebhook) notificationInputs[key].checked = false;
+    });
   }
   function notificationTime(value){
     const date = new Date(value || 0);
@@ -538,14 +530,18 @@
     notificationStatus.className = 'share-state ' + (value.lastError ? 'warn' : 'ok');
     notificationStatus.textContent = value.lastError
       ? value.lastError
-      : ('Canal principal configurado. Webhook de alertas ' + (value.criticalConfigured ? 'configurado' : 'não configurado') + '.' + (lastSuccess ? ' Último envio: ' + lastSuccess + '.' : ''));
+      : ('Conquistas e drops ativos. Webhook pessoal ' + (value.criticalConfigured ? 'configurado' : 'não configurado') + '.' + (lastSuccess ? ' Último envio: ' + lastSuccess + '.' : ''));
   }
   function readNotifications(){
     const value = {};
     Object.keys(notificationInputs).forEach(function(key){ value[key] = notificationInputs[key].checked; });
     const submittedWebhook = notificationWebhook.value.trim();
     if (submittedWebhook) value.criticalWebhookUrl = submittedWebhook;
-    if (!(notificationSnapshot && notificationSnapshot.criticalConfigured) && !validDiscordWebhook(submittedWebhook)) value.criticalAlertsEnabled = false;
+    if (!(notificationSnapshot && notificationSnapshot.criticalConfigured) && !validDiscordWebhook(submittedWebhook)) {
+      value.partyDeaths = false;
+      value.repeatedStalls = false;
+      value.taskCompletions = false;
+    }
     return value;
   }
   function saveNotifications(){
@@ -572,7 +568,11 @@
   document.getElementById('notifications-back').onclick = function(){ openConfigPanel(null); };
   notificationClear.onclick = function(){
     if (!P || !P.setDiscordNotifications || !notificationSnapshot) return;
-    const value = readNotifications(); value.clearCriticalWebhook = true; value.criticalAlertsEnabled = false;
+    const value = readNotifications();
+    value.clearCriticalWebhook = true;
+    value.partyDeaths = false;
+    value.repeatedStalls = false;
+    value.taskCompletions = false;
     notificationStatus.className = 'share-state off'; notificationStatus.textContent = 'Removendo…';
     P.setDiscordNotifications(value).then(function(next){ renderNotifications(next); savedFeedback('✓ Webhook removido'); })
       .catch(function(error){ notificationStatus.className = 'share-state warn'; notificationStatus.textContent = error && error.message ? error.message : 'Não foi possível remover.'; });

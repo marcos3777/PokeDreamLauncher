@@ -102,6 +102,9 @@ test('painel de Tasks acompanha as contas e controla o aviso geral', () => {
 test('alertas pessoais usam webhook próprio sem ID nem botão de teste', () => {
   assert.match(config, /id="notifications-critical-webhook"/);
   assert.match(config, /Webhook do seu canal/);
+  assert.match(config, /Alertas pessoais/);
+  assert.match(config, /id="notifications-tasks"/);
+  assert.doesNotMatch(config, /id="notifications-critical-enabled"|id="notifications-enabled"|id="notifications-rare-drops"|id="notifications-mythic"|id="notifications-shiny"/);
   assert.doesNotMatch(config + preload + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
 });
 
