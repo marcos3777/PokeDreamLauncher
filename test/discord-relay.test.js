@@ -22,6 +22,7 @@ test('relay envia somente o evento estruturado para a Edge Function', async () =
   let request = null;
   const notifier = createDiscordRelayNotifier(() => ({
     enabled:true, rareDrops:true, mythicCaptures:true, shinyCaptures:true,
+    discordUserId:'123456789012345678',
   }), () => IDENTITY, {
     baseUrl:'https://example.supabase.co',
     publishableKey:'sb_publishable_test',
@@ -38,6 +39,7 @@ test('relay envia somente o evento estruturado para a Edge Function', async () =
   assert.equal(request.url, 'https://example.supabase.co/functions/v1/discord-notification');
   assert.equal(request.init.headers.apikey, 'sb_publishable_test');
   assert.equal(request.body.client_token, IDENTITY.clientToken);
+  assert.equal(request.body.discord_user_id, '123456789012345678');
   assert.equal(request.body.event.kind, 'rare_drop');
   assert.equal(JSON.stringify(request.body).includes('discord.com/api/webhooks'), false);
 });

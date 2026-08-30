@@ -99,13 +99,15 @@ test('painel de Tasks acompanha as contas e controla o aviso geral', () => {
   assert.doesNotMatch(taskPanel, /automa[cç][aã]o|autom[aá]tic/i);
 });
 
-test('alertas pessoais usam webhook próprio sem ID nem botão de teste', () => {
+test('notificações usam webhook próprio, ID opcional global e nenhum botão de teste', () => {
   assert.match(config, /id="notifications-critical-webhook"/);
+  assert.match(config, /id="notifications-discord-user-id"/);
   assert.match(config, /Webhook do seu canal/);
   assert.match(config, /Alertas pessoais/);
+  assert.match(config, /mencionado em todas as notificações/);
   assert.match(config, /id="notifications-tasks"/);
   assert.doesNotMatch(config, /id="notifications-critical-enabled"|id="notifications-enabled"|id="notifications-rare-drops"|id="notifications-mythic"|id="notifications-shiny"/);
-  assert.doesNotMatch(config + preload + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
+  assert.doesNotMatch(config + preload + main, /notifications-test|testDiscordNotifications|allowDiscordTest/);
 });
 
 test('bolsa usa os sprites do jogo sem piscar nem destacar itens configurados em vermelho', () => {

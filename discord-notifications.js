@@ -34,6 +34,11 @@ function isDiscordWebhookUrl(value) {
   } catch { return false; }
 }
 
+function normalizeDiscordUserId(value) {
+  const id = String(value == null ? '' : value).trim();
+  return /^\d{17,20}$/.test(id) ? id : '';
+}
+
 function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCriticalWebhookUrl = '') {
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   const result = {};
@@ -50,6 +55,7 @@ function normalizeDiscordNotifications(value, currentWebhookUrl = '', currentCri
   result.criticalWebhookUrl = isDiscordWebhookUrl(requestedCriticalUrl)
     ? requestedCriticalUrl
     : (isDiscordWebhookUrl(currentCriticalWebhookUrl) ? currentCriticalWebhookUrl : '');
+  result.discordUserId = normalizeDiscordUserId(source.discordUserId);
   if (!result.criticalWebhookUrl) {
     result.taskCompletions = false;
     result.partyDeaths = false;
@@ -179,11 +185,14 @@ function buildDiscordPayload(event, settings) {
   if (!embed) return null;
   embed.timestamp = new Date(event.at || Date.now()).toISOString();
   embed.footer = { text:'Poke Dream Launcher' };
-  return {
+  const userId = normalizeDiscordUserId(settings && settings.discordUserId);
+  const payload = {
     username:'Poke Dream Launcher',
-    allowed_mentions:{ parse:[] },
+    allowed_mentions:userId ? { parse:[], users:[userId] } : { parse:[] },
     embeds:[embed],
   };
+  if (userId) payload.content = `<@${userId}>`;
+  return payload;
 }
 
 function eventEnabled(event, settings) {
@@ -260,6 +269,7 @@ module.exports = {
   eventEnabled,
   isDiscordWebhookUrl,
   isMythicPokemon,
+  normalizeDiscordUserId,
   normalizeDiscordNotifications,
   postDiscordWebhook,
   webhookForEvent,

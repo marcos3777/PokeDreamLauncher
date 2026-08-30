@@ -197,6 +197,11 @@
       <input class="text-field" id="notifications-critical-webhook" type="password" inputmode="url" autocomplete="off" maxlength="300" placeholder="https://discord.com/api/webhooks/…">
       <div class="status" style="margin-top:7px">O endereço fica salvo neste computador e não é enviado ao canal principal.</div>
       <button class="btn" id="notifications-critical-clear" style="display:none;margin-top:8px">Remover webhook</button>
+      <label class="setting-row" for="notifications-discord-user-id">
+        <span class="setting-copy"><b>ID do usuário do Discord</b><span>Opcional. Quando preenchido, você será mencionado em todas as notificações.</span></span>
+      </label>
+      <input class="text-field" id="notifications-discord-user-id" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Ex.: 123456789012345678">
+      <div class="status" style="margin-top:7px">No Discord, ative o modo desenvolvedor e use “Copiar ID do usuário”.</div>
       <label class="setting-row" for="notifications-deaths"><span class="setting-copy"><b>Mortes na party</b><span>Avisa quando o HP de um Pokémon da party chega a zero.</span></span><span class="toggle"><input type="checkbox" id="notifications-deaths"><span aria-hidden="true"></span></span></label>
       <label class="setting-row" for="notifications-stalls"><span class="setting-copy"><b>Travamento repetido</b><span>Avisa se a mesma tela precisar de um segundo F5 seguido.</span></span><span class="toggle"><input type="checkbox" id="notifications-stalls"><span aria-hidden="true"></span></span></label>
       <label class="setting-row" for="notifications-tasks"><span class="setting-copy"><b>Conclusões de Tasks</b><span>Avisa quando uma Task for concluída em qualquer uma das suas contas.</span></span><span class="toggle"><input type="checkbox" id="notifications-tasks"><span aria-hidden="true"></span></span></label>
@@ -495,6 +500,7 @@
     taskCompletions:document.getElementById('notifications-tasks'),
   };
   const notificationWebhook = document.getElementById('notifications-critical-webhook');
+  const notificationDiscordUserId = document.getElementById('notifications-discord-user-id');
   const notificationClear = document.getElementById('notifications-critical-clear');
   const notificationStatus = document.getElementById('notifications-status');
   let notificationSnapshot = null;
@@ -506,6 +512,7 @@
         && /^\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+\/?$/.test(url.pathname);
     } catch (_) { return false; }
   }
+  function validDiscordUserId(value){ return !String(value || '').trim() || /^\d{17,20}$/.test(String(value).trim()); }
   function syncCriticalNotificationControls(){
     const configured = !!(notificationSnapshot && notificationSnapshot.criticalConfigured);
     const hasWebhook = configured || validDiscordWebhook(notificationWebhook.value);
@@ -524,6 +531,7 @@
     Object.keys(notificationInputs).forEach(function(key){ notificationInputs[key].checked = value[key] === true; });
     notificationWebhook.value = '';
     notificationWebhook.placeholder = value.criticalConfigured ? 'Webhook configurado — cole outro para substituir' : 'https://discord.com/api/webhooks/…';
+    notificationDiscordUserId.value = value.discordUserId || '';
     notificationClear.style.display = value.criticalConfigured ? '' : 'none';
     syncCriticalNotificationControls();
     const lastSuccess = notificationTime(value.lastSuccessAt);
@@ -537,6 +545,7 @@
     Object.keys(notificationInputs).forEach(function(key){ value[key] = notificationInputs[key].checked; });
     const submittedWebhook = notificationWebhook.value.trim();
     if (submittedWebhook) value.criticalWebhookUrl = submittedWebhook;
+    value.discordUserId = notificationDiscordUserId.value.trim();
     if (!(notificationSnapshot && notificationSnapshot.criticalConfigured) && !validDiscordWebhook(submittedWebhook)) {
       value.partyDeaths = false;
       value.repeatedStalls = false;
@@ -550,6 +559,11 @@
     if (invalidWebhook) {
       notificationStatus.className = 'share-state warn';
       notificationStatus.textContent = 'Use um webhook válido do Discord.';
+      return Promise.resolve(null);
+    }
+    if (!validDiscordUserId(notificationDiscordUserId.value)) {
+      notificationStatus.className = 'share-state warn';
+      notificationStatus.textContent = 'Use um ID de usuário válido do Discord (somente números).';
       return Promise.resolve(null);
     }
     notificationStatus.className = 'share-state off'; notificationStatus.textContent = 'Salvando…';
@@ -580,6 +594,7 @@
   Object.keys(notificationInputs).forEach(function(key){ notificationInputs[key].onchange = function(){ syncCriticalNotificationControls(); if (notificationSnapshot) saveNotifications(); }; });
   notificationWebhook.oninput = syncCriticalNotificationControls;
   notificationWebhook.onchange = function(){ if (notificationSnapshot) saveNotifications(); };
+  notificationDiscordUserId.onchange = function(){ if (notificationSnapshot) saveNotifications(); };
 
   // ---- failsafe de tela sem novas kills ----
   const failsafe = document.getElementById('failsafe');

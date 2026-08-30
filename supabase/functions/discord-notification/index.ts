@@ -6,7 +6,6 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
 const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,31}$/;
 const DISCORD_ID_PATTERN = /^\d{17,20}$/;
 const WEBHOOK_PATH_PATTERN = /^\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+\/?$/;
-const CRITICAL_EVENTS = new Set(["party_death", "repeated_stall"]);
 
 type JsonObject = Record<string, unknown>;
 
@@ -208,9 +207,12 @@ export default {
         throw new RequestError(400, "invalid_submission");
       }
       const event = validateEvent(body.event);
-      const critical = CRITICAL_EVENTS.has(String(event.kind));
-      if ((critical && (typeof body.discord_user_id !== "string" || !DISCORD_ID_PATTERN.test(body.discord_user_id)))
-        || (!critical && body.discord_user_id !== null)) throw new RequestError(400, "invalid_discord_user");
+      const discordUserId = body.discord_user_id === null
+        ? null
+        : (typeof body.discord_user_id === "string" && DISCORD_ID_PATTERN.test(body.discord_user_id)
+          ? body.discord_user_id
+          : null);
+      if (body.discord_user_id !== null && discordUserId === null) throw new RequestError(400, "invalid_discord_user");
 
       const sourceSalt = Deno.env.get("DISCORD_RATE_LIMIT_SALT") || Deno.env.get("SUPABASE_URL") || "poke-dream-launcher";
       const sourceHash = await sha256(`${sourceSalt}:${requestSource(req)}`);
@@ -244,7 +246,7 @@ export default {
       const discordResponse = await fetch(target, {
         method:"POST",
         headers:{ "content-type":"application/json", "user-agent":"Poke-Dream-Launcher-Relay" },
-        body:JSON.stringify(buildDiscordPayload(event, critical ? String(body.discord_user_id) : null)),
+        body:JSON.stringify(buildDiscordPayload(event, discordUserId)),
       });
       if (!discordResponse.ok) {
         console.error("Discord notification failed", { status:discordResponse.status, kind:event.kind });

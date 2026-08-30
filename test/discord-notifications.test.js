@@ -10,6 +10,7 @@ const {
   eventEnabled,
   isDiscordWebhookUrl,
   isMythicPokemon,
+  normalizeDiscordUserId,
   normalizeDiscordNotifications,
   webhookForEvent,
 } = require('../discord-notifications');
@@ -22,6 +23,12 @@ test('aceita somente endpoints oficiais de webhook do Discord', () => {
   assert.equal(isDiscordWebhookUrl('http://discord.com/api/webhooks/1/token'), false);
   assert.equal(isDiscordWebhookUrl('https://example.com/api/webhooks/1/token'), false);
   assert.equal(isDiscordWebhookUrl('https://discord.com/channels/1/2'), false);
+});
+
+test('aceita somente IDs numéricos de usuário do Discord', () => {
+  assert.equal(normalizeDiscordUserId(' 123456789012345678 '), '123456789012345678');
+  assert.equal(normalizeDiscordUserId('123'), '');
+  assert.equal(normalizeDiscordUserId('12345678901234567x'), '');
 });
 
 test('conquistas e drops ficam sempre ativos e alertas pessoais nascem desligados', () => {
@@ -101,15 +108,25 @@ test('capturas shiny e Mythic continuam ativas mesmo com preferências antigas d
   assert.match(mythic.embeds[0].title, /Shiny \+ Mythic/);
 });
 
-test('mensagem de morte e travamento repetido inclui contexto útil sem exigir menção', () => {
+test('alertas pessoais mencionam o usuário somente quando o ID foi configurado', () => {
   const settings = normalizeDiscordNotifications({ criticalWebhookUrl:CRITICAL_WEBHOOK });
   const death = buildDiscordPayload({ kind:'party_death', characterName:'Misty', pokemon:{ species:'Starmie', level:50, potential:88 } }, settings);
-  const stall = buildDiscordPayload({ kind:'repeated_stall', characterName:'Brock', attempts:2, timeoutSeconds:30 }, settings);
+  const mentionedSettings = normalizeDiscordNotifications({ criticalWebhookUrl:CRITICAL_WEBHOOK, discordUserId:'123456789012345678' });
+  const stall = buildDiscordPayload({ kind:'repeated_stall', characterName:'Brock', attempts:2, timeoutSeconds:30 }, mentionedSettings);
   assert.match(death.embeds[0].description, /Starmie.*Misty/);
   assert.equal(death.content, undefined);
   assert.deepEqual(death.allowed_mentions, { parse:[] });
   assert.match(stall.embeds[0].description, /2ª vez/);
   assert.equal(stall.embeds[0].fields[0].value, '30 segundos');
+  assert.equal(stall.content, '<@123456789012345678>');
+  assert.deepEqual(stall.allowed_mentions, { parse:[], users:['123456789012345678'] });
+});
+
+test('conquistas e drops também incluem a menção configurada', () => {
+  const settings = normalizeDiscordNotifications({ webhookUrl:WEBHOOK, discordUserId:'123456789012345678' });
+  const payload = buildDiscordPayload({ kind:'rare_drop', itemName:'Green Queen Ear', count:1 }, settings);
+  assert.equal(payload.content, '<@123456789012345678>');
+  assert.deepEqual(payload.allowed_mentions, { parse:[], users:['123456789012345678'] });
 });
 
 test('conclusão de Task gera aviso no webhook de alertas', () => {
@@ -133,7 +150,8 @@ test('launcher preserva o canal principal e aceita webhook local apenas para ale
   assert.match(main, /hasOwnProperty\.call\(preferences, 'taskCompletions'\)/);
   assert.doesNotMatch(main, /discord\.com\/api\/webhooks/);
   assert.match(config, /id="notifications-critical-webhook"/);
+  assert.match(config, /id="notifications-discord-user-id"/);
   assert.match(config, /id="notifications-tasks"/);
   assert.doesNotMatch(config, /id="notifications-critical-enabled"|id="notifications-enabled"|id="notifications-rare-drops"|id="notifications-mythic"|id="notifications-shiny"/);
-  assert.doesNotMatch(config + main, /notifications-test|testDiscordNotifications|notifications-discord-user|discordUserId|allowDiscordTest/);
+  assert.doesNotMatch(config + main, /notifications-test|testDiscordNotifications|allowDiscordTest/);
 });

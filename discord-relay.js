@@ -95,7 +95,7 @@ function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
           app_version:String(identity.appVersion || '0.0.0'),
           client_id:identity.clientId,
           client_token:identity.clientToken,
-          discord_user_id:null,
+          discord_user_id:settings.discordUserId || null,
           event:serialized,
         }),
         signal:controller.signal,

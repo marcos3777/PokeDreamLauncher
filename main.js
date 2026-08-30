@@ -1674,6 +1674,7 @@ function fixedDiscordSettings(value) {
   else if (isDiscordWebhookUrl(source.criticalWebhookUrl)) criticalWebhookUrl = String(source.criticalWebhookUrl).trim();
   const { webhookUrl: _ignoredWebhook, criticalWebhookUrl: _submittedCriticalWebhook, clearCriticalWebhook: _ignoredClear, ...preferences } = source;
   if (!Object.prototype.hasOwnProperty.call(preferences, 'taskCompletions')) preferences.taskCompletions = discordNotifications.taskCompletions === true;
+  if (!Object.prototype.hasOwnProperty.call(preferences, 'discordUserId')) preferences.discordUserId = discordNotifications.discordUserId || '';
   return normalizeDiscordNotifications(Object.assign(preferences, { criticalWebhookUrl }), '', criticalWebhookUrl);
 }
 function loadHuntPerformance() {
