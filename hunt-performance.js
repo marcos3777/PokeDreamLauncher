@@ -5,6 +5,7 @@ const HUNT_PERFORMANCE_FIRST_MS = 10 * 60 * 1000;
 const HUNT_PERFORMANCE_INTERVAL_MS = 5 * 60 * 1000;
 const METRICS = ['xpPerHour', 'mobsPerHour'];
 const XP_BUFF_RATES = Object.freeze({ vip: 0.20, xpPotion: 0.50 });
+const XP_RUNE_RATES = Object.freeze({ 1: 0.02, 2: 0.04, 3: 0.08 });
 const XP_BUFF_KEYS = Object.freeze(['vip', 'xpPotion', 'task', 'rune']);
 
 function safeNumber(value) {
@@ -64,6 +65,16 @@ function normalizeXpBuffs(value) {
   return buffs;
 }
 
+function xpRuneBonusRate(species, runeAssign, runeStages) {
+  if (typeof species !== 'string' || !species) return 0;
+  const assignments = runeAssign && typeof runeAssign === 'object' && !Array.isArray(runeAssign) ? runeAssign : {};
+  const stages = runeStages && typeof runeStages === 'object' && !Array.isArray(runeStages) ? runeStages : {};
+  const assignedSpecies = Object.keys(assignments).find((name) => name.toLowerCase() === species.toLowerCase());
+  if (!assignedSpecies || String(assignments[assignedSpecies]).toLowerCase() !== 'xp') return 0;
+  const stage = Math.floor(Number(stages.xp));
+  return XP_RUNE_RATES[stage] || 0;
+}
+
 function activeXpBuffs(value, now = Date.now()) {
   const source = value && typeof value === 'object' ? value : {};
   const at = Number(now);
@@ -76,7 +87,6 @@ function activeXpBuffs(value, now = Date.now()) {
   if (Number.isFinite(xpBoostEndsAtMs) && xpBoostEndsAtMs > at) buffs.xpPotion = XP_BUFF_RATES.xpPotion;
   const completedTaskTypes = Math.floor(Number(source.completedTaskTypes));
   if (Number.isFinite(completedTaskTypes) && completedTaskTypes > 0) buffs.task = Math.min(100, completedTaskTypes) / 100;
-  // Preparado para a futura leitura de runas; nenhum chamador informa este valor ainda.
   const runeBonusRate = Number(source.runeBonusRate);
   if (Number.isFinite(runeBonusRate) && runeBonusRate > 0 && runeBonusRate <= 5) buffs.rune = runeBonusRate;
   return buffs;
@@ -337,6 +347,7 @@ module.exports = {
   HUNT_PERFORMANCE_INTERVAL_MS,
   HUNT_PERFORMANCE_V,
   XP_BUFF_RATES,
+  XP_RUNE_RATES,
   activeXpBuffs,
   backfillTrainerNameForAccount,
   communityPerformanceRecords,
@@ -347,4 +358,5 @@ module.exports = {
   markCommunityPerformanceRecordsSynced,
   performanceDelta,
   updatePerformanceRecords,
+  xpRuneBonusRate,
 };

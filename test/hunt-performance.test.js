@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { HUNT_PERFORMANCE_V, activeXpBuffs, backfillTrainerNameForAccount, communityPerformanceRecords, createPerformanceBaseline, markCommunityPerformanceRecordsSynced, normalizeHuntPerformance, performanceDelta, updatePerformanceRecords } = require('../hunt-performance');
+const { HUNT_PERFORMANCE_V, XP_RUNE_RATES, activeXpBuffs, backfillTrainerNameForAccount, communityPerformanceRecords, createPerformanceBaseline, markCommunityPerformanceRecordsSynced, normalizeHuntPerformance, performanceDelta, updatePerformanceRecords, xpRuneBonusRate } = require('../hunt-performance');
 
 const ACCOUNT_ID = 'a'.repeat(64);
 
@@ -107,6 +107,22 @@ test('detecta VIP, poção e uma porcentagem por trilha de task concluída', () 
   assert.deepEqual(activeXpBuffs({ premiumActive:true, premiumUntilMs:900, xpBoostEndsAtMs:3000 }, 1000), { xpPotion:0.5 });
   assert.deepEqual(activeXpBuffs({ premiumActive:false, xpBoostEndsAtMs:900 }, 1000), {});
   assert.deepEqual(activeXpBuffs({ completedTaskTypes:1, runeBonusRate:0.12 }, 1000), { task:0.01, rune:0.12 });
+});
+
+test('detecta a runa de XP atribuída à espécie com bônus por estágio', () => {
+  assert.deepEqual(XP_RUNE_RATES, { 1:0.02, 2:0.04, 3:0.08 });
+  assert.equal(xpRuneBonusRate('Haunter', { Haunter:'xp' }, { xp:1 }), 0.02);
+  assert.equal(xpRuneBonusRate('haunter', { Haunter:'xp' }, { xp:2 }), 0.04);
+  assert.equal(xpRuneBonusRate('Haunter', { Haunter:'xp' }, { xp:3 }), 0.08);
+  assert.equal(xpRuneBonusRate('Gastly', { Haunter:'xp' }, { xp:3 }), 0);
+  assert.equal(xpRuneBonusRate('Haunter', { Haunter:'catch' }, { xp:3 }), 0);
+});
+
+test('salva e envia a porcentagem da runa junto ao novo recorde', () => {
+  const store = { v:HUNT_PERFORMANCE_V, data:{}, accounts:{} };
+  updatePerformanceRecords(store, 'Haunter', sample({ xpBuffs:{ rune:0.08 } }));
+  assert.deepEqual(store.data.Haunter.xpPerHour.xpBuffs, { rune:0.08 });
+  assert.ok(communityPerformanceRecords(store).every((record) => record.rune_bonus_percent === 8));
 });
 
 test('trocar o Pokémon cria um baseline novo sem misturar os nove minutos anteriores', () => {

@@ -16,7 +16,7 @@ const { buildPokemonCatalog, buildPokemonHub } = require('./pokemon-hub');
 const { isRareItem } = require('./rare-items');
 const { DREAM_TAB_ID, MAX_TABS, MAX_VIEWS_PER_TAB, normalizeSiteUrl, restoreWorkspaceState, sitePartition } = require('./site-tabs');
 const { buildXpOverlayScript, createXpRate, observeKillXp, resetXpRate, xpPerHour } = require('./xp-rate');
-const { HUNT_PERFORMANCE_FIRST_MS, HUNT_PERFORMANCE_INTERVAL_MS, HUNT_PERFORMANCE_V, activeXpBuffs, backfillTrainerNameForAccount, communityPerformanceRecords, createPerformanceBaseline, markCommunityPerformanceRecordsSynced, normalizeHuntPerformance, performanceDelta, updatePerformanceRecords } = require('./hunt-performance');
+const { HUNT_PERFORMANCE_FIRST_MS, HUNT_PERFORMANCE_INTERVAL_MS, HUNT_PERFORMANCE_V, activeXpBuffs, backfillTrainerNameForAccount, communityPerformanceRecords, createPerformanceBaseline, markCommunityPerformanceRecordsSynced, normalizeHuntPerformance, performanceDelta, updatePerformanceRecords, xpRuneBonusRate } = require('./hunt-performance');
 const { TASK_TRACKS, applyTaskDelta, completedTaskTrackCount, taskEntriesForTrack, taskMapFromState } = require('./task-catalog');
 
 const GAME_URL = 'https://pokedream.com.br/';
@@ -452,13 +452,56 @@ function setHuntSpecies(g, species, remember = false) {
   const values = Array.isArray(species) ? species : [species];
   const list = [...new Set(values.filter(Boolean).map(String))];
   const s = g._stats || (g._stats = {});
+  const previous = Array.isArray(s.huntSpeciesList) ? s.huntSpeciesList.join('|') : '';
   s.huntSpeciesList = list;
   s.huntSpecies = list[0] || null;
   if (remember && g.hunt != null && list.length) {
     const known = g._huntSpeciesById || (g._huntSpeciesById = new Map());
     known.set(String(g.hunt), list);
   }
+  if (previous !== list.join('|')) syncXpBuffWindow(g);
   return list;
+}
+
+function runeMap(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+function replaceRuneMap(g, key, value) {
+  const next = Object.assign({}, runeMap(value));
+  const changed = JSON.stringify(g[key] || {}) !== JSON.stringify(next);
+  g[key] = next;
+  return changed;
+}
+function patchRuneMap(g, key, value) {
+  const patch = runeMap(value);
+  const target = g[key] || (g[key] = {});
+  if (patch.u || patch.r) return applyObjectDelta(target, patch);
+  let changed = false;
+  for (const [name, next] of Object.entries(patch)) {
+    if (target[name] !== next) { target[name] = next; changed = true; }
+  }
+  return changed;
+}
+function readRuneState(g, source, delta = false, statusAt = estimatedServerNow(g)) {
+  if (!g || !source || typeof source !== 'object') return false;
+  let changed = false;
+  if (Object.prototype.hasOwnProperty.call(source, 'runeStages')) {
+    changed = replaceRuneMap(g, '_runeStages', source.runeStages) || changed;
+  } else if (Object.prototype.hasOwnProperty.call(source, 'rs')) {
+    changed = (delta ? patchRuneMap(g, '_runeStages', source.rs) : replaceRuneMap(g, '_runeStages', source.rs)) || changed;
+  }
+  if (Object.prototype.hasOwnProperty.call(source, 'runeAssign')) {
+    changed = replaceRuneMap(g, '_runeAssign', source.runeAssign) || changed;
+  } else if (Object.prototype.hasOwnProperty.call(source, 'ra')) {
+    changed = (delta ? patchRuneMap(g, '_runeAssign', source.ra) : replaceRuneMap(g, '_runeAssign', source.ra)) || changed;
+  }
+  if (changed) syncXpBuffWindow(g, statusAt);
+  return changed;
+}
+function xpRuneBonusForGame(g) {
+  const speciesList = g && g._stats && Array.isArray(g._stats.huntSpeciesList) ? g._stats.huntSpeciesList : [];
+  const species = speciesList.length === 1 ? speciesList[0] : (speciesList.length ? null : huntSpeciesFromId(g && g.hunt));
+  return xpRuneBonusRate(species, g && g._runeAssign, g && g._runeStages);
 }
 function applyState(g, state) {   // estado completo do /offline: base para os deltas recebidos pelo WebSocket
   if (!state) return false;
@@ -522,6 +565,7 @@ function xpBuffsForGame(g, at = estimatedServerNow(g)) {
     premiumUntilMs: g && g._premiumUntilMs,
     xpBoostEndsAtMs: g && g._xpBoostEndsAtMs,
     completedTaskTypes: completedTaskTrackCount(g && g._tasks),
+    runeBonusRate: xpRuneBonusForGame(g),
   }, at);
 }
 function xpBuffSignature(buffs) {
@@ -560,6 +604,7 @@ function resetCharacterState(g) {
   g._sig = null; g.active = null; g.party2 = null; g.hunt = null;
   g._shinyUids = new Set(); g._boxUids = new Set(); g._baselineDone = false; g._freshShinyBatch = []; g._freshShinyAt = 0;
   g._worldFrameOrder = null; g._serverClockOffsetMs = null; g._xpBoostEndsAtMs = 0; g._tasks = {};
+  g._runeStages = {}; g._runeAssign = {};
   g._xpBuffSignature = xpBuffSignature(xpBuffsForGame(g, Date.now()));
   g._huntSpeciesById = new Map(); g.charName = null;
   g._xpRate = resetXpRate(g._xpRate, Date.now()); scheduleXpOverlay(g);
@@ -575,6 +620,7 @@ function applyOfflineState(g, url, body) {
   if (!state) return;
   g._worldFrameOrder = null;
   const progress = state.progress || state;
+  readRuneState(g, progress, false, estimatedServerNow(g));
   readXpBoostState(g, progress, null, estimatedServerNow(g));
   const changed = applyState(g, state);
   resolveName(g);
@@ -595,6 +641,7 @@ function applyWorldFrame(g, frame) {
   if (updateHunt(g, nextHunt)) changed = true;
 
   const gameDelta = body.g && typeof body.g === 'object' ? body.g : {};
+  readRuneState(g, gameDelta, true, Number(frame.t));
   const taskResult = applyTaskDelta(g._tasks || (g._tasks = {}), gameDelta.t);
   if (taskResult.changed) {
     syncXpBuffWindow(g, Number(frame.t));
@@ -669,6 +716,7 @@ function applyWorldSnapshot(g, snapshot) {
   if (Number.isFinite(Number(snapshot.t))) g._serverClockOffsetMs = Number(snapshot.t) - Date.now();
   const state = snapshot.s && typeof snapshot.s === 'object' ? snapshot.s : {};
   const game = state.g && typeof state.g === 'object' ? state.g : {};
+  readRuneState(g, game, false, Number(snapshot.t));
   if (game.tasks && typeof game.tasks === 'object') {
     g._tasks = taskMapFromState(game.tasks);
     syncXpBuffWindow(g, Number(snapshot.t));
@@ -1434,7 +1482,7 @@ function createGame(slot) {
       backgroundThrottling: false,
     },
   });
-  const g = { view, slot, _shown: false, _persistTimer: null, _restored: false, _loopGuard: false, _loads: [], _bagLocks: new Set(), _tasks: {}, _premiumActive: false, _premiumUntilMs: 0, _xpBoostEndsAtMs: 0, _xpBuffSignature: '', _serverClockOffsetMs: null, _killWatch: createKillWatchState(), _xpRate: createXpRate() };
+  const g = { view, slot, _shown: false, _persistTimer: null, _restored: false, _loopGuard: false, _loads: [], _bagLocks: new Set(), _tasks: {}, _runeStages: {}, _runeAssign: {}, _premiumActive: false, _premiumUntilMs: 0, _xpBoostEndsAtMs: 0, _xpBuffSignature: '', _serverClockOffsetMs: null, _killWatch: createKillWatchState(), _xpRate: createXpRate() };
   const wc = view.webContents;
 
   // persiste cookies+storage de forma DEBOUNCED (agrupa rajadas de navegação num único save)
