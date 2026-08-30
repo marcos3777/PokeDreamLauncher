@@ -112,6 +112,12 @@
   .text-field{ width:100%; height:38px; margin-top:9px; padding:0 11px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:#0a1018; color:var(--text); outline:none; }
   .text-field:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(89,216,196,.1); }
   .text-field::placeholder{ color:#596779; }
+  .notification-stack{ display:grid; gap:12px; }
+  .notification-stack > .settings-card{ margin:0; }
+  .notification-card .setting-row:first-child{ padding-top:0; }
+  .notification-card .setting-row:last-child{ padding-bottom:0; }
+  .webhook-entry[hidden],.webhook-actions[hidden]{ display:none; }
+  .webhook-actions{ display:flex; align-items:center; gap:8px; margin-top:10px; }
   .auto-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
   .auto-card{ margin:0; padding:14px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
   .auto-card:has([data-auto-enabled]:checked){ border-color:var(--accent-line); background:linear-gradient(145deg,rgba(89,216,196,.08),var(--surface)); }
@@ -184,29 +190,37 @@
 
   <div class="cl-panel" id="notifications">
     <div class="h"><button class="x" id="notifications-back" title="Voltar" style="margin-left:0;margin-right:8px">←</button><span class="t">🔔 Notificações no Discord</span></div>
-    <div class="cl-body">
-      <div class="setting-row">
-        <span class="setting-copy"><b>Conquistas e drops</b><span>Capturas shiny, capturas Mythic e drops raros são enviados para o canal principal.</span></span>
-        <span class="status" style="color:var(--good);white-space:nowrap">Sempre ativo</span>
-      </div>
-      <div class="sep"></div>
-      <div class="row"><b>Alertas pessoais</b><br>Escolha quais avisos deseja receber no seu próprio canal. Eles começam desligados.</div>
-      <label class="setting-row" for="notifications-critical-webhook">
-        <span class="setting-copy"><b>Webhook do seu canal</b><span>Configure o canal do Discord em que deseja receber esses alertas.</span></span>
-      </label>
-      <input class="text-field" id="notifications-critical-webhook" type="password" inputmode="url" autocomplete="off" maxlength="300" placeholder="https://discord.com/api/webhooks/…">
-      <div class="status" style="margin-top:7px">O endereço fica salvo neste computador e não é enviado ao canal principal.</div>
-      <button class="btn" id="notifications-critical-clear" style="display:none;margin-top:8px">Remover webhook</button>
-      <label class="setting-row" for="notifications-discord-user-id">
-        <span class="setting-copy"><b>ID do usuário do Discord</b><span>Opcional. Quando preenchido, você será mencionado em todas as notificações.</span></span>
-      </label>
-      <input class="text-field" id="notifications-discord-user-id" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Ex.: 123456789012345678">
-      <div class="status" style="margin-top:7px">No Discord, ative o modo desenvolvedor e use “Copiar ID do usuário”.</div>
-      <label class="setting-row" for="notifications-deaths"><span class="setting-copy"><b>Mortes na party</b><span>Avisa quando o HP de um Pokémon da party chega a zero.</span></span><span class="toggle"><input type="checkbox" id="notifications-deaths"><span aria-hidden="true"></span></span></label>
-      <label class="setting-row" for="notifications-stalls"><span class="setting-copy"><b>Travamento repetido</b><span>Avisa se a mesma tela precisar de um segundo F5 seguido.</span></span><span class="toggle"><input type="checkbox" id="notifications-stalls"><span aria-hidden="true"></span></span></label>
-      <label class="setting-row" for="notifications-tasks"><span class="setting-copy"><b>Conclusões de Tasks</b><span>Avisa quando uma Task for concluída em qualquer uma das suas contas.</span></span><span class="toggle"><input type="checkbox" id="notifications-tasks"><span aria-hidden="true"></span></span></label>
-      <div class="row" style="margin-top:14px">Os controles ficam disponíveis depois que um webhook válido for configurado.</div>
-      <div class="share-state off" id="notifications-status" aria-live="polite">Carregando…</div>
+    <div class="cl-body notification-stack">
+      <section class="settings-card notification-card">
+        <div class="setting-row">
+          <span class="setting-copy"><b>Conquistas e drops</b><span>Capturas shiny, capturas Mythic e drops raros são enviados para o canal principal.</span></span>
+          <span class="status" style="color:var(--good);white-space:nowrap">Sempre ativo</span>
+        </div>
+      </section>
+      <section class="settings-card notification-card">
+        <div class="row"><b>Webhook do seu canal</b><br>Configure o canal do Discord em que deseja receber seus alertas pessoais.</div>
+        <div class="webhook-entry" id="notifications-critical-entry">
+          <input class="text-field" id="notifications-critical-webhook" type="password" inputmode="url" autocomplete="off" maxlength="300" placeholder="https://discord.com/api/webhooks/…">
+          <div class="status" style="margin-top:7px">O endereço fica salvo somente neste computador.</div>
+        </div>
+        <div class="webhook-actions" id="notifications-critical-actions" hidden>
+          <button class="btn" id="notifications-critical-test">Testar webhook</button>
+          <button class="btn" id="notifications-critical-clear">Remover webhook</button>
+        </div>
+      </section>
+      <section class="settings-card notification-card">
+        <div class="row"><b>Alertas pessoais</b><br>Escolha quais avisos deseja receber no seu próprio canal. Eles começam desligados.</div>
+        <label class="setting-row" for="notifications-discord-user-id">
+          <span class="setting-copy"><b>ID do usuário do Discord</b><span>Opcional. Quando preenchido, você será mencionado em todas as notificações.</span></span>
+        </label>
+        <input class="text-field" id="notifications-discord-user-id" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Ex.: 123456789012345678">
+        <div class="status" style="margin-top:7px">No Discord, ative o modo desenvolvedor e use “Copiar ID do usuário”.</div>
+        <label class="setting-row" for="notifications-deaths"><span class="setting-copy"><b>Mortes na party</b><span>Avisa quando o HP de um Pokémon da party chega a zero.</span></span><span class="toggle"><input type="checkbox" id="notifications-deaths"><span aria-hidden="true"></span></span></label>
+        <label class="setting-row" for="notifications-stalls"><span class="setting-copy"><b>Travamento repetido</b><span>Avisa se a mesma tela precisar de um segundo F5 seguido.</span></span><span class="toggle"><input type="checkbox" id="notifications-stalls"><span aria-hidden="true"></span></span></label>
+        <label class="setting-row" for="notifications-tasks"><span class="setting-copy"><b>Conclusões de Tasks</b><span>Avisa quando uma Task for concluída em qualquer uma das suas contas.</span></span><span class="toggle"><input type="checkbox" id="notifications-tasks"><span aria-hidden="true"></span></span></label>
+        <div class="row" style="margin-top:14px">Os controles ficam disponíveis depois que um webhook válido for configurado.</div>
+        <div class="share-state off" id="notifications-status" aria-live="polite">Carregando…</div>
+      </section>
     </div>
   </div>
 
@@ -377,7 +391,7 @@
       scopeNote.textContent = panel.id === 'share' ? 'Dados comunitários' : 'Todas as contas';
       if (panelHeader) panelHeader.appendChild(scopeNote);
       const panelBody = panel.querySelector(':scope > .cl-body');
-      if (panelBody) panelBody.classList.add('settings-card');
+      if (panelBody && panel.id !== 'notifications') panelBody.classList.add('settings-card');
       content.appendChild(panel);
     });
     const itemsBody = document.querySelector('#items > .cl-body');
@@ -501,6 +515,9 @@
   };
   const notificationWebhook = document.getElementById('notifications-critical-webhook');
   const notificationDiscordUserId = document.getElementById('notifications-discord-user-id');
+  const notificationWebhookEntry = document.getElementById('notifications-critical-entry');
+  const notificationWebhookActions = document.getElementById('notifications-critical-actions');
+  const notificationTest = document.getElementById('notifications-critical-test');
   const notificationClear = document.getElementById('notifications-critical-clear');
   const notificationStatus = document.getElementById('notifications-status');
   let notificationSnapshot = null;
@@ -530,9 +547,10 @@
     notificationSnapshot = value;
     Object.keys(notificationInputs).forEach(function(key){ notificationInputs[key].checked = value[key] === true; });
     notificationWebhook.value = '';
-    notificationWebhook.placeholder = value.criticalConfigured ? 'Webhook configurado — cole outro para substituir' : 'https://discord.com/api/webhooks/…';
+    notificationWebhook.placeholder = 'https://discord.com/api/webhooks/…';
     notificationDiscordUserId.value = value.discordUserId || '';
-    notificationClear.style.display = value.criticalConfigured ? '' : 'none';
+    notificationWebhookEntry.hidden = value.criticalConfigured;
+    notificationWebhookActions.hidden = !value.criticalConfigured;
     syncCriticalNotificationControls();
     const lastSuccess = notificationTime(value.lastSuccessAt);
     notificationStatus.className = 'share-state ' + (value.lastError ? 'warn' : 'ok');
@@ -580,6 +598,14 @@
   }
   document.getElementById('notifications-btn').onclick = function(){ openConfigPanel('notifications'); refreshNotifications(); };
   document.getElementById('notifications-back').onclick = function(){ openConfigPanel(null); };
+  notificationTest.onclick = function(){
+    if (!P || !P.testDiscordNotifications || !notificationSnapshot || !notificationSnapshot.criticalConfigured) return;
+    notificationTest.disabled = true;
+    notificationStatus.className = 'share-state off'; notificationStatus.textContent = 'Enviando teste…';
+    P.testDiscordNotifications().then(function(next){ renderNotifications(next); savedFeedback('✓ Teste enviado ao Discord'); })
+      .catch(function(error){ notificationStatus.className = 'share-state warn'; notificationStatus.textContent = error && error.message ? error.message : 'Não foi possível enviar o teste.'; })
+      .finally(function(){ notificationTest.disabled = false; });
+  };
   notificationClear.onclick = function(){
     if (!P || !P.setDiscordNotifications || !notificationSnapshot) return;
     const value = readNotifications();

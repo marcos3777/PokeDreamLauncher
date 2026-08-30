@@ -2313,6 +2313,12 @@ ipcMain.handle('pickSoundFile', async () => {
 });
 ipcMain.handle('resetSound', () => { soundPath = null; saveSettings(); pushSoundConfig(); return { name: soundName(), custom: false }; });
 ipcMain.handle('getDiscordNotifications', () => discordSettingsPayload());
+ipcMain.handle('testDiscordNotifications', async () => {
+  if (!discordNotifications.criticalWebhookUrl) throw new Error('Configure o webhook antes de testar.');
+  const result = await criticalDiscordNotifier.notify({ kind:'test', at:Date.now() });
+  if (!result || !result.ok) throw new Error(result && result.error ? result.error : 'Não foi possível enviar o teste.');
+  return discordSettingsPayload();
+});
 ipcMain.handle('setDiscordNotifications', (_e, value) => {
   const submittedWebhook = value && typeof value.criticalWebhookUrl === 'string' ? value.criticalWebhookUrl.trim() : '';
   if (submittedWebhook && !isDiscordWebhookUrl(submittedWebhook)) throw new Error('Use um webhook válido do Discord.');

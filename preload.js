@@ -46,6 +46,7 @@ contextBridge.exposeInMainWorld('poke', {
   resetSound: () => ipcRenderer.invoke('resetSound'),
   testSound: () => ipcRenderer.invoke('testSound'),
   getDiscordNotifications: () => ipcRenderer.invoke('getDiscordNotifications'),
+  testDiscordNotifications: () => ipcRenderer.invoke('testDiscordNotifications'),
   setDiscordNotifications: (value) => ipcRenderer.invoke('setDiscordNotifications', value),
   getTaskOverview: () => ipcRenderer.invoke('getTaskOverview'),
   setTaskCompletionNotifications: (on) => ipcRenderer.invoke('setTaskCompletionNotifications', on),

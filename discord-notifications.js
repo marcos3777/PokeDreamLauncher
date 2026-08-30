@@ -196,7 +196,7 @@ function buildDiscordPayload(event, settings) {
 }
 
 function eventEnabled(event, settings) {
-  if (event.kind === 'test') return !!settings.webhookUrl;
+  if (event.kind === 'test') return !!(settings.criticalWebhookUrl || settings.webhookUrl);
   if (event.kind === 'task_completed') return settings.taskCompletions === true && !!settings.criticalWebhookUrl;
   if (CRITICAL_EVENTS.has(event.kind)) {
     const key = EVENT_SETTING[event.kind];
@@ -211,6 +211,7 @@ function eventEnabled(event, settings) {
 }
 
 function webhookForEvent(event, settings) {
+  if (event && event.kind === 'test') return settings.criticalWebhookUrl || settings.webhookUrl;
   return event && CRITICAL_EVENTS.has(event.kind) ? settings.criticalWebhookUrl : settings.webhookUrl;
 }
 

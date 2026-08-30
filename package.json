@@ -1,6 +1,6 @@
 {
   "name": "poke-dream-launcher",
-  "version": "2.0.19",
+  "version": "2.0.20",
   "description": "Navegador multitela (Electron) para PokeDream e outros sites — até 4 abas com 4 sessões",
   "main": "main.js",
   "scripts": {
