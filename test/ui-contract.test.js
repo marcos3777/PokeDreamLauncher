@@ -93,8 +93,16 @@ test('painel de Tasks acompanha as contas e controla o aviso geral', () => {
   assert.match(app, /P\.getTaskOverview/);
   assert.match(app, /P\.setTaskCompletionNotifications/);
   assert.match(preload, /onTaskOverview[\s\S]*task-overview/);
+  assert.match(preload, /getPokemonCombatCatalog:[\s\S]*getPokemonCombatCatalog/);
   assert.match(main, /ipcMain\.handle\('getTaskOverview'/);
+  assert.match(main, /ipcMain\.handle\('getPokemonCombatCatalog'/);
+  assert.match(main, /POKEMON_COMBAT_FILE[\s\S]*pokemon-combat\.json/);
+  assert.match(main, /active:g\.active && g\.active\.species/);
   assert.match(main, /notifyTaskCompletions\(g, taskResult\.completions\)/);
+  assert.match(taskPanel, /id="task-attacker"/);
+  assert.match(taskPanel, /function taskEffectiveness\(account, species\)/);
+  assert.match(taskPanel, /class="task-damage/);
+  assert.match(taskPanel, />Usar ativo</);
   assert.ok(taskPanel.length > 0);
   assert.doesNotMatch(taskPanel, /automa[cç][aã]o|autom[aá]tic/i);
 });

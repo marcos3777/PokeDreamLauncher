@@ -16,7 +16,7 @@ Navegador multitela leve (Electron) para [PokeDream](https://pokedream.com.br/) 
 - Recarregar telas individualmente (botaozinho ↻)
 - Janela sem moldura com barra arrastavel
 - **Pokédex em formato de hub**: cada card mostra XP/h, mobs/h, captura, shiny e nível da task; o detalhe lateral reúne broke normal/shiny, recordes, tasks e drops observados
-- **Painel de Tasks por conta e trilha**, com progresso, objetivos e conclusão acompanhados ao vivo
+- **Painel de Tasks por conta e trilha**, com progresso ao vivo e efetividade de cada alvo para o Pokémon ativo ou escolhido
 - **Avisos pessoais por webhook do Discord** para conclusão de Tasks, mortes na party e travamentos repetidos
 - Dados comunitários de captura e performance passam por uma leitura agregada por espécie; as tabelas e contas brutas não são expostas ao aplicativo
 
@@ -142,6 +142,7 @@ site-tabs.js  - validação, restauração e isolamento das abas de sites
 Sessoes e logins ficam **somente no seu computador**, em `%APPDATA%/poke-dream-launcher/`:
 
 - `storage/storage-accN.bin` -- backup do localStorage/sessionStorage de cada tela, **criptografado** com `safeStorage` (DPAPI no Windows / Keychain no macOS / libsecret no Linux). Como pode conter o token de login, nunca compartilhe esses arquivos.
+- `pokemon-combat.json` -- cache validado dos tipos e efetividades; na primeira consulta de cada execução o servidor informa pela versão se houve alteração.
 - Cookies de sessao sao convertidos em persistentes (~60 dias) para manter o login entre execucoes.
 - Cada sessão de um site genérico usa uma partição persistente própria; cookies e logins não são compartilhados entre telas.
 

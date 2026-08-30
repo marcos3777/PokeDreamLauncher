@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { autoUpdater } = require('electron-updater');
-const { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, createCommunityClient, huntLogToAccountStats } = require('./community');
+const { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, createCommunityClient, huntLogToAccountStats, parsePokemonCombatSnapshot } = require('./community');
 const { describeBroke, describeSequences, huntBaseline, huntDelta, huntSpeciesFromId, recordObservation } = require('./hunt-metrics');
 const { acceptWorldFrame, activeUidFromParty, applyActiveProgress, applyKeyedDelta, applyObjectDelta, applyPartyDelta, parseWorldFrame, parseWorldMessage } = require('./world-frame');
 const { collectRareDrops, createDiscordNotifier, isDiscordWebhookUrl, normalizeDiscordNotifications } = require('./discord-notifications');
@@ -71,6 +71,7 @@ let HUNTLOG_FILE = null;   // histórico acumulado de caçada por espécie
 let HUNT_PERFORMANCE_FILE = null; // melhores ritmos observados localmente por espécie
 let ITEM_SOURCES_FILE = null; // fontes de drop observadas localmente nos eventos de kill + loot
 let DISCORD_FILE = null; // webhook e preferências ficam só neste computador, fora do código do launcher
+let POKEMON_COMBAT_FILE = null; // catálogo estático de tipos/efetividade, atualizado por versão
 let soundEnabled = true;   // tocar som ao capturar shiny
 let soundVolume = 0.8;     // 0..1
 let soundPath = null;      // caminho de um áudio do PC do usuário; null = som padrão embutido
@@ -97,6 +98,9 @@ let huntPerformanceTimer = null;
 let persistentStateLoaded = false;
 let communityQuitPending = false;
 let communityQuitFlushed = false;
+let pokemonCombatCache = null;
+let pokemonCombatChecked = false;
+let pokemonCombatCheckInFlight = null;
 const communityClient = createCommunityClient();
 const discordRelayNotifier = createDiscordRelayNotifier(
   () => discordNotifications,
@@ -293,6 +297,11 @@ function taskOverviewPayload() {
       slot:g.slot,
       name:g.charName || ('Tela ' + g.slot),
       hunt:g.hunt == null ? null : String(g.hunt),
+      active:g.active && g.active.species ? {
+        species:String(g.active.species),
+        level:Number.isFinite(Number(g.active.level)) ? Number(g.active.level) : null,
+        shiny:g.active.shiny === true,
+      } : null,
       ready:!!g._charId && Object.keys(g._tasks || {}).length > 0,
       tracks:Object.fromEntries(Object.values(TASK_TRACKS).map((track) => [track.id, {
         id:track.id,
@@ -1651,6 +1660,30 @@ function writeJsonAtomic(file, value) {
     return false;
   }
 }
+function emptyPokemonCombatCatalog() {
+  return { types:{}, pokemon:{}, matchups:[] };
+}
+function hasPokemonCombatCatalog(value) {
+  return !!value && typeof value === 'object'
+    && value.types && Object.keys(value.types).length > 0
+    && value.pokemon && Object.keys(value.pokemon).length > 0
+    && Array.isArray(value.matchups) && value.matchups.length > 0;
+}
+function loadPokemonCombatCache() {
+  pokemonCombatCache = null;
+  try {
+    const parsed = parsePokemonCombatSnapshot(readJsonWithBackup(POKEMON_COMBAT_FILE));
+    if (hasPokemonCombatCatalog(parsed.combat)) pokemonCombatCache = parsed;
+  } catch {}
+}
+function storePokemonCombatCache(snapshot) {
+  if (!snapshot || !hasPokemonCombatCatalog(snapshot.combat) || !snapshot.combatWire) return false;
+  pokemonCombatCache = snapshot;
+  return writeJsonAtomic(POKEMON_COMBAT_FILE, {
+    version:snapshot.version,
+    combat:snapshot.combatWire,
+  });
+}
 function encodeDiscordWebhook(value) {
   if (!isDiscordWebhookUrl(value)) return null;
   try {
@@ -1956,10 +1989,12 @@ function createWindow() {
     HUNT_PERFORMANCE_FILE = path.join(app.getPath('userData'), 'hunt-performance.json');
     ITEM_SOURCES_FILE = path.join(app.getPath('userData'), 'item-sources.json');
     DISCORD_FILE = path.join(app.getPath('userData'), 'discord-notifications.json');
+    POKEMON_COMBAT_FILE = path.join(app.getPath('userData'), 'pokemon-combat.json');
     loadSettings();
     loadHuntLog();
     loadHuntPerformance();
     loadItemSources();
+    loadPokemonCombatCache();
     persistentStateLoaded = true;
     huntLogSaveTimer = setInterval(saveHuntLog, 30000);   // um só timer, mesmo se a janela for recriada
     huntPerformanceTimer = setInterval(() => games.forEach((game) => maybeRecordHuntPerformance(game)), 5000);
@@ -2441,25 +2476,75 @@ async function communityPokemonHub(species) {
   }
 }
 
+async function pokemonCombatCatalogPayload() {
+  if (pokemonCombatChecked) {
+    return { combat:pokemonCombatCache ? pokemonCombatCache.combat : emptyPokemonCombatCatalog(), cached:!!pokemonCombatCache };
+  }
+  if (pokemonCombatCheckInFlight) return pokemonCombatCheckInFlight;
+
+  pokemonCombatCheckInFlight = (async () => {
+    const cached = pokemonCombatCache;
+    try {
+      const remote = await communityHubTimeout(
+        communityClient.getPokemonCombatCatalog(cached && cached.version),
+        'pokemon_combat_timeout',
+      );
+      if (remote && remote.notModified === true && cached) {
+        pokemonCombatChecked = true;
+        return { combat:cached.combat, cached:true };
+      }
+      if (remote && hasPokemonCombatCatalog(remote.combat) && remote.combatWire) {
+        storePokemonCombatCache(remote);
+        pokemonCombatChecked = true;
+        return { combat:remote.combat, cached:false };
+      }
+    } catch {
+      // Compatibilidade: a versão anterior do servidor entregava combate junto do catálogo.
+      try {
+        const legacy = await communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout');
+        if (legacy && hasPokemonCombatCatalog(legacy.combat) && legacy.combatWire) {
+          const parsed = parsePokemonCombatSnapshot({ version:'legacy-1', combat:legacy.combatWire });
+          storePokemonCombatCache(parsed);
+          pokemonCombatChecked = true;
+          return { combat:parsed.combat, cached:false };
+        }
+      } catch {}
+    }
+
+    if (pokemonCombatCache) {
+      pokemonCombatChecked = true;
+      return { combat:pokemonCombatCache.combat, cached:true };
+    }
+    // Sem cache, uma abertura posterior pode tentar novamente se a rede estava indisponível.
+    return { combat:emptyPokemonCombatCatalog(), cached:false, remoteError:true };
+  })().finally(() => { pokemonCombatCheckInFlight = null; });
+  return pokemonCombatCheckInFlight;
+}
+
 // Pokédex unificada: o catálogo abastece todos os cards; o detalhe reúne fontes locais e o
 // read model comunitário sem entregar as tabelas brutas ao renderer.
 ipcMain.handle('getPokedexHubCatalog', async () => {
   saveHuntLog();
   saveHuntPerformance();
   let remoteRows = [];
-  let combat = { types:{}, pokemon:{}, matchups:[] };
   let remoteError = false;
-  try {
-    const remoteCatalog = await communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout');
-    remoteRows = remoteCatalog && Array.isArray(remoteCatalog.rows) ? remoteCatalog.rows : [];
-    if (remoteCatalog && remoteCatalog.combat) combat = remoteCatalog.combat;
-  } catch { remoteError = true; }
+  const [remoteResult, combatResult] = await Promise.allSettled([
+    communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout'),
+    pokemonCombatCatalogPayload(),
+  ]);
+  if (remoteResult.status === 'fulfilled') {
+    remoteRows = remoteResult.value && Array.isArray(remoteResult.value.rows) ? remoteResult.value.rows : [];
+  } else remoteError = true;
+  const combat = combatResult.status === 'fulfilled' && combatResult.value
+    ? combatResult.value.combat : (pokemonCombatCache ? pokemonCombatCache.combat : emptyPokemonCombatCatalog());
   return {
     rows: buildPokemonCatalog({ huntLog, huntPerformance, itemSources:itemDropSources, remoteRows }),
     combat,
     remoteError,
   };
 });
+
+ipcMain.handle('getPokemonCombatCatalog', () => pokemonCombatCatalogPayload());
 
 ipcMain.handle('getPokemonHub', async (_e, species) => {
   const key = typeof species === 'string' && /^[A-Z][A-Za-z0-9]{0,31}$/.test(species) ? species : null;

@@ -74,6 +74,10 @@ test('read model do banco permanece privado e é servido por uma única Edge Fun
   assert.match(edge, /from\("community_species_types"\)\.select\("species,type_code,slot"\)/);
   assert.match(edge, /from\("type_matchups"\)\.select\("attack_type_code,defense_type_code,relation"\)/);
   assert.match(edge, /combat:\s*\{[\s\S]*species_types:/);
+  assert.match(edge, /COMBAT_CATALOG_VERSION/);
+  assert.match(edge, /if-none-match/);
+  assert.match(edge, /scope === "combat"/);
+  assert.match(edge, /status:\s*304/);
   assert.match(config, /\[functions\.pokemon-hub\][\s\S]*?verify_jwt = false/);
 });
 

@@ -1,0 +1,64 @@
+name: Release Windows
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-windows
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -Raw package.json | ConvertFrom-Json).version
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      - name: Check existing release
+        id: existing
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ steps.version.outputs.tag }}" --repo "${{ github.repository }}" 2>$null
+          if ($LASTEXITCODE -eq 0) { "found=true" >> $env:GITHUB_OUTPUT } else { "found=false" >> $env:GITHUB_OUTPUT }
+
+      - name: Install dependencies
+        if: steps.existing.outputs.found != 'true'
+        run: npm ci
+
+      - name: Build installer
+        if: steps.existing.outputs.found != 'true'
+        run: npm run dist
+
+      - name: Publish release
+        if: steps.existing.outputs.found != 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" `
+            "dist/Poke-Dream-Launcher-Windows-x64.exe" `
+            "dist/Poke-Dream-Launcher-Windows-x64.exe.blockmap" `
+            "dist/latest.yml" `
+            --repo "${{ github.repository }}" `
+            --target "${{ github.sha }}" `
+            --title "Poke Dream Launcher ${{ steps.version.outputs.tag }}" `
+            --generate-notes

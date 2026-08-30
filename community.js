@@ -12,6 +12,7 @@ const MAX_HUNT_MS = 630_720_000_000;
 const MAX_ACCOUNTS = 32;
 const SPECIES_RE = /^[A-Z][A-Za-z0-9]{0,31}$/;
 const TYPE_CODE_RE = /^[a-z][a-z0-9_]{1,31}$/;
+const COMBAT_VERSION_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 const MATCHUP_RELATIONS = new Set(['super_effective', 'neutral', 'resisted', 'immune']);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_RE = /^[A-Za-z0-9_-]{43,128}$/;
@@ -409,6 +410,18 @@ function parsePokemonCombatCatalog(value) {
   return { types, pokemon, matchups };
 }
 
+function parsePokemonCombatSnapshot(value) {
+  if (!isRecord(value) || typeof value.version !== 'string' || !COMBAT_VERSION_RE.test(value.version)
+    || !isRecord(value.combat)) {
+    throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+  }
+  const combat = parsePokemonCombatCatalog(value.combat);
+  if (!Object.keys(combat.types).length || !Object.keys(combat.pokemon).length || !combat.matchups.length) {
+    throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+  }
+  return { version:value.version, combat, combatWire:value.combat };
+}
+
 function parsePokemonHubCatalog(payload) {
   const value = isRecord(payload) && Object.prototype.hasOwnProperty.call(payload, 'data') ? payload.data : payload;
   if (!Array.isArray(value) || value.length > 1000) {
@@ -464,8 +477,9 @@ function parsePokemonHubCatalog(payload) {
       },
     };
   });
-  const combat = isRecord(payload) ? parsePokemonCombatCatalog(payload.combat) : parsePokemonCombatCatalog(null);
-  return { rows, combat };
+  const combatWire = isRecord(payload) && isRecord(payload.combat) ? payload.combat : null;
+  const combat = parsePokemonCombatCatalog(combatWire);
+  return { rows, combat, combatWire };
 }
 
 function parsePokemonHub(payload, species) {
@@ -627,8 +641,14 @@ function createCommunityClient(options = {}) {
     if (activeRequest && activeRequest.generation === cacheGeneration) return activeRequest.promise;
     const requestGeneration = cacheGeneration;
     let request;
-    request = requestJson(`${baseUrl}/functions/v1/pokemon-hub`, {
+    request = requestJson(`${baseUrl}/functions/v1/pokemon-hub?scope=catalog`, {
       method:'GET', headers:{ apikey:publishableKey, accept:'application/json' },
+    }).catch((error) => {
+      // Compatibilidade com o endpoint anterior, que ainda não conhecia o parâmetro scope.
+      if (!(error instanceof CommunityHttpError) || error.status !== 400 || error.code !== 'invalid_request') throw error;
+      return requestJson(`${baseUrl}/functions/v1/pokemon-hub`, {
+        method:'GET', headers:{ apikey:publishableKey, accept:'application/json' },
+      });
     }).then((payload) => {
       const value = parsePokemonHubCatalog(payload);
       if (requestGeneration === cacheGeneration) cache.set(cacheKey, { value, expiresAt:now() + POSITIVE_CACHE_MS });
@@ -637,6 +657,38 @@ function createCommunityClient(options = {}) {
       const current = inFlight.get(cacheKey);
       if (current && current.promise === request) inFlight.delete(cacheKey);
     });
+    inFlight.set(cacheKey, { generation:requestGeneration, promise:request });
+    return request;
+  }
+
+  function getPokemonCombatCatalog(cachedVersion) {
+    const version = typeof cachedVersion === 'string' && COMBAT_VERSION_RE.test(cachedVersion) ? cachedVersion : '';
+    const cacheKey = `pokemon-combat:catalog:${version || 'empty'}`;
+    const cached = cache.get(cacheKey);
+    const time = now();
+    if (cached && cached.expiresAt > time) return Promise.resolve(cached.value);
+    if (cached) cache.delete(cacheKey);
+    const activeRequest = inFlight.get(cacheKey);
+    if (activeRequest && activeRequest.generation === cacheGeneration) return activeRequest.promise;
+    const requestGeneration = cacheGeneration;
+    const headers = { apikey:publishableKey, accept:'application/json' };
+    if (version) headers['if-none-match'] = `"pokemon-combat-${version}"`;
+    let request;
+    request = requestJson(`${baseUrl}/functions/v1/pokemon-hub?scope=combat`, {
+      method:'GET', headers,
+    }).then((payload) => ({ ...parsePokemonCombatSnapshot(payload), notModified:false }))
+      .catch((error) => {
+        if (version && error instanceof CommunityHttpError && error.status === 304) {
+          return { version, combat:null, combatWire:null, notModified:true };
+        }
+        throw error;
+      }).then((value) => {
+        if (requestGeneration === cacheGeneration) cache.set(cacheKey, { value, expiresAt:now() + POSITIVE_CACHE_MS });
+        return value;
+      }).finally(() => {
+        const current = inFlight.get(cacheKey);
+        if (current && current.promise === request) inFlight.delete(cacheKey);
+      });
     inFlight.set(cacheKey, { generation:requestGeneration, promise:request });
     return request;
   }
@@ -682,7 +734,7 @@ function createCommunityClient(options = {}) {
     for (const controller of activeSubmitControllers) controller.abort();
   }
 
-  return { submitStats, submitPerformance, getSpeciesStats, getPerformanceLeaderboard, getPokemonHubCatalog, getPokemonHub, clearCache, abortSubmissions };
+  return { submitStats, submitPerformance, getSpeciesStats, getPerformanceLeaderboard, getPokemonHubCatalog, getPokemonCombatCatalog, getPokemonHub, clearCache, abortSubmissions };
 }
 
 module.exports = {
@@ -699,6 +751,7 @@ module.exports = {
   buildPerformancePayload,
   parsePerformanceLeaderboard,
   parsePokemonCombatCatalog,
+  parsePokemonCombatSnapshot,
   parsePokemonHubCatalog,
   parsePokemonHub,
   createCommunityClient,

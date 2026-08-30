@@ -426,6 +426,15 @@
   .task-account-tabs,.task-track-tabs{ display:flex; flex-wrap:wrap; gap:6px; }
   .task-account-tabs{ margin-bottom:10px; }
   .task-track-tabs{ margin-bottom:12px; }
+  .task-combat-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; padding:9px 10px; border:1px solid var(--line); border-radius:var(--r-md); background:rgba(7,13,19,.58); }
+  .task-combat-picker{ display:flex; align-items:center; gap:7px; min-width:245px; }
+  .task-combat-picker > span{ color:var(--accent); font-size:8px; font-weight:900; letter-spacing:.55px; text-transform:uppercase; white-space:nowrap; }
+  .task-combat-picker input{ width:150px; height:29px; padding:0 9px; border:1px solid var(--line2); border-radius:8px; outline:none; background:#091017; color:var(--txt); font:inherit; font-size:9px; }
+  .task-combat-picker input:focus{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(89,216,196,.09); }
+  .task-combat-picker input[aria-invalid="true"]{ border-color:var(--bad); }
+  .task-combat-meta{ flex:1 1 190px; color:var(--mut); font-size:8.5px; }
+  .task-combat-meta b{ color:var(--accent); }
+  .task-use-active.on{ color:var(--good); border-color:var(--good-line); background:var(--good-soft); }
   .task-pill{ min-height:30px; padding:0 11px; border:1px solid var(--line2); border-radius:var(--r-pill); background:#0a0e16; color:var(--mut); font-family:inherit; font-size:10px; font-weight:750; cursor:pointer; }
   .task-pill:hover{ color:var(--txt); border-color:var(--line3); }
   .task-pill.on{ border-color:var(--gold-line); background:var(--gold-soft); color:var(--gold); }
@@ -433,12 +442,18 @@
   .task-summary{ display:flex; flex-wrap:wrap; align-items:center; gap:7px 16px; margin-bottom:10px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-md); background:#0a0e16; color:var(--mut); font-size:10.5px; line-height:1.5; }
   .task-summary b{ color:var(--txt); }
   .task-list{ display:grid; gap:6px; }
-  .task-row{ min-height:50px; display:grid; grid-template-columns:30px minmax(0,1fr) auto auto; align-items:center; gap:10px; padding:8px 11px; border:1px solid var(--line); border-radius:var(--r-md); background:linear-gradient(155deg,var(--panel),#0b1018); }
+  .task-row{ min-height:50px; display:grid; grid-template-columns:30px minmax(0,1fr) auto auto auto; align-items:center; gap:10px; padding:8px 11px; border:1px solid var(--line); border-radius:var(--r-md); background:linear-gradient(155deg,var(--panel),#0b1018); }
   .task-row.is-hunt{ border-color:var(--gold-line); background:linear-gradient(120deg,rgba(255,206,86,.09),var(--panel)); }
   .task-index{ color:var(--dim); font-size:9.5px; font-weight:850; text-align:center; font-variant-numeric:tabular-nums; }
   .task-name{ min-width:0; }
   .task-name b{ display:block; font-size:11.5px; }
   .task-name span{ display:block; margin-top:2px; color:var(--dim); font-size:9px; }
+  .task-damage{ min-width:48px; display:flex; flex-direction:column; align-items:center; gap:1px; padding:3px 7px; border:1px solid var(--line2); border-radius:var(--r-sm); background:#0b1219; color:var(--mut); text-align:center; white-space:nowrap; }
+  .task-damage small{ color:var(--dim); font-size:6.5px; font-weight:850; letter-spacing:.45px; text-transform:uppercase; }
+  .task-damage b{ font-size:9.5px; font-variant-numeric:tabular-nums; }
+  .task-damage.good{ color:var(--good); border-color:var(--good-line); background:var(--good-soft); }
+  .task-damage.bad{ color:var(--bad); border-color:var(--bad-line); background:var(--bad-soft); }
+  .task-damage.neutral{ color:var(--info); border-color:var(--info-line); background:var(--info-soft); }
   .task-level{ min-width:42px; padding:3px 7px; border:1px solid var(--info-line); border-radius:var(--r-pill); background:var(--info-soft); color:var(--info); font-size:8.5px; font-weight:850; text-align:center; white-space:nowrap; }
   .task-progress{ color:var(--mut); font-size:9.5px; font-weight:750; white-space:nowrap; font-variant-numeric:tabular-nums; }
   .task-progress.completed{ color:var(--good); }
@@ -1234,6 +1249,7 @@
 
   // ---- PokéData: catálogo + detalhe persistente, alimentados pelo hub unificado por espécie ----
   const DEX_LIST = Object.keys(DEX_MAP).map(function(n){ return { species: n, dex: DEX_MAP[n] }; }).sort(function(a,b){ return a.dex - b.dex; });
+  const COMBAT_SPECIES_ALIASES = { "Farfetch'd":'Farfetchd', 'Mr. Mime':'MrMime' };
   let dexOpen = false, dexRegion = 'all', dexShiny = false, dexQuery = '', dexSort = 'dex', dexDir = 1;
   let dexAttackerSpecies = '', dexCombatXp = false, dexGroupLevel = false;
   let dexCatalog = {}, dexCatalogError = false, dexSelectedSpecies = null;
@@ -1262,7 +1278,12 @@
     catch { return fmtInt(Math.round(number)); }
   }
   function dexCatalogRow(species){ return dexCatalog[species] || {}; }
-  function dexCombatPokemon(species){ return dexCombat && dexCombat.pokemon ? dexCombat.pokemon[species] || null : null; }
+  function combatSpeciesName(species){ return COMBAT_SPECIES_ALIASES[species] || species; }
+  function dexCombatPokemon(species){ const key = combatSpeciesName(species); return dexCombat && dexCombat.pokemon ? dexCombat.pokemon[key] || null : null; }
+  function applyPokemonCombatCatalog(combat){
+    dexCombat = combat && typeof combat === 'object' ? combat : { types:{}, pokemon:{}, matchups:[] };
+    dexMatchupIndex = DEX_COMBAT && DEX_COMBAT.createMatchupIndex ? DEX_COMBAT.createMatchupIndex(dexCombat.matchups) : {};
+  }
   function dexTypeName(typeCode){
     const type = dexCombat && dexCombat.types ? dexCombat.types[typeCode] : null;
     return type && type.namePt ? type.namePt : titce(typeCode);
@@ -1601,8 +1622,7 @@
       boxData = result[0] || []; boxRows = flattenBox(boxData);
       const hub = result[1] || { rows:[] }; dexCatalog = {}; dexCatalogError = hub.remoteError === true;
       (hub.rows || []).forEach(function(row){ if (row && row.species) dexCatalog[row.species] = row; });
-      dexCombat = hub.combat && typeof hub.combat === 'object' ? hub.combat : { types:{}, pokemon:{}, matchups:[] };
-      dexMatchupIndex = DEX_COMBAT && DEX_COMBAT.createMatchupIndex ? DEX_COMBAT.createMatchupIndex(dexCombat.matchups) : {};
+      applyPokemonCombatCatalog(hub.combat);
       renderDex();
     })
       .catch(function(){ document.getElementById('main').innerHTML = panelState('!','PokéData indisponível','Não foi possível consultar os dados agora.','error'); });
@@ -1622,9 +1642,42 @@
   let taskSnapshot = { accounts:[], notificationsEnabled:false, notificationsConfigured:false };
   let selectedTaskSlot = null;
   let selectedTaskTrack = null;
+  const taskAttackerBySlot = Object.create(null);
   function taskNumber(value){ return Number(value || 0).toLocaleString('pt-BR'); }
   function selectedTaskAccount(){
     return (taskSnapshot.accounts || []).find(function(account){ return account.slot === selectedTaskSlot; }) || null;
+  }
+  function taskFollowsActive(account){
+    return !!account && !Object.prototype.hasOwnProperty.call(taskAttackerBySlot, account.slot);
+  }
+  function taskAttackerSpecies(account){
+    if (!account) return '';
+    const manual = taskAttackerBySlot[account.slot];
+    if (manual && DEX_MAP[manual]) return manual;
+    const active = combatSpeciesName(account.active && account.active.species);
+    return active && DEX_MAP[active] ? active : '';
+  }
+  function taskAttacker(account){
+    const species = taskAttackerSpecies(account), combat = dexCombatPokemon(species);
+    return species && combat ? { species, attackType:combat.attackType, types:combat.types } : null;
+  }
+  function taskEffectiveness(account, species){
+    const attacker = taskAttacker(account), defender = dexCombatPokemon(species);
+    if (!attacker || !defender || !DEX_COMBAT || !DEX_COMBAT.effectivenessFor) return null;
+    return DEX_COMBAT.effectivenessFor(attacker.attackType, defender.types, dexMatchupIndex);
+  }
+  function taskCombatBar(account){
+    if (!account) return '';
+    const species = taskAttackerSpecies(account), attacker = taskAttacker(account), following = taskFollowsActive(account);
+    const options = DEX_LIST.map(function(entry){ return '<option value="'+esc(entry.species)+'"></option>'; }).join('');
+    let meta = 'Escolha um Pokémon para comparar o dano em cada Task.';
+    if (attacker) meta = (following ? 'Seguindo o ativo: ' : 'Escolha manual: ')+'<b>'+esc(species)+'</b> ataca com <b>'+esc(dexTypeName(attacker.attackType))+'</b>';
+    else if (species) meta = '<b>'+esc(species)+'</b> selecionado; os tipos estão indisponíveis agora.';
+    else if (following) meta = 'O Pokémon ativo será selecionado assim que entrar em combate.';
+    return '<div class="task-combat-bar">'
+      + '<label class="task-combat-picker"><span>Meu Pokémon</span><input id="task-attacker" type="search" list="task-attacker-options" value="'+esc(species)+'" placeholder="Ex.: Poliwrath" autocomplete="off" spellcheck="false"><datalist id="task-attacker-options">'+options+'</datalist></label>'
+      + '<span class="task-combat-meta">'+meta+'</span>'
+      + '<button type="button" class="sbtn task-use-active'+(following ? ' on' : '')+'" id="task-use-active" aria-pressed="'+(following ? 'true' : 'false')+'">Usar ativo</button></div>';
   }
   function taskPanelBody(account, track){
     if (!account) return panelState('✓','Nenhuma conta disponível','Abra uma tela e entre em um personagem para acompanhar as Tasks.','');
@@ -1634,11 +1687,14 @@
     const rows = tasks.map(function(entry,index){
       const state = entry.status || 'locked';
       const isHunt = String(account.hunt || '').toLowerCase() === String(entry.huntId || '').toLowerCase();
+      const effectiveness = taskEffectiveness(account,entry.species), damageClass = dexDamageClass(effectiveness);
       const progress = Number.isFinite(Number(entry.progress)) ? Math.max(0,Number(entry.progress)) : 0;
       const label = state === 'completed' ? 'Concluída ✓' : (state === 'active' ? taskNumber(progress)+' / '+taskNumber(entry.target) : 'Não iniciada');
       const detail = isHunt ? 'Hunt atual' : (state === 'completed' ? 'Finalizada' : (state === 'active' ? 'Em andamento' : 'Aguardando início'));
+      const damageTitle = effectiveness ? taskAttackerSpecies(account)+' causa '+dexMultiplier(effectiveness.multiplier)+' em '+entry.species : 'Efetividade indisponível';
       return '<div class="task-row'+(isHunt ? ' is-hunt' : '')+'"><span class="task-index">'+String(index+1).padStart(2,'0')+'</span>'
         + '<span class="task-name"><b>'+esc(entry.species)+'</b><span>'+detail+'</span></span>'
+        + '<span class="task-damage '+damageClass+'" title="'+esc(damageTitle)+'"><small>Dano</small><b>'+(effectiveness ? dexMultiplier(effectiveness.multiplier) : '—')+'</b></span>'
         + '<span class="task-level">Lv '+taskNumber(entry.requiredLevel)+'</span>'
         + '<span class="task-progress '+state+'">'+label+'</span></div>';
     }).join('');
@@ -1670,10 +1726,22 @@
     main.innerHTML = '<div class="task-wrap"><div class="task-head"><b><span class="panel-icon" aria-hidden="true">✓</span>Tasks</b><span class="sp"></span>'
       + '<button type="button" class="task-notify'+(notifying ? ' on' : '')+'" id="task-notify" aria-pressed="'+(notifying ? 'true' : 'false')+'" title="'+(configured ? 'Ativar ou desativar avisos de conclusão' : 'Configure o webhook em Notificações no Discord')+'">🔔 Notificar conclusões: '+(notifying ? 'ligado' : 'desligado')+'</button></div>'
       + '<div class="task-scroll"><div class="task-account-tabs">'+(accountsHtml || '<span class="panel-hint">Nenhuma conta disponível</span>')+'</div>'
-      + '<div class="task-track-tabs">'+tracksHtml+'</div>'+taskPanelBody(account,track)
+      + taskCombatBar(account)+'<div class="task-track-tabs">'+tracksHtml+'</div>'+taskPanelBody(account,track)
       + (!configured ? '<div class="task-note">Configure o webhook em Notificações no Discord para ativar os avisos de conclusão.</div>' : '')+'</div></div>';
     main.querySelectorAll('[data-task-account]').forEach(function(button){ button.onclick = function(){ selectedTaskSlot = Number(button.dataset.taskAccount); selectedTaskTrack = null; renderTasks(); }; });
     main.querySelectorAll('[data-task-track]').forEach(function(button){ button.onclick = function(){ selectedTaskTrack = button.dataset.taskTrack; renderTasks(); }; });
+    const taskAttackerInput = document.getElementById('task-attacker');
+    if (taskAttackerInput && account) {
+      taskAttackerInput.oninput = function(){ this.setCustomValidity(''); this.setAttribute('aria-invalid','false'); };
+      taskAttackerInput.onchange = function(){
+        const match = dexFindSpecies(this.value);
+        if (!this.value.trim()) { delete taskAttackerBySlot[account.slot]; renderTasks(); return; }
+        if (!match) { this.setAttribute('aria-invalid','true'); this.setCustomValidity('Escolha um Pokémon da lista.'); this.reportValidity(); return; }
+        this.setCustomValidity(''); taskAttackerBySlot[account.slot] = match.species; renderTasks();
+      };
+    }
+    const useActive = document.getElementById('task-use-active');
+    if (useActive && account) useActive.onclick = function(){ delete taskAttackerBySlot[account.slot]; renderTasks(); };
     const notify = document.getElementById('task-notify');
     if (notify) notify.onclick = function(){
       if (!configured) { appFeedback('Configure o webhook nas Notificações do Discord',true); if (P && P.toggleConfig) P.toggleConfig(); return; }
@@ -1686,7 +1754,13 @@
   function refreshTasks(first){
     if (!P || !P.getTaskOverview) { taskSnapshot = { accounts:[] }; renderTasks(); return; }
     if (first) document.getElementById('main').innerHTML = panelState('◌','Carregando Tasks','Lendo as trilhas e o progresso das contas abertas.','loading');
-    P.getTaskOverview().then(function(value){ if (tasksOpen) renderTasks(value); })
+    const combatRequest = P.getPokemonCombatCatalog
+      ? P.getPokemonCombatCatalog().catch(function(){ return { combat:null }; })
+      : Promise.resolve({ combat:null });
+    Promise.all([P.getTaskOverview(),combatRequest]).then(function(result){
+      if (result[1] && result[1].combat) applyPokemonCombatCatalog(result[1].combat);
+      if (tasksOpen) renderTasks(result[0]);
+    })
       .catch(function(){ if (tasksOpen) document.getElementById('main').innerHTML = panelState('!','Tasks indisponíveis','Não foi possível consultar as Tasks agora.','error'); });
   }
   function closeTasksState(){ tasksOpen = false; setToolState('btn-tasks',false); }

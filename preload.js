@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('poke', {
   getHuntLog: (species) => ipcRenderer.invoke('getHuntLog', species),
   getHuntPerformance: (species) => ipcRenderer.invoke('getHuntPerformance', species),
   getPokedexHubCatalog: () => ipcRenderer.invoke('getPokedexHubCatalog'),
+  getPokemonCombatCatalog: () => ipcRenderer.invoke('getPokemonCombatCatalog'),
   getPokemonHub: (species) => ipcRenderer.invoke('getPokemonHub', species),
   getShareStats: () => ipcRenderer.invoke('getShareStats'),
   forceCommunitySync: () => ipcRenderer.invoke('forceCommunitySync'),

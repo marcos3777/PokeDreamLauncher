@@ -13,6 +13,7 @@ const {
   buildSubmitPayload,
   buildPerformancePayload,
   parsePerformanceLeaderboard,
+  parsePokemonCombatSnapshot,
   parsePokemonHubCatalog,
   parsePokemonHub,
   createCommunityClient,
@@ -145,6 +146,14 @@ test('pokemon hub interpreta catálogo compacto e detalhe unificado', () => {
   assert.equal(hub.performance.mobsPerHour[0].pokemon.shiny, true);
 });
 
+test('snapshot versionado de combate preserva o formato validado para o cache local', () => {
+  const parsed = parsePokemonCombatSnapshot({ version:'20260829192538', combat:combatCatalog() });
+  assert.equal(parsed.version, '20260829192538');
+  assert.equal(parsed.combat.pokemon.MrMime.attackType, 'fairy');
+  assert.deepEqual(parsed.combatWire, combatCatalog());
+  assert.throws(() => parsePokemonCombatSnapshot({ version:'inválida', combat:combatCatalog() }), CommunityHttpError);
+});
+
 test('cliente consulta catálogo e espécie pelo endpoint unificado', async () => {
   const urls = [];
   const client = createCommunityClient({ fetchImpl:async (url) => {
@@ -160,6 +169,23 @@ test('cliente consulta catálogo e espécie pelo endpoint unificado', async () =
   assert.equal(catalog.combat.pokemon.MrMime.attackType, 'fairy');
   assert.equal((await client.getPokemonHub('MrMime')).dexNumber, 122);
   assert.equal(urls.length, 2);
+  assert.equal(urls[0].endsWith('/functions/v1/pokemon-hub?scope=catalog'), true);
+});
+
+test('catálogo de combate usa ETag e reconhece resposta sem alteração', async () => {
+  const calls = [];
+  const client = createCommunityClient({ fetchImpl:async (url, init) => {
+    calls.push({ url, init });
+    if (init.headers['if-none-match']) return new Response(null, { status:304 });
+    return jsonResponse({ version:'20260829192538', combat:combatCatalog() });
+  } });
+  const fresh = await client.getPokemonCombatCatalog();
+  const unchanged = await client.getPokemonCombatCatalog(fresh.version);
+  assert.equal(fresh.combat.pokemon.MrMime.attackType, 'fairy');
+  assert.equal(unchanged.notModified, true);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].url.endsWith('/functions/v1/pokemon-hub?scope=combat'), true);
+  assert.equal(calls[1].init.headers['if-none-match'], '"pokemon-combat-20260829192538"');
 });
 
 test('huntLogToStats separa shinies encontrados de capturas e envia somente dados comunitários', () => {
