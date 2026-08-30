@@ -1,0 +1,2761 @@
+{
+  "source": "https://pokedream.com.br/assets/DIAOFSJ_.js",
+  "verifiedAt": "2026-08-30",
+  "sha256": "3e16dc3d1f5e5775a2e582c4465e2de1f492c0c9337159a824d27b256ec8da63",
+  "types": [
+    {
+      "id": "bug",
+      "name": "Inseto (Bug)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "caterpie_antenna",
+              "name": "Caterpie Antenna",
+              "count": 420,
+              "species": "Caterpie"
+            },
+            {
+              "itemId": "mushroom",
+              "name": "Mushroom",
+              "count": 420,
+              "species": "Paras"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "piece_of_cocoon",
+              "name": "Piece Of Cocoon",
+              "count": 1080,
+              "species": "Metapod"
+            },
+            {
+              "itemId": "pineco_shell",
+              "name": "Pineco Shell",
+              "count": 1080,
+              "species": "Pineco"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "butterfree_wing",
+              "name": "Butterfree Wing",
+              "count": 675,
+              "species": "Butterfree"
+            },
+            {
+              "itemId": "arachnid_legs",
+              "name": "Arachnid Legs",
+              "count": 1125,
+              "species": "Ariados"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "mosquito_tail",
+              "name": "Mosquito Tail",
+              "count": 2880,
+              "species": "Yanma"
+            },
+            {
+              "itemId": "big_mushroom",
+              "name": "Big Mushroom",
+              "count": 2160,
+              "species": "Parasect"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "pinsir_horn",
+              "name": "Pinsir Horn",
+              "count": 2700,
+              "species": "Pinsir"
+            },
+            {
+              "itemId": "scythe",
+              "name": "Scythe",
+              "count": 2700,
+              "species": "Scyther"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "bug_gosme",
+              "name": "Bug Gosme",
+              "count": 548
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "bug_gosme",
+              "name": "Bug Gosme",
+              "count": 1643
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "bug_gosme",
+              "name": "Bug Gosme",
+              "count": 4108
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "bug_gosme",
+              "name": "Bug Gosme",
+              "count": 8216
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "bug_gosme",
+              "name": "Bug Gosme",
+              "count": 16433
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dark",
+      "name": "Sombrio (Dark)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "back_bone",
+              "name": "Back Bone",
+              "count": 198,
+              "species": "Houndour"
+            },
+            {
+              "itemId": "yellow_beak",
+              "name": "Yellow Beak",
+              "count": 144,
+              "species": "Murkrow"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "yellow_beak",
+              "name": "Yellow Beak",
+              "count": 432,
+              "species": "Murkrow"
+            },
+            {
+              "itemId": "sneasel_feather",
+              "name": "Sneasel Feather",
+              "count": 432,
+              "species": "Sneasel"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "dark_ears",
+              "name": "Dark Ears",
+              "count": 810,
+              "species": "Umbreon"
+            },
+            {
+              "itemId": "dark_canine_horns",
+              "name": "Dark Canine Horns",
+              "count": 675,
+              "species": "Houndoom"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "dark_canine_horns",
+              "name": "Dark Canine Horns",
+              "count": 1350,
+              "species": "Houndoom"
+            },
+            {
+              "itemId": "tyranitar_tail",
+              "name": "Tyranitar Tail",
+              "count": 1350,
+              "species": "Tyranitar"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "dark_canine_horns",
+              "name": "Dark Canine Horns",
+              "count": 2700,
+              "species": "Houndoom"
+            },
+            {
+              "itemId": "tyranitar_tail",
+              "name": "Tyranitar Tail",
+              "count": 2700,
+              "species": "Tyranitar"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "dark_gem",
+              "name": "Dark Gem",
+              "count": 1176
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "dark_gem",
+              "name": "Dark Gem",
+              "count": 3528
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "dark_gem",
+              "name": "Dark Gem",
+              "count": 8820
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "dark_gem",
+              "name": "Dark Gem",
+              "count": 17640
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "dark_gem",
+              "name": "Dark Gem",
+              "count": 35280
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dragon",
+      "name": "Dragão (Dragon)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "dratini_ear",
+              "name": "Dratini Ear",
+              "count": 180,
+              "species": "Dratini"
+            },
+            {
+              "itemId": "dragonair_tail",
+              "name": "Dragonair Tail",
+              "count": 138,
+              "species": "Dragonair"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "dragonair_tail",
+              "name": "Dragonair Tail",
+              "count": 414,
+              "species": "Dragonair"
+            },
+            {
+              "itemId": "dragonite_tail",
+              "name": "Dragonite Tail",
+              "count": 270,
+              "species": "Dragonite"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "dragonite_tail",
+              "name": "Dragonite Tail",
+              "count": 675,
+              "species": "Dragonite"
+            },
+            {
+              "itemId": "sea_dragon_fin",
+              "name": "Sea Dragon Fin",
+              "count": 675,
+              "species": "Kingdra"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "dragonite_tail",
+              "name": "Dragonite Tail",
+              "count": 1350,
+              "species": "Dragonite"
+            },
+            {
+              "itemId": "sea_dragon_fin",
+              "name": "Sea Dragon Fin",
+              "count": 1350,
+              "species": "Kingdra"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "dragonite_tail",
+              "name": "Dragonite Tail",
+              "count": 2700,
+              "species": "Dragonite"
+            },
+            {
+              "itemId": "sea_dragon_fin",
+              "name": "Sea Dragon Fin",
+              "count": 2700,
+              "species": "Kingdra"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "dragon_scale",
+              "name": "Dragon Scale",
+              "count": 1320
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "dragon_scale",
+              "name": "Dragon Scale",
+              "count": 3960
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "dragon_scale",
+              "name": "Dragon Scale",
+              "count": 9900
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "dragon_scale",
+              "name": "Dragon Scale",
+              "count": 19800
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "dragon_scale",
+              "name": "Dragon Scale",
+              "count": 39600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "electric",
+      "name": "Elétrico (Electric)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "remains_of_voltorb",
+              "name": "Remains Of Voltorb",
+              "count": 360,
+              "species": "Voltorb"
+            },
+            {
+              "itemId": "yellow_sheep_wool",
+              "name": "Yellow Sheep Wool",
+              "count": 198,
+              "species": "Mareep"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "pichu_ears",
+              "name": "Pichu Ears",
+              "count": 594,
+              "species": "Pichu"
+            },
+            {
+              "itemId": "plug_ears",
+              "name": "Plug Ears",
+              "count": 540,
+              "species": "Elekid"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "soft_wool",
+              "name": "Soft Wool",
+              "count": 1125,
+              "species": "Flaaffy"
+            },
+            {
+              "itemId": "electric_sheep_tail",
+              "name": "Electric Sheep Tail",
+              "count": 810,
+              "species": "Ampharos"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "electric_collar",
+              "name": "Electric Collar",
+              "count": 1620,
+              "species": "Jolteon"
+            },
+            {
+              "itemId": "electric_ear",
+              "name": "Electric Ear",
+              "count": 1620,
+              "species": "Raichu"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "electric_ear",
+              "name": "Electric Ear",
+              "count": 3240,
+              "species": "Raichu"
+            },
+            {
+              "itemId": "electric_tail",
+              "name": "Electric Tail",
+              "count": 2700,
+              "species": "Electabuzz"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "screw",
+              "name": "Screw",
+              "count": 1215
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "screw",
+              "name": "Screw",
+              "count": 3644
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "screw",
+              "name": "Screw",
+              "count": 9109
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "screw",
+              "name": "Screw",
+              "count": 18218
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "screw",
+              "name": "Screw",
+              "count": 36436
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fairy",
+      "name": "Fada (Fairy)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "baby_egg_shell",
+              "name": "Baby Egg Shell",
+              "count": 198,
+              "species": "Togepi"
+            },
+            {
+              "itemId": "small_pink_ears",
+              "name": "Small Pink Ears",
+              "count": 198,
+              "species": "Cleffa"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "aquatic_tail",
+              "name": "Aquatic Tail",
+              "count": 594,
+              "species": "Marill"
+            },
+            {
+              "itemId": "snubbull_ear",
+              "name": "Snubbull Ear",
+              "count": 540,
+              "species": "Snubbull"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "microphone",
+              "name": "Microphone",
+              "count": 1125,
+              "species": "Jigglypuff"
+            },
+            {
+              "itemId": "mimic_clothes",
+              "name": "Mimic Clothes",
+              "count": 945,
+              "species": "MrMime"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "pink_wings",
+              "name": "Pink Wings",
+              "count": 1620,
+              "species": "Clefable"
+            },
+            {
+              "itemId": "granbull_ear",
+              "name": "Granbull Ear",
+              "count": 1620,
+              "species": "Granbull"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "dainty_wing",
+              "name": "Dainty Wing",
+              "count": 3240,
+              "species": "Togetic"
+            },
+            {
+              "itemId": "wigglytuff_ear",
+              "name": "Wigglytuff Ear",
+              "count": 3240,
+              "species": "Wigglytuff"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "fairy_essence",
+              "name": "Fairy Essence",
+              "count": 708
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "fairy_essence",
+              "name": "Fairy Essence",
+              "count": 2125
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "fairy_essence",
+              "name": "Fairy Essence",
+              "count": 5313
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "fairy_essence",
+              "name": "Fairy Essence",
+              "count": 10625
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "fairy_essence",
+              "name": "Fairy Essence",
+              "count": 21250
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fighting",
+      "name": "Lutador (Fighting)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "mankey_tail",
+              "name": "Mankey Tail",
+              "count": 360,
+              "species": "Mankey"
+            },
+            {
+              "itemId": "fighter_hawk",
+              "name": "Fighter Hawk",
+              "count": 198,
+              "species": "Machop"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "fist_bandages",
+              "name": "Fist Bandages",
+              "count": 414,
+              "species": "Tyrogue"
+            },
+            {
+              "itemId": "fighter_underwear",
+              "name": "Fighter Underwear",
+              "count": 450,
+              "species": "Machoke"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "punching_machine",
+              "name": "Punching Machine",
+              "count": 1035,
+              "species": "Hitmonchan"
+            },
+            {
+              "itemId": "kick_machine",
+              "name": "Kick Machine",
+              "count": 1035,
+              "species": "Hitmonlee"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "martial_arts_tail",
+              "name": "Martial Arts Tail",
+              "count": 2070,
+              "species": "Hitmontop"
+            },
+            {
+              "itemId": "belt_of_champion",
+              "name": "Belt Of Champion",
+              "count": 1620,
+              "species": "Machamp"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "belt_of_champion",
+              "name": "Belt Of Champion",
+              "count": 3240,
+              "species": "Machamp"
+            },
+            {
+              "itemId": "big_fist_gloves",
+              "name": "Big Fist Gloves",
+              "count": 3240,
+              "species": "Poliwrath"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "band_aid",
+              "name": "Band Aid",
+              "count": 1284
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "band_aid",
+              "name": "Band Aid",
+              "count": 3852
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "band_aid",
+              "name": "Band Aid",
+              "count": 9630
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "band_aid",
+              "name": "Band Aid",
+              "count": 19260
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "band_aid",
+              "name": "Band Aid",
+              "count": 38520
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fire",
+      "name": "Fogo (Fire)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "magma_ears",
+              "name": "Magma Ears",
+              "count": 360,
+              "species": "Slugma"
+            },
+            {
+              "itemId": "fire_tail",
+              "name": "Fire Tail",
+              "count": 198,
+              "species": "Charmander"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "canine_tail",
+              "name": "Canine Tail",
+              "count": 594,
+              "species": "Vulpix"
+            },
+            {
+              "itemId": "dog_fur",
+              "name": "Dog Fur",
+              "count": 540,
+              "species": "Growlithe"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "quilava_fur",
+              "name": "Quilava Fur",
+              "count": 1125,
+              "species": "Quilava"
+            },
+            {
+              "itemId": "fire_hoof",
+              "name": "Fire Hoof",
+              "count": 675,
+              "species": "Rapidash"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "magma_shell",
+              "name": "Magma Shell",
+              "count": 1620,
+              "species": "Magcargo"
+            },
+            {
+              "itemId": "typhlosion_fur",
+              "name": "Typhlosion Fur",
+              "count": 1620,
+              "species": "Typhlosion"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "giant_piece_of_fur",
+              "name": "Giant Piece Of Fur",
+              "count": 2700,
+              "species": "Arcanine"
+            },
+            {
+              "itemId": "magma_foot",
+              "name": "Magma Foot",
+              "count": 2700,
+              "species": "Magmar"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "essence_of_fire",
+              "name": "Essence Of Fire",
+              "count": 1174
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "essence_of_fire",
+              "name": "Essence Of Fire",
+              "count": 3522
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "essence_of_fire",
+              "name": "Essence Of Fire",
+              "count": 8806
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "essence_of_fire",
+              "name": "Essence Of Fire",
+              "count": 17612
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "essence_of_fire",
+              "name": "Essence Of Fire",
+              "count": 35224
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flying",
+      "name": "Voador (Flying)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "bird_crest",
+              "name": "Bird Crest",
+              "count": 420,
+              "species": "Pidgey"
+            },
+            {
+              "itemId": "owl_antennas",
+              "name": "Owl Antennas",
+              "count": 198,
+              "species": "Hoothoot"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "bird_wing",
+              "name": "Bird Wing",
+              "count": 1080,
+              "species": "Spearow"
+            },
+            {
+              "itemId": "bird_tail",
+              "name": "Bird Tail",
+              "count": 450,
+              "species": "Pidgeotto"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "pointy_beak",
+              "name": "Pointy Beak",
+              "count": 1080,
+              "species": "Fearow"
+            },
+            {
+              "itemId": "dodrio_feather",
+              "name": "Dodrio Feather",
+              "count": 1080,
+              "species": "Dodrio"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "owl_crest",
+              "name": "Owl Crest",
+              "count": 2070,
+              "species": "Noctowl"
+            },
+            {
+              "itemId": "big_crest",
+              "name": "Big Crest",
+              "count": 1620,
+              "species": "Pidgeot"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "dainty_wing",
+              "name": "Dainty Wing",
+              "count": 3240,
+              "species": "Togetic"
+            },
+            {
+              "itemId": "steel_wing",
+              "name": "Steel Wing",
+              "count": 2700,
+              "species": "Skarmory"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "straw",
+              "name": "Straw",
+              "count": 549
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "straw",
+              "name": "Straw",
+              "count": 1648
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "straw",
+              "name": "Straw",
+              "count": 4119
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "straw",
+              "name": "Straw",
+              "count": 8238
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "straw",
+              "name": "Straw",
+              "count": 16475
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ghost",
+      "name": "Fantasma (Ghost)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "ghost_bottle",
+              "name": "Ghost Bottle",
+              "count": 198,
+              "species": "Gastly"
+            },
+            {
+              "itemId": "ghost_claw",
+              "name": "Ghost Claw",
+              "count": 150,
+              "species": "Haunter"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "ghost_claw",
+              "name": "Ghost Claw",
+              "count": 450,
+              "species": "Haunter"
+            },
+            {
+              "itemId": "ectoplasm",
+              "name": "Ectoplasm",
+              "count": 270,
+              "species": "Gengar"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "ectoplasm",
+              "name": "Ectoplasm",
+              "count": 675,
+              "species": "Gengar"
+            },
+            {
+              "itemId": "miss_traces",
+              "name": "Miss Traces",
+              "count": 675,
+              "species": "Misdreavus"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "ectoplasm",
+              "name": "Ectoplasm",
+              "count": 1350,
+              "species": "Gengar"
+            },
+            {
+              "itemId": "miss_traces",
+              "name": "Miss Traces",
+              "count": 1350,
+              "species": "Misdreavus"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "ectoplasm",
+              "name": "Ectoplasm",
+              "count": 2700,
+              "species": "Gengar"
+            },
+            {
+              "itemId": "miss_traces",
+              "name": "Miss Traces",
+              "count": 2700,
+              "species": "Misdreavus"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "ghost_essence",
+              "name": "Ghost Essence",
+              "count": 1130
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "ghost_essence",
+              "name": "Ghost Essence",
+              "count": 3390
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "ghost_essence",
+              "name": "Ghost Essence",
+              "count": 8475
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "ghost_essence",
+              "name": "Ghost Essence",
+              "count": 16950
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "ghost_essence",
+              "name": "Ghost Essence",
+              "count": 33900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grass",
+      "name": "Planta (Grass)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "flower_stem",
+              "name": "Flower Stem",
+              "count": 420,
+              "species": "Bellsprout"
+            },
+            {
+              "itemId": "leaves",
+              "name": "Leaves",
+              "count": 420,
+              "species": "Oddish"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "bulb",
+              "name": "Bulb",
+              "count": 594,
+              "species": "Bulbasaur"
+            },
+            {
+              "itemId": "chicory",
+              "name": "Chicory",
+              "count": 594,
+              "species": "Chikorita"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "sunflower",
+              "name": "Sunflower",
+              "count": 1350,
+              "species": "Sunflora"
+            },
+            {
+              "itemId": "big_leaf",
+              "name": "Big Leaf",
+              "count": 1125,
+              "species": "Bayleef"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "small_red_flower",
+              "name": "Small Red Flower",
+              "count": 2160,
+              "species": "Bellossom"
+            },
+            {
+              "itemId": "poison_petal",
+              "name": "Poison Petal",
+              "count": 2160,
+              "species": "Vileplume"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "red_petal",
+              "name": "Red Petal",
+              "count": 3240,
+              "species": "Venusaur"
+            },
+            {
+              "itemId": "coconut_leaves",
+              "name": "Coconut Leaves",
+              "count": 2700,
+              "species": "Exeggutor"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "seed",
+              "name": "Seed",
+              "count": 718
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "seed",
+              "name": "Seed",
+              "count": 2153
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "seed",
+              "name": "Seed",
+              "count": 5382
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "seed",
+              "name": "Seed",
+              "count": 10764
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "seed",
+              "name": "Seed",
+              "count": 21529
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ground",
+      "name": "Terra (Ground)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "small_handfull_of_stones",
+              "name": "Small Handfull Of Stones",
+              "count": 360,
+              "species": "Diglett"
+            },
+            {
+              "itemId": "cubone_skull",
+              "name": "Cubone Skull",
+              "count": 198,
+              "species": "Cubone"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "armadillo_tail",
+              "name": "Armadillo Tail",
+              "count": 594,
+              "species": "Sandshrew"
+            },
+            {
+              "itemId": "hardrock_shell",
+              "name": "Hardrock Shell",
+              "count": 540,
+              "species": "Rhyhorn"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "bone",
+              "name": "Bone",
+              "count": 1080,
+              "species": "Marowak"
+            },
+            {
+              "itemId": "onix_tail",
+              "name": "Onix Tail",
+              "count": 1080,
+              "species": "Onix"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "queen_ear",
+              "name": "Queen Ear",
+              "count": 1890,
+              "species": "Nidoqueen"
+            },
+            {
+              "itemId": "elephant_foot",
+              "name": "Elephant Foot",
+              "count": 1620,
+              "species": "Donphan"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "horn_drill",
+              "name": "Horn Drill",
+              "count": 3240,
+              "species": "Rhydon"
+            },
+            {
+              "itemId": "steelix_tail",
+              "name": "Steelix Tail",
+              "count": 2700,
+              "species": "Steelix"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 990
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 2970
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 7425
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 14850
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 29700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ice",
+      "name": "Gelo (Ice)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "locksmith_of_shell",
+              "name": "Locksmith Of Shell",
+              "count": 360,
+              "species": "Shellder"
+            },
+            {
+              "itemId": "furry_hair",
+              "name": "Furry Hair",
+              "count": 360,
+              "species": "Swinub"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "seel_tail",
+              "name": "Seel Tail",
+              "count": 450,
+              "species": "Seel"
+            },
+            {
+              "itemId": "baby_hair",
+              "name": "Baby Hair",
+              "count": 540,
+              "species": "Smoochum"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "pieces_of_shell",
+              "name": "Pieces Of Shell",
+              "count": 1035,
+              "species": "Cloyster"
+            },
+            {
+              "itemId": "dewgong_tail",
+              "name": "Dewgong Tail",
+              "count": 1035,
+              "species": "Dewgong"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "psychic_wig",
+              "name": "Psychic Wig",
+              "count": 1620,
+              "species": "Jynx"
+            },
+            {
+              "itemId": "ice_tusks",
+              "name": "Ice Tusks",
+              "count": 1620,
+              "species": "Piloswine"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "ice_tusks",
+              "name": "Ice Tusks",
+              "count": 3240,
+              "species": "Piloswine"
+            },
+            {
+              "itemId": "lapras_fin",
+              "name": "Lapras Fin",
+              "count": 2700,
+              "species": "Lapras"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "snowball",
+              "name": "Snowball",
+              "count": 1220
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "snowball",
+              "name": "Snowball",
+              "count": 3660
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "snowball",
+              "name": "Snowball",
+              "count": 9150
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "snowball",
+              "name": "Snowball",
+              "count": 18300
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "snowball",
+              "name": "Snowball",
+              "count": 36600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "normal",
+      "name": "Normal",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "mouse_tail",
+              "name": "Mouse Tail",
+              "count": 420,
+              "species": "Rattata"
+            },
+            {
+              "itemId": "furry_tail",
+              "name": "Furry Tail",
+              "count": 360,
+              "species": "Sentret"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "dunsparce_wings",
+              "name": "Dunsparce Wings",
+              "count": 540,
+              "species": "Dunsparce"
+            },
+            {
+              "itemId": "rat_ear",
+              "name": "Rat Ear",
+              "count": 540,
+              "species": "Raticate"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "virtual_head",
+              "name": "Virtual Head",
+              "count": 1125,
+              "species": "Porygon"
+            },
+            {
+              "itemId": "wool_ball",
+              "name": "Wool Ball",
+              "count": 1080,
+              "species": "Persian"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "big_tongue",
+              "name": "Big Tongue",
+              "count": 2070,
+              "species": "Lickitung"
+            },
+            {
+              "itemId": "giraffe_antenna",
+              "name": "Giraffe Antenna",
+              "count": 1620,
+              "species": "Girafarig"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "snorlax_paw",
+              "name": "Snorlax Paw",
+              "count": 2700,
+              "species": "Snorlax"
+            },
+            {
+              "itemId": "bear_claw",
+              "name": "Bear Claw",
+              "count": 2700,
+              "species": "Ursaring"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "rubber_ball",
+              "name": "Rubber Ball",
+              "count": 1223
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "rubber_ball",
+              "name": "Rubber Ball",
+              "count": 3668
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "rubber_ball",
+              "name": "Rubber Ball",
+              "count": 9170
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "rubber_ball",
+              "name": "Rubber Ball",
+              "count": 18341
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "rubber_ball",
+              "name": "Rubber Ball",
+              "count": 36682
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poison",
+      "name": "Veneno (Poison)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "snake_tail",
+              "name": "Snake Tail",
+              "count": 360,
+              "species": "Ekans"
+            },
+            {
+              "itemId": "stinky_gosme",
+              "name": "Stinky Gosme",
+              "count": 360,
+              "species": "Grimer"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "small_purple_ear",
+              "name": "Small Purple Ear",
+              "count": 1080,
+              "species": "NidoranM"
+            },
+            {
+              "itemId": "bat_wing",
+              "name": "Bat Wing",
+              "count": 1080,
+              "species": "Zubat"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "purple_nido_ear",
+              "name": "Purple Nido Ear",
+              "count": 1350,
+              "species": "Nidorino"
+            },
+            {
+              "itemId": "cobra_tail",
+              "name": "Cobra Tail",
+              "count": 1125,
+              "species": "Arbok"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "king_ear",
+              "name": "King Ear",
+              "count": 1890,
+              "species": "Nidoking"
+            },
+            {
+              "itemId": "giant_bat_wing",
+              "name": "Giant Bat Wing",
+              "count": 1620,
+              "species": "Crobat"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "stinky_hand",
+              "name": "Stinky Hand",
+              "count": 3240,
+              "species": "Muk"
+            },
+            {
+              "itemId": "giant_ruby",
+              "name": "Giant Ruby",
+              "count": 3240,
+              "species": "Tentacruel"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "bottle_of_poison",
+              "name": "Bottle of Poison",
+              "count": 871
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "bottle_of_poison",
+              "name": "Bottle of Poison",
+              "count": 2614
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "bottle_of_poison",
+              "name": "Bottle of Poison",
+              "count": 6535
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "bottle_of_poison",
+              "name": "Bottle of Poison",
+              "count": 13070
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "bottle_of_poison",
+              "name": "Bottle of Poison",
+              "count": 26140
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psychic",
+      "name": "Psíquico (Psychic)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "psychic_vest",
+              "name": "Psychic Vest",
+              "count": 360,
+              "species": "Abra"
+            },
+            {
+              "itemId": "slowpoke_tail",
+              "name": "Slowpoke Tail",
+              "count": 360,
+              "species": "Slowpoke"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "natu_wing",
+              "name": "Natu Wing",
+              "count": 540,
+              "species": "Natu"
+            },
+            {
+              "itemId": "psychic_spoon",
+              "name": "Psychic Spoon",
+              "count": 450,
+              "species": "Kadabra"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "hypnosis_pendant",
+              "name": "Hypnosis Pendant",
+              "count": 1080,
+              "species": "Hypno"
+            },
+            {
+              "itemId": "slowbro_shell",
+              "name": "Slowbro Shell",
+              "count": 1080,
+              "species": "Slowbro"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "xatu_wing",
+              "name": "Xatu Wing",
+              "count": 1620,
+              "species": "Xatu"
+            },
+            {
+              "itemId": "two_eyed_black_tail",
+              "name": "Two-Eyed Black Tail",
+              "count": 1620,
+              "species": "Wobbuffet"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "two_eyed_black_tail",
+              "name": "Two-Eyed Black Tail",
+              "count": 3240,
+              "species": "Wobbuffet"
+            },
+            {
+              "itemId": "psychic_moustache",
+              "name": "Psychic Moustache",
+              "count": 2700,
+              "species": "Alakazam"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "enchanted_gem",
+              "name": "Enchanted Gem",
+              "count": 1140
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "enchanted_gem",
+              "name": "Enchanted Gem",
+              "count": 3420
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "enchanted_gem",
+              "name": "Enchanted Gem",
+              "count": 8550
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "enchanted_gem",
+              "name": "Enchanted Gem",
+              "count": 17100
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "enchanted_gem",
+              "name": "Enchanted Gem",
+              "count": 34200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rock",
+      "name": "Pedra (Rock)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "rock_fist",
+              "name": "Rock Fist",
+              "count": 360,
+              "species": "Geodude"
+            },
+            {
+              "itemId": "dome_shell",
+              "name": "Dome Shell",
+              "count": 198,
+              "species": "Kabuto"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "larvitar_tail",
+              "name": "Larvitar Tail",
+              "count": 540,
+              "species": "Larvitar"
+            },
+            {
+              "itemId": "rock_forehead",
+              "name": "Rock Forehead",
+              "count": 450,
+              "species": "Graveler"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "stone_rocks",
+              "name": "Stone Rocks",
+              "count": 810,
+              "species": "Golem"
+            },
+            {
+              "itemId": "spike_shell",
+              "name": "Spike Shell",
+              "count": 810,
+              "species": "Omastar"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "gray_scythe",
+              "name": "Gray Scythe",
+              "count": 900,
+              "species": "Kabutops"
+            },
+            {
+              "itemId": "membranous_wing",
+              "name": "Membranous Wing",
+              "count": 1350,
+              "species": "Aerodactyl"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "branch_of_stones",
+              "name": "Branch of Stones",
+              "count": 2700,
+              "species": "Sudowoodo"
+            },
+            {
+              "itemId": "tyranitar_tail",
+              "name": "Tyranitar Tail",
+              "count": 2700,
+              "species": "Tyranitar"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 490
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 1470
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 3675
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 7350
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "earth_ball",
+              "name": "Earth Ball",
+              "count": 14700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "steel",
+      "name": "Aço (Steel)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "electric_screws",
+              "name": "Electric Screws",
+              "count": 360,
+              "species": "Magnemite"
+            },
+            {
+              "itemId": "forretress_shell",
+              "name": "Forretress Shell",
+              "count": 108,
+              "species": "Forretress"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "forretress_shell",
+              "name": "Forretress Shell",
+              "count": 324,
+              "species": "Forretress"
+            },
+            {
+              "itemId": "magnet",
+              "name": "Magnet",
+              "count": 324,
+              "species": "Magneton"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "scizor_claw",
+              "name": "Scizor Claw",
+              "count": 675,
+              "species": "Scizor"
+            },
+            {
+              "itemId": "steel_wing",
+              "name": "Steel Wing",
+              "count": 675,
+              "species": "Skarmory"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "steel_wing",
+              "name": "Steel Wing",
+              "count": 1350,
+              "species": "Skarmory"
+            },
+            {
+              "itemId": "steelix_tail",
+              "name": "Steelix Tail",
+              "count": 1350,
+              "species": "Steelix"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "steel_wing",
+              "name": "Steel Wing",
+              "count": 2700,
+              "species": "Skarmory"
+            },
+            {
+              "itemId": "steelix_tail",
+              "name": "Steelix Tail",
+              "count": 2700,
+              "species": "Steelix"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "piece_of_steel",
+              "name": "Piece Of Steel",
+              "count": 1153
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "piece_of_steel",
+              "name": "Piece Of Steel",
+              "count": 3460
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "piece_of_steel",
+              "name": "Piece Of Steel",
+              "count": 8650
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "piece_of_steel",
+              "name": "Piece Of Steel",
+              "count": 17300
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "piece_of_steel",
+              "name": "Piece Of Steel",
+              "count": 34600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "water",
+      "name": "Água (Water)",
+      "damage": [
+        {
+          "level": 1,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "magikarp_fin",
+              "name": "Magikarp Fin",
+              "count": 420,
+              "species": "Magikarp"
+            },
+            {
+              "itemId": "frog_tail",
+              "name": "Frog Tail",
+              "count": 420,
+              "species": "Poliwag"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 750000,
+          "items": [
+            {
+              "itemId": "aquatic_tail",
+              "name": "Aquatic Tail",
+              "count": 594,
+              "species": "Marill"
+            },
+            {
+              "itemId": "duck_beak",
+              "name": "Duck Beak",
+              "count": 594,
+              "species": "Psyduck"
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 1875000,
+          "items": [
+            {
+              "itemId": "seaking_tail",
+              "name": "Seaking Tail",
+              "count": 1125,
+              "species": "Seaking"
+            },
+            {
+              "itemId": "piece_of_corsola",
+              "name": "Piece of Corsola",
+              "count": 1080,
+              "species": "Corsola"
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 3750000,
+          "items": [
+            {
+              "itemId": "cute_ears",
+              "name": "Cute Ears",
+              "count": 1620,
+              "species": "Azumarill"
+            },
+            {
+              "itemId": "water_cannon",
+              "name": "Water Cannon",
+              "count": 1620,
+              "species": "Blastoise"
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 7500000,
+          "items": [
+            {
+              "itemId": "blue_ray_tail",
+              "name": "Blue Ray Tail",
+              "count": 2700,
+              "species": "Mantine"
+            },
+            {
+              "itemId": "slowking_necklace",
+              "name": "Slowking Necklace",
+              "count": 2700,
+              "species": "Slowking"
+            }
+          ]
+        }
+      ],
+      "defense": [
+        {
+          "level": 1,
+          "gold": 83333,
+          "items": [
+            {
+              "itemId": "water_gem",
+              "name": "Water Gem",
+              "count": 916
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "gold": 250000,
+          "items": [
+            {
+              "itemId": "water_gem",
+              "name": "Water Gem",
+              "count": 2747
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "gold": 625000,
+          "items": [
+            {
+              "itemId": "water_gem",
+              "name": "Water Gem",
+              "count": 6867
+            }
+          ]
+        },
+        {
+          "level": 4,
+          "gold": 1250000,
+          "items": [
+            {
+              "itemId": "water_gem",
+              "name": "Water Gem",
+              "count": 13733
+            }
+          ]
+        },
+        {
+          "level": 5,
+          "gold": 2500000,
+          "items": [
+            {
+              "itemId": "water_gem",
+              "name": "Water Gem",
+              "count": 27467
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

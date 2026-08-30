@@ -304,6 +304,26 @@
   .bag-drop-empty{ color:var(--dim); font-style:italic; }
   .bag-lock{ display:inline-flex; flex:0 0 auto; min-height:22px; align-items:center; padding:0 8px; border:1px solid var(--warn-line); border-radius:var(--r-pill); color:var(--warn); background:var(--warn-soft); font-size:8.5px; font-weight:800; }
   .bag-lock.rare{ border-color:var(--gold-line); color:var(--gold); background:var(--gold-soft); }
+  .bag-mastery{ display:flex; align-items:center; gap:6px; margin-top:10px; padding-top:9px; border-top:1px solid var(--line); font-size:10px; }
+  .bag-mastery-tag{ display:inline-flex; align-items:center; gap:4px; color:var(--accent); font-weight:800; }
+  .bag-mastery-info{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; padding:0; border:1px solid var(--accent-line); border-radius:50%; background:var(--accent-soft); color:var(--accent); font:700 11px Georgia,serif; cursor:pointer; }
+  .bag-mastery-info:hover{ border-color:var(--accent); color:var(--txt); }
+  .bag-mastery-info:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+  .bag-mastery-quantity{ margin-left:auto; color:var(--txt); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bag-mastery-dialog{ width:min(580px,calc(100vw - 32px)); max-height:80vh; padding:20px; border:1px solid var(--line3); border-radius:var(--r-lg); background:var(--panel); color:var(--txt); box-shadow:var(--sh-2); }
+  .bag-mastery-dialog::backdrop{ background:rgba(0,0,0,.65); }
+  .bag-mastery-dialog-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .bag-mastery-dialog-head h2{ margin:0; font-size:16px; }
+  .bag-mastery-dialog-head button{ margin-left:auto; }
+  .bag-mastery-reference{ overflow:auto; }
+  .bag-mastery-reference p{ margin:0 0 12px; color:var(--mut); font-size:11px; line-height:1.5; }
+  .bag-mastery-reference table{ width:100%; border-collapse:collapse; font-size:11px; }
+  .bag-mastery-reference caption{ text-align:left; font-size:13px; font-weight:700; padding-bottom:12px; color:var(--accent); }
+  .bag-mastery-reference th,.bag-mastery-reference td{ text-align:left; padding:9px 6px; border-bottom:1px solid var(--line); }
+  .bag-mastery-reference th{ color:var(--mut); font-size:10px; }
+  .bag-mastery-reference .quantity{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bag-mastery-reference .done{ color:var(--dim); }
+  .bag-mastery-reference tfoot{ font-weight:700; }
 
   /* ---------- PokéData ---------- */
   .dex-shell{ display:grid; grid-template-columns:minmax(430px,1fr) minmax(340px,410px); gap:12px; width:100%; height:100%; min-height:0; }
@@ -1181,9 +1201,11 @@
   }
 
   // ---- Bolsa: inventário observado em cada conta ----
-  let bagOpen = false, bagData = null, bagDataSignature = '', bagSlot = 'all', bagTimer = null, bagQuery = '';
+  let bagOpen = false, bagData = null, bagDataSignature = '', bagSlot = 'all', bagTimer = null, bagQuery = '', bagMasteryOnly = false;
+  let bagMasteryItems = new Map(), bagMasteryItemId = null;
   function closeBagState(){
     bagOpen = false;
+    closeBagMasteryReference();
     setToolState('btn-bag', false);
     if (bagTimer){ clearInterval(bagTimer); bagTimer = null; }
   }
@@ -1218,44 +1240,99 @@
       (account.items || []).forEach(function(item){
         if (Number(item.count || 0) <= 0) return;
         let group = groups.get(item.itemId);
-        if (!group){ group = { itemId:item.itemId, count:0, locked:false, rare:false, sources:new Set(), accounts:[] }; groups.set(item.itemId,group); }
+        if (!group){ group = { itemId:item.itemId, count:0, locked:false, rare:false, mastery:item.mastery, sources:new Set(), accounts:[] }; groups.set(item.itemId,group); }
         group.count += Number(item.count || 0);
         group.locked = group.locked || item.locked === true;
         group.rare = group.rare || item.rare === true;
-        group.accounts.push({ name:account.name || ('Tela '+account.slot), count:Number(item.count || 0) });
+        group.accounts.push({ slot:account.slot, name:account.name || ('Tela '+account.slot), count:Number(item.count || 0), mastery:item.mastery });
         (item.sources || []).forEach(function(source){ group.sources.add(source); });
       });
     });
     return Array.from(groups.values()).map(function(group){ group.sources = Array.from(group.sources); return group; });
+  }
+  function bagMasteryHtml(item){
+    if (!item.mastery) return '';
+    const quantity = bagSlot === 'all' ? item.mastery.uses.reduce(function(sum,use){ return sum+use.count; },0) : item.mastery.remaining;
+    const hint = quantity == null ? 'Aguardando o progresso desta conta' : (bagSlot === 'all' ? 'Referência por conta: todos os níveis' : 'Necessário para os níveis pendentes desta conta; não desconta os itens na bolsa');
+    return '<section class="bag-mastery" aria-label="Requisitos de maestria"><span class="bag-mastery-tag">Item de maestria</span>'
+      +'<button type="button" class="bag-mastery-info" data-bag-mastery-info="'+esc(item.itemId)+'" aria-label="Referência de maestria: '+esc(item.mastery.name)+'" aria-haspopup="dialog" title="Ver tabela de referência">i</button>'
+      +'<strong class="bag-mastery-quantity" title="'+hint+'">'+(quantity == null ? '—' : quantity.toLocaleString('pt-BR')+'×')+'</strong></section>';
+  }
+  function bagMasteryReferenceHtml(item){
+    const info = item.mastery, reference = bagSlot === 'all';
+    const account = (item.accounts || []).find(function(entry){ return entry.slot === bagSlot; });
+    const format = function(n){ return n == null ? '—' : Number(n).toLocaleString('pt-BR')+'×'; };
+    const quantity = reference ? info.uses.reduce(function(sum,use){ return sum+use.count; },0) : info.remaining;
+    const note = reference ? 'Referência por conta para todos os níveis. Selecione uma conta para ver apenas a quantidade que ela ainda precisa.'
+      : 'Conta: '+(account ? account.name : 'Tela '+bagSlot)+'. A quantidade considera apenas os níveis pendentes, sem descontar o que já está na bolsa.';
+    const rows = info.uses.map(function(use){
+      const status = use.completed === true ? 'Concluído' : (use.completed === false ? 'Pendente' : 'Aguardando');
+      return '<tr'+(!reference && use.completed === true ? ' class="done"' : '')+'><td>'+esc(use.typeName)+'</td><td>'+esc(use.trackName)+'</td><td>'+use.level+'</td><td class="quantity">'+format(use.count)+'</td>'+(!reference ? '<td>'+status+'</td>' : '')+'</tr>';
+    }).join('');
+    return '<p>'+esc(note)+'</p><table><caption>'+esc(info.name)+'</caption><thead><tr><th scope="col">Elemento</th><th scope="col">Trilha</th><th scope="col">Nível</th><th scope="col" class="quantity">Quantidade</th>'+(!reference ? '<th scope="col">Situação</th>' : '')+'</tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="3">'+(reference ? 'Total de referência' : 'Necessário nesta conta')+'</td><td class="quantity">'+format(quantity)+'</td>'+(!reference ? '<td></td>' : '')+'</tr></tfoot></table>'
+      +'<p style="margin-top:12px">'+(!reference && quantity == null ? 'Aguardando o progresso enviado pelo jogo. ' : '')+'Requisitos conferidos em 30/08/2026. O launcher não trava nem reserva itens.</p>';
+  }
+  function closeBagMasteryReference(){
+    bagMasteryItemId = null;
+    const dialog = document.getElementById('bag-mastery-dialog');
+    if (dialog && dialog.open) dialog.close();
+  }
+  function openBagMasteryReference(itemId){
+    const item = bagMasteryItems.get(itemId);
+    if (!item || !item.mastery) return;
+    let dialog = document.getElementById('bag-mastery-dialog');
+    if (!dialog){
+      dialog = document.createElement('dialog'); dialog.id = 'bag-mastery-dialog'; dialog.className = 'bag-mastery-dialog';
+      dialog.setAttribute('aria-labelledby','bag-mastery-title');
+      dialog.innerHTML = '<div class="bag-mastery-dialog-head"><h2 id="bag-mastery-title">Referência de maestria</h2><button type="button" class="tbtn" aria-label="Fechar referência">✕</button></div><div class="bag-mastery-reference"></div>';
+      dialog.querySelector('button').onclick = closeBagMasteryReference;
+      dialog.onclose = function(){ bagMasteryItemId = null; };
+      dialog.onclick = function(event){ const r = dialog.getBoundingClientRect(); if (event.target === dialog && (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom)) closeBagMasteryReference(); };
+      document.body.appendChild(dialog);
+    }
+    bagMasteryItemId = itemId;
+    dialog.querySelector('.bag-mastery-reference').innerHTML = bagMasteryReferenceHtml(item);
+    if (!dialog.open) dialog.showModal();
   }
   function renderBags(){
     if (!bagOpen) return;
     const main = document.getElementById('main');
     const previousScroll = main.querySelector('.bag-scroll');
     const scrollTop = previousScroll ? previousScroll.scrollTop : 0;
+    const previousSearch = main.querySelector('#bag-q');
+    const restoreSearchFocus = previousSearch && document.activeElement === previousSearch;
+    const searchSelection = restoreSearchFocus ? [previousSearch.selectionStart, previousSearch.selectionEnd] : null;
     const accountsBag = (bagData && bagData.accounts) || [];
     if (bagSlot !== 'all' && !accountsBag.some(function(account){ return account.slot === bagSlot; })) bagSlot = 'all';
     const current = bagSlot === 'all' ? null : accountsBag.find(function(account){ return account.slot === bagSlot; });
     const tabs = '<button class="sbtn'+(bagSlot === 'all' ? ' on' : '')+'" data-bag-slot="all">Todas</button>'+accountsBag.map(function(account){ return '<button class="sbtn'+(account.slot === bagSlot ? ' on' : '')+'" data-bag-slot="'+account.slot+'">'+esc(account.name || ('Tela '+account.slot))+'</button>'; }).join('');
-    let rows = bagSlot === 'all' ? groupBagItems(accountsBag) : ((current && current.items) || []).filter(function(item){ return Number(item.count || 0) > 0; }).map(function(item){ return Object.assign({},item,{ accounts:[{ name:current.name || ('Tela '+current.slot), count:Number(item.count || 0) }] }); });
+    let rows = bagSlot === 'all' ? groupBagItems(accountsBag) : ((current && current.items) || []).filter(function(item){ return Number(item.count || 0) > 0; }).map(function(item){ return Object.assign({},item,{ accounts:[{ slot:current.slot, name:current.name || ('Tela '+current.slot), count:Number(item.count || 0), mastery:item.mastery }] }); });
     const query = bagQuery.trim().toLowerCase();
-    if (query) rows = rows.filter(function(item){ return bagItemName(item.itemId).toLowerCase().includes(query) || String(item.itemId).toLowerCase().includes(query); });
+    if (bagMasteryOnly) rows = rows.filter(function(item){ return !!item.mastery; });
+    if (query) rows = rows.filter(function(item){ return bagItemName(item.itemId).toLowerCase().includes(query) || String(item.itemId).toLowerCase().includes(query) || !!(item.mastery && item.mastery.uses.some(function(use){ return (use.typeName+' '+use.trackName+' maestria').toLowerCase().includes(query); })); });
     rows.sort(function(a,b){ return Number(b.rare)-Number(a.rare) || Number(b.locked)-Number(a.locked) || a.itemId.localeCompare(b.itemId); });
+    bagMasteryItems = new Map(rows.map(function(item){ return [item.itemId,item]; }));
     const cards = rows.map(function(item){
       const accountsHtml = bagSlot === 'all' ? '<span class="bag-accounts">'+(item.accounts || []).map(function(account){ return '<span class="bag-account">'+esc(account.name)+' · '+Number(account.count || 0).toLocaleString('pt-BR')+'</span>'; }).join('')+'</span>' : '';
       const state = item.rare ? '<span class="bag-lock rare">★ Raro</span>' : (item.locked ? '<span class="bag-lock">🔒 Travado</span>' : '');
       return '<div class="bag-row'+(item.locked ? ' locked' : '')+(item.rare ? ' rare' : '')+'"><div class="bag-card-head">'
         + '<span class="bag-icon"><span class="bag-icon-fallback">'+bagItemGlyph(item.itemId)+'</span><img src="'+esc(bagItemSprite(item.itemId))+'" data-fallback-src="'+esc(bagItemFallbackSprite(item.itemId))+'" alt="" loading="lazy" onerror="bagItemSpriteFallback(this)"></span>'
-        + '<span class="bag-name"><b>'+esc(bagItemName(item.itemId))+'</b><small>'+esc(item.itemId)+'</small>'+accountsHtml+'</span>'
+        + '<span class="bag-name"><b>'+esc(item.mastery ? item.mastery.name : bagItemName(item.itemId))+'</b><small>'+esc(item.itemId)+'</small>'+accountsHtml+'</span>'
         + '<span class="bag-qty"><span>'+(bagSlot === 'all' ? 'Total' : 'Qtd.')+'</span><b>'+Number(item.count || 0).toLocaleString('pt-BR')+'</b></span></div>'
-        + '<div class="bag-meta"><div class="bag-drop"><span class="bag-drop-label">Drop:</span>'+bagDropHtml(item.sources)+'</div>'+state+'</div></div>';
+        + '<div class="bag-meta"><div class="bag-drop"><span class="bag-drop-label">Drop:</span>'+bagDropHtml(item.sources)+'</div>'+state+'</div>'+bagMasteryHtml(item)+'</div>';
     }).join('');
-    const ready = accountsBag.some(function(account){ return account.ready; });
+    const ready = current ? current.ready : accountsBag.some(function(account){ return account.ready; });
     const body = !accountsBag.length ? panelState('🎒','Nenhuma conta aberta','Abra uma tela para visualizar o inventário.','') : (!ready ? panelState('⏳','Carregando a bolsa','O inventário chega junto com o próximo estado enviado pelo jogo.','loading') : (cards || panelState('◇','Bolsa vazia','Nenhum item encontrado neste filtro.','')));
     const units = rows.reduce(function(total,item){ return total + Number(item.count || 0); },0);
-    main.innerHTML = '<div class="box-wrap"><div class="bag-head"><b><span class="panel-icon" aria-hidden="true">◇</span>Bolsa</b><span class="box-count">'+accountsBag.length+(accountsBag.length === 1 ? ' conta' : ' contas')+'</span><span class="psearch"><input id="bag-q" type="search" placeholder="Buscar item" value="'+esc(bagQuery)+'" spellcheck="false"></span><span class="bag-note">Inventário observado pelo launcher</span><span class="panel-hint">'+units.toLocaleString('pt-BR')+' unidades</span><button class="tbtn" id="bag-refresh" title="Atualizar">🔄</button></div><div class="bag-tabs"><span class="lbl">Conta</span>'+tabs+'</div><div class="bag-scroll"><div class="bag-list">'+body+'</div></div></div>';
+    main.innerHTML = '<div class="box-wrap"><div class="bag-head"><b><span class="panel-icon" aria-hidden="true">◇</span>Bolsa</b><span class="box-count">'+accountsBag.length+(accountsBag.length === 1 ? ' conta' : ' contas')+'</span><span class="psearch"><input id="bag-q" type="search" placeholder="Buscar item ou elemento" value="'+esc(bagQuery)+'" spellcheck="false"></span><label><input id="bag-mastery-only" type="checkbox"'+(bagMasteryOnly ? ' checked' : '')+'>Só maestria</label><span class="panel-hint">'+units.toLocaleString('pt-BR')+' unidades</span><button class="tbtn" id="bag-refresh" title="Atualizar">🔄</button></div><div class="bag-tabs"><span class="lbl">Conta</span>'+tabs+'</div><div class="bag-scroll"><div class="bag-list">'+body+'</div></div></div>';
     const nextScroll = main.querySelector('.bag-scroll'); if (nextScroll) nextScroll.scrollTop = scrollTop;
+    // Keep the actual search field while refreshing cards so typing and the caret survive.
+    if (restoreSearchFocus) document.getElementById('bag-q').replaceWith(previousSearch);
     const input = document.getElementById('bag-q'); if (input) input.oninput = function(){ bagQuery = this.value || ''; renderBags(); };
+    if (restoreSearchFocus && input){ input.focus(); if (searchSelection[0] != null) input.setSelectionRange(searchSelection[0], searchSelection[1]); }
+    document.getElementById('bag-mastery-only').onchange = function(){ bagMasteryOnly = this.checked; renderBags(); };
+    main.querySelectorAll('[data-bag-mastery-info]').forEach(function(button){ button.onclick = function(){ openBagMasteryReference(this.dataset.bagMasteryInfo); }; });
+    if (bagMasteryItemId){ if (bagMasteryItems.has(bagMasteryItemId)) openBagMasteryReference(bagMasteryItemId); else closeBagMasteryReference(); }
     main.querySelectorAll('[data-bag-slot]').forEach(function(button){ button.onclick = function(){ bagSlot = button.dataset.bagSlot === 'all' ? 'all' : Number(button.dataset.bagSlot); renderBags(); }; });
     const refresh = document.getElementById('bag-refresh'); if (refresh) refresh.onclick = function(){ loadBags(false); };
   }

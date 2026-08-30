@@ -13,6 +13,7 @@ const { collectRareDrops, createDiscordNotifier, isDiscordWebhookUrl, normalizeD
 const { createDiscordRelayNotifier } = require('./discord-relay');
 const { KILL_STALL_MAX_SECONDS, KILL_STALL_MIN_SECONDS, KILL_STALL_TIMEOUT_MS, createKillWatchState, normalizeKillStallTimeoutSeconds, observeKill, resetKillWatch, shouldReloadForKillStall } = require('./kill-watch');
 const { learnLootSourcesFromDump, normalizeLootSources, observeLootSources } = require('./loot-sources');
+const { createMasteryState, readMasteryState, masteryForItem } = require('./mastery-catalog');
 const { buildPokemonCatalog, buildPokemonHub } = require('./pokemon-hub');
 const { isRareItem } = require('./rare-items');
 const { DREAM_TAB_ID, MAX_TABS, MAX_VIEWS_PER_TAB, normalizeSiteUrl, restoreWorkspaceState, sitePartition } = require('./site-tabs');
@@ -619,6 +620,7 @@ function resetCharacterState(g) {
   g._shinyUids = new Set(); g._boxUids = new Set(); g._baselineDone = false; g._freshShinyBatch = []; g._freshShinyAt = 0;
   g._worldFrameOrder = null; g._serverClockOffsetMs = null; g._xpBoostEndsAtMs = 0; g._tasks = {};
   g._runeStages = {}; g._runeAssign = {};
+  g._mastery = createMasteryState();
   g._xpBuffSignature = xpBuffSignature(xpBuffsForGame(g, Date.now()));
   g._huntSpeciesById = new Map(); g.charName = null;
   g._xpRate = resetXpRate(g._xpRate, Date.now()); scheduleXpOverlay(g);
@@ -635,6 +637,7 @@ function applyOfflineState(g, url, body) {
   g._worldFrameOrder = null;
   const progress = state.progress || state;
   readRuneState(g, progress, false, estimatedServerNow(g));
+  readMasteryState(g._mastery || (g._mastery = createMasteryState()), progress);
   readXpBoostState(g, progress, null, estimatedServerNow(g));
   const changed = applyState(g, state);
   resolveName(g);
@@ -656,6 +659,7 @@ function applyWorldFrame(g, frame) {
 
   const gameDelta = body.g && typeof body.g === 'object' ? body.g : {};
   readRuneState(g, gameDelta, true, Number(frame.t));
+  if (readMasteryState(g._mastery || (g._mastery = createMasteryState()), gameDelta, true)) changed = true;
   const taskResult = applyTaskDelta(g._tasks || (g._tasks = {}), gameDelta.t);
   if (taskResult.changed) {
     syncXpBuffWindow(g, Number(frame.t));
@@ -731,6 +735,7 @@ function applyWorldSnapshot(g, snapshot) {
   const state = snapshot.s && typeof snapshot.s === 'object' ? snapshot.s : {};
   const game = state.g && typeof state.g === 'object' ? state.g : {};
   readRuneState(g, game, false, Number(snapshot.t));
+  readMasteryState(g._mastery || (g._mastery = createMasteryState()), game);
   if (game.tasks && typeof game.tasks === 'object') {
     g._tasks = taskMapFromState(game.tasks);
     syncXpBuffWindow(g, Number(snapshot.t));
@@ -2298,6 +2303,7 @@ function bagAccountsPayload() {
       const items = Object.keys(g._bag || {}).map((itemId) => ({
         itemId,
         count: Math.max(0, Math.round(Number(g._bag[itemId]) || 0)),
+        mastery: masteryForItem(itemId, g._mastery, g._bag[itemId]),
         locked: locks.has(itemId),
         rare: isRareItem(itemId),
         sources: Array.isArray(itemDropSources[itemId]) ? itemDropSources[itemId] : [],
