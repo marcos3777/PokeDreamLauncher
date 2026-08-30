@@ -39,6 +39,7 @@ jobs:
         run: |
           gh release view "${{ steps.version.outputs.tag }}" --repo "${{ github.repository }}" 2>$null
           if ($LASTEXITCODE -eq 0) { "found=true" >> $env:GITHUB_OUTPUT } else { "found=false" >> $env:GITHUB_OUTPUT }
+          exit 0
 
       - name: Install dependencies
         if: steps.existing.outputs.found != 'true'
