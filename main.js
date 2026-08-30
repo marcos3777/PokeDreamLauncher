@@ -35,9 +35,11 @@ const COMMUNITY_HUB_WAIT_MS = 1500;
 const XP_PANEL_WIDTH = 430;
 const CRITICAL_DISCORD_EVENTS = new Set(['party_death', 'repeated_stall', 'task_completed']);
 const TASK_DEFINITION_BY_ID = new Map(Object.values(TASK_TRACKS).flatMap((track) => track.tasks.map((definition) => [definition.id, { track, definition }])));
+const APP_ICON = path.join(__dirname, 'assets', 'app-icon.png');
 
 // userData persistente (nao some ao fechar)
 app.setPath('userData', path.join(app.getPath('appData'), 'poke-dream-launcher'));
+if (process.platform === 'win32') app.setAppUserModelId('com.pokedream.launcher');
 
 let win = null;
 let launcherMinimized = false;
@@ -2007,7 +2009,7 @@ function createWindow() {
     minWidth: 800, minHeight: 500,
     frame: false,
     backgroundColor: '#0a0d13',
-    icon: undefined,
+    icon: APP_ICON,
   });
   launcherMinimized = false;
 

@@ -1,6 +1,6 @@
 {
   "name": "poke-dream-launcher",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "description": "Navegador multitela (Electron) para PokeDream e outros sites — até 4 abas com 4 sessões",
   "main": "main.js",
   "scripts": {
@@ -56,14 +56,17 @@
       "app.html",
       "config.html",
       "xp-panel.html",
+      "assets/app-icon.png",
       "sounds/**"
     ],
     "win": {
       "target": "nsis",
+      "icon": "assets/app-icon.ico",
       "artifactName": "Poke-Dream-Launcher-Windows-${arch}.${ext}"
     },
     "linux": {
       "target": "AppImage",
+      "icon": "assets/app-icon.png",
       "category": "Utility",
       "artifactName": "Poke-Dream-Launcher-Linux-${arch}.${ext}"
     },
