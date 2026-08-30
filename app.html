@@ -1661,19 +1661,21 @@
   let selectedTaskSlot = null;
   let selectedTaskTrack = null;
   const taskAttackerBySlot = Object.create(null);
+  let taskRenderedLayout = '';
+  let taskRenderedCards = '';
   function taskNumber(value){ return Number(value || 0).toLocaleString('pt-BR'); }
   function selectedTaskAccount(){
     return (taskSnapshot.accounts || []).find(function(account){ return account.slot === selectedTaskSlot; }) || null;
   }
-  function taskFollowsActive(account){
-    return !!account && !Object.prototype.hasOwnProperty.call(taskAttackerBySlot, account.slot);
+  function taskSelectActive(account){
+    if (!account) return;
+    const species = combatSpeciesName(account.active && account.active.species);
+    taskAttackerBySlot[account.slot] = species && DEX_MAP[species] ? species : '';
   }
   function taskAttackerSpecies(account){
     if (!account) return '';
-    const manual = taskAttackerBySlot[account.slot];
-    if (manual && DEX_MAP[manual]) return manual;
-    const active = combatSpeciesName(account.active && account.active.species);
-    return active && DEX_MAP[active] ? active : '';
+    if (!Object.prototype.hasOwnProperty.call(taskAttackerBySlot, account.slot)) taskSelectActive(account);
+    return taskAttackerBySlot[account.slot];
   }
   function taskAttacker(account){
     const species = taskAttackerSpecies(account), combat = dexCombatPokemon(species);
@@ -1684,18 +1686,21 @@
     if (!attacker || !defender || !DEX_COMBAT || !DEX_COMBAT.effectivenessFor) return null;
     return DEX_COMBAT.effectivenessFor(attacker.attackType, defender.types, dexMatchupIndex);
   }
+  function taskCombatMeta(account){
+    const species = taskAttackerSpecies(account), attacker = taskAttacker(account);
+    let meta = 'Escolha um Pokémon para comparar o dano em cada Task.';
+    if (attacker) meta = '<b>'+esc(species)+'</b> selecionado; ataca com <b>'+esc(dexTypeName(attacker.attackType))+'</b>';
+    else if (species) meta = '<b>'+esc(species)+'</b> selecionado; os tipos estão indisponíveis agora.';
+    return meta;
+  }
   function taskCombatBar(account){
     if (!account) return '';
-    const species = taskAttackerSpecies(account), attacker = taskAttacker(account), following = taskFollowsActive(account);
+    const species = taskAttackerSpecies(account);
     const options = DEX_LIST.map(function(entry){ return '<option value="'+esc(entry.species)+'"></option>'; }).join('');
-    let meta = 'Escolha um Pokémon para comparar o dano em cada Task.';
-    if (attacker) meta = (following ? 'Seguindo o ativo: ' : 'Escolha manual: ')+'<b>'+esc(species)+'</b> ataca com <b>'+esc(dexTypeName(attacker.attackType))+'</b>';
-    else if (species) meta = '<b>'+esc(species)+'</b> selecionado; os tipos estão indisponíveis agora.';
-    else if (following) meta = 'O Pokémon ativo será selecionado assim que entrar em combate.';
     return '<div class="task-combat-bar">'
       + '<label class="task-combat-picker"><span>Meu Pokémon</span><input id="task-attacker" type="search" list="task-attacker-options" value="'+esc(species)+'" placeholder="Ex.: Poliwrath" autocomplete="off" spellcheck="false"><datalist id="task-attacker-options">'+options+'</datalist></label>'
-      + '<span class="task-combat-meta">'+meta+'</span>'
-      + '<button type="button" class="sbtn task-use-active'+(following ? ' on' : '')+'" id="task-use-active" aria-pressed="'+(following ? 'true' : 'false')+'">Usar ativo</button></div>';
+      + '<span class="task-combat-meta">'+taskCombatMeta(account)+'</span>'
+      + '<button type="button" class="sbtn task-use-active" id="task-use-active">Usar ativo</button></div>';
   }
   function taskPanelBody(account, track){
     if (!account) return panelState('✓','Nenhuma conta disponível','Abra uma tela e entre em um personagem para acompanhar as Tasks.','');
@@ -1726,6 +1731,29 @@
     return '<div class="task-summary"><span>Personagem: <b>'+esc(account.name)+'</b></span><span>Hunt atual: <b>'+esc(account.hunt || 'não identificada')+'</b></span><span>Concluídas: <b>'+completed+' / '+tasks.length+'</b></span></div>'
       + '<div class="task-list">'+rows+'</div>';
   }
+  function taskLayoutSignature(){
+    return JSON.stringify([(taskSnapshot.accounts || []).map(function(account){
+      return [account.slot,account.name,Object.keys(account.tracks || {})];
+    }),taskSnapshot.notificationsEnabled,taskSnapshot.notificationsConfigured]);
+  }
+  function updateTaskCards(){
+    const target = document.getElementById('task-cards');
+    if (!tasksOpen || !target) return;
+    const account = selectedTaskAccount();
+    const track = account && account.tracks ? account.tracks[selectedTaskTrack] : null;
+    const html = taskPanelBody(account,track);
+    if (html === taskRenderedCards) return;
+    const scroll = document.querySelector('.task-scroll');
+    const top = scroll ? scroll.scrollTop : 0;
+    target.innerHTML = html;
+    taskRenderedCards = html;
+    if (scroll) scroll.scrollTop = top;
+  }
+  function updateTaskComparison(){
+    const meta = document.querySelector('.task-combat-meta');
+    if (meta) meta.innerHTML = taskCombatMeta(selectedTaskAccount());
+    updateTaskCards();
+  }
   function renderTasks(value){
     if (value && Array.isArray(value.accounts)) taskSnapshot = value;
     if (!tasksOpen) return;
@@ -1749,10 +1777,12 @@
     }).join('');
     const notifying = taskSnapshot.notificationsEnabled === true;
     const configured = taskSnapshot.notificationsConfigured === true;
+    taskRenderedLayout = taskLayoutSignature();
+    taskRenderedCards = taskPanelBody(account,track);
     main.innerHTML = '<div class="task-wrap"><div class="task-head"><b><span class="panel-icon" aria-hidden="true">✓</span>Tasks</b><span class="sp"></span>'
       + '<button type="button" class="task-notify'+(notifying ? ' on' : '')+'" id="task-notify" aria-pressed="'+(notifying ? 'true' : 'false')+'" title="'+(configured ? 'Ativar ou desativar avisos de conclusão' : 'Configure o webhook em Notificações no Discord')+'">🔔 Notificar conclusões: '+(notifying ? 'ligado' : 'desligado')+'</button></div>'
       + '<div class="task-scroll"><div class="task-account-tabs">'+(accountsHtml || '<span class="panel-hint">Nenhuma conta disponível</span>')+'</div>'
-      + taskCombatBar(account)+'<div class="task-track-tabs">'+tracksHtml+'</div>'+taskPanelBody(account,track)
+      + taskCombatBar(account)+'<div class="task-track-tabs">'+tracksHtml+'</div><div id="task-cards">'+taskRenderedCards+'</div>'
       + (!configured ? '<div class="task-note">Configure o webhook em Notificações no Discord para ativar os avisos de conclusão.</div>' : '')+'</div></div>';
     const nextScroll = main.querySelector('.task-scroll');
     if (nextScroll && previousScrollTop) nextScroll.scrollTop = previousScrollTop;
@@ -1760,16 +1790,28 @@
     main.querySelectorAll('[data-task-track]').forEach(function(button){ button.onclick = function(){ selectedTaskTrack = button.dataset.taskTrack; renderTasks(); }; });
     const taskAttackerInput = document.getElementById('task-attacker');
     if (taskAttackerInput && account) {
-      taskAttackerInput.oninput = function(){ this.setCustomValidity(''); this.setAttribute('aria-invalid','false'); };
+      taskAttackerInput.oninput = function(){
+        this.setCustomValidity(''); this.setAttribute('aria-invalid','false');
+        const match = dexFindSpecies(this.value);
+        if (match || !this.value.trim()) {
+          taskAttackerBySlot[account.slot] = match ? match.species : '';
+          updateTaskComparison();
+        }
+      };
       taskAttackerInput.onchange = function(){
         const match = dexFindSpecies(this.value);
-        if (!this.value.trim()) { delete taskAttackerBySlot[account.slot]; renderTasks(); return; }
+        if (!this.value.trim()) { taskAttackerBySlot[account.slot] = ''; updateTaskComparison(); return; }
         if (!match) { this.setAttribute('aria-invalid','true'); this.setCustomValidity('Escolha um Pokémon da lista.'); this.reportValidity(); return; }
-        this.setCustomValidity(''); taskAttackerBySlot[account.slot] = match.species; renderTasks();
+        this.setCustomValidity(''); taskAttackerBySlot[account.slot] = match.species; updateTaskComparison();
       };
     }
     const useActive = document.getElementById('task-use-active');
-    if (useActive && account) useActive.onclick = function(){ delete taskAttackerBySlot[account.slot]; renderTasks(); };
+    if (useActive && account) useActive.onclick = function(){
+      taskSelectActive(selectedTaskAccount());
+      taskAttackerInput.value = taskAttackerSpecies(selectedTaskAccount());
+      taskAttackerInput.setCustomValidity(''); taskAttackerInput.setAttribute('aria-invalid','false');
+      updateTaskComparison();
+    };
     const notify = document.getElementById('task-notify');
     if (notify) notify.onclick = function(){
       if (!configured) { appFeedback('Configure o webhook nas Notificações do Discord',true); if (P && P.toggleConfig) P.toggleConfig(); return; }
@@ -1796,6 +1838,8 @@
     tasksOpen = open == null ? !tasksOpen : !!open;
     setToolState('btn-tasks',tasksOpen);
     if (tasksOpen){
+      Object.keys(taskAttackerBySlot).forEach(function(slot){ delete taskAttackerBySlot[slot]; });
+      taskRenderedLayout = ''; taskRenderedCards = '';
       if (bagOpen) closeBagState();
       if (boxOpen){ boxOpen = false; setToolState('btn-box',false); }
       if (dexOpen){ dexOpen = false; setToolState('btn-dex',false); }
@@ -1804,7 +1848,16 @@
     if (P && P.setBoxOpen) P.setBoxOpen(tasksOpen);
     if (tasksOpen) refreshTasks(true); else renderSidebar();
   }
-  if (P && P.onTaskOverview) P.onTaskOverview(function(value){ taskSnapshot = value || { accounts:[] }; if (tasksOpen) renderTasks(); });
+  if (P && P.onTaskOverview) P.onTaskOverview(function(value){
+    taskSnapshot = value || { accounts:[] };
+    if (!tasksOpen || !document.getElementById('task-cards')) return;
+    if (taskRenderedLayout !== taskLayoutSignature()) {
+      const input = document.getElementById('task-attacker');
+      if (!input || document.activeElement !== input) renderTasks();
+      return;
+    }
+    updateTaskCards();
+  });
 
   function openDexSpecies(species){
     const wanted = String(species || '').trim().toLowerCase();
