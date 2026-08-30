@@ -1,6 +1,7 @@
 'use strict';
 
 const { buildDiscordPayload, normalizeDiscordNotifications } = require('./discord-notifications');
+const { createLauncherAccess } = require('./launcher-access');
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
@@ -64,6 +65,7 @@ function serializeRelayEvent(event, settings) {
 }
 
 function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
+  const access = options.access || createLauncherAccess({ onBlocked:options.onUpdateRequired });
   const baseUrl = String(options.baseUrl || '').replace(/\/+$/, '');
   const publishableKey = String(options.publishableKey || '');
   const fetchImpl = options.fetchImpl || globalThis.fetch;
@@ -73,6 +75,7 @@ function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
   let lastSuccessAt = 0;
 
   async function post(event) {
+    access.assertAllowed();
     const settings = normalizeDiscordNotifications(typeof getSettings === 'function' ? getSettings() : getSettings);
     if (!relayEventEnabled(event, settings)) return { ok:false, skipped:true };
     const identity = typeof getIdentity === 'function' ? getIdentity() : getIdentity;
@@ -89,7 +92,7 @@ function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
     try {
       response = await fetchImpl(`${baseUrl}/functions/v1/discord-notification`, {
         method:'POST',
-        headers:{ apikey:publishableKey, accept:'application/json', 'content-type':'application/json' },
+        headers:{ apikey:publishableKey, accept:'application/json', 'content-type':'application/json', 'x-launcher-version':String(identity.appVersion || '0.0.0') },
         body:JSON.stringify({
           schema_version:1,
           app_version:String(identity.appVersion || '0.0.0'),
@@ -108,6 +111,8 @@ function createDiscordRelayNotifier(getSettings, getIdentity, options = {}) {
     }
     let data = null;
     try { data = await response.json(); } catch {}
+    if (response.status === 426) throw access.block(data);
+    access.assertAllowed();
     if (!response.ok || !data || data.ok !== true) {
       const code = data && typeof data.error === 'string' ? data.error : `status_${response.status}`;
       throw new Error(code === 'rate_limited' ? 'Muitas notificações em pouco tempo.' : 'Falha no canal seguro de notificações.');

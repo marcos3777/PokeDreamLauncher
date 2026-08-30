@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@1.4.1";
+import { withLauncherVersion, launcherVersionError } from "../_shared/launcher-version.mjs";
 
 const MAX_BODY_BYTES = 16 * 1024;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -192,13 +193,15 @@ function buildDiscordPayload(event: JsonObject, discordUserId: string | null): J
 }
 
 export default {
-  fetch: withSupabase({ auth:"publishable:default" }, async (req, ctx) => {
+  fetch: withSupabase({ auth:"publishable:default" }, withLauncherVersion(async (req, ctx) => {
     if (req.method !== "POST") return response({ error:"method_not_allowed" }, 405, { allow:"POST" });
     if (req.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() !== "application/json") {
       return response({ error:"unsupported_media_type" }, 415);
     }
     try {
       const body = await readJson(req);
+      const versionError = launcherVersionError(req, isRecord(body) ? (body.app_version ?? null) : null);
+      if (versionError) return versionError;
       if (!isRecord(body) || !exactKeys(body, ["schema_version", "app_version", "client_id", "client_token", "discord_user_id", "event"])
         || body.schema_version !== 1
         || typeof body.app_version !== "string" || !VERSION_PATTERN.test(body.app_version)
@@ -258,5 +261,5 @@ export default {
       console.error("discord notification failed", error);
       return response({ error:"server_error" }, 500);
     }
-  }),
+  })),
 };

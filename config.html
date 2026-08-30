@@ -353,7 +353,7 @@
     versionCard.append(versionRow,discord);
     discord.classList.add('btn-block');
     const updateCard = document.createElement('div'); updateCard.className = 'settings-card';
-    updateCard.innerHTML = '<h2>Atualização</h2><p>Busca uma nova versão sem instalar ou reiniciar automaticamente.</p>';
+    updateCard.innerHTML = '<h2>Atualização</h2><p>Busca uma nova versão sem instalar ou reiniciar automaticamente.</p><p id="launcher-update-notice" role="alert" hidden style="color:#ffdc92"></p>';
     check.classList.add('btn-block'); installButton.classList.add('btn-block');
     updateCard.append(check,installButton,updateStatus);
     aboutGrid.append(versionCard,updateCard);
@@ -677,7 +677,9 @@
     const nextSync = shareTime(s.nextSyncAt);
     shareForce.disabled = !available;
     shareId.textContent = s.clientId || '—';
-    if (!available) {
+    if (s.updateRequired) {
+      setShareState((s.message || 'Atualize o launcher para usar os recursos online.')+' Consultas e envios estão pausados. O jogo e o histórico local continuam disponíveis.', 'warn');
+    } else if (!available) {
       setShareState('Compartilhamento indisponível no momento. Seus dados continuam somente neste computador.', 'off');
     } else if (s.lastError) {
       setShareState(String(s.lastError) + (lastSuccess ? ' Último envio bem-sucedido: ' + lastSuccess + '.' : ' O launcher tentará novamente automaticamente.'), 'warn');
@@ -739,15 +741,28 @@
   };
   alrInputs.forEach(function(input){ input.onchange = function(){ const value = Math.max(0,parseInt(input.value,10) || 0); input.value = value; if (P && P.setItemAlert) P.setItemAlert(input.dataset.alert,value).then(function(){ savedFeedback(); }); }; });
 
-  if (P && P.onUpdateStatus) P.onUpdateStatus(function(s){
+  let launcherRequiresUpdate = false;
+  function renderUpdateStatus(s){
     if (!s) return;
     if (s.state === 'checking') setStatus('Verificando atualizacao…');
-    else if (s.state === 'none') { setStatus('✅ Voce ja esta na versao mais recente.'); install.style.display = 'none'; }
+    else if (s.state === 'none') { setStatus(launcherRequiresUpdate ? 'O servidor exige uma atualização, mas ela ainda não foi encontrada. Tente novamente mais tarde.' : '✅ Voce ja esta na versao mais recente.'); install.style.display = 'none'; }
     else if (s.state === 'available') setStatus('Versao ' + (s.version || '') + ' encontrada — baixando…');
     else if (s.state === 'downloading') setStatus('Baixando atualizacao… ' + (s.percent || 0) + '%');
     else if (s.state === 'downloaded') { setStatus('✅ Versao ' + (s.version || '') + ' baixada!'); install.style.display = 'block'; }
     else if (s.state === 'error') { setStatus('❌ ' + (s.message || 'erro ao verificar')); install.style.display = 'none'; }
-  });
+  }
+  function renderLauncherAccess(s){
+    launcherRequiresUpdate = !!(s && s.updateRequired);
+    const notice = document.getElementById('launcher-update-notice');
+    notice.hidden = !launcherRequiresUpdate;
+    notice.textContent = launcherRequiresUpdate ? s.message+' Consultas e envios estão pausados. O jogo e o histórico local continuam disponíveis.' : '';
+    if (s && s.update) renderUpdateStatus(s.update);
+    if (launcherRequiresUpdate && shareSnapshot) renderShareState({ ...shareSnapshot, ...s, available:false });
+  }
+  if (P && P.onUpdateStatus) P.onUpdateStatus(renderUpdateStatus);
+  if (P && P.onLauncherAccess) P.onLauncherAccess(renderLauncherAccess);
+  if (P && P.getLauncherAccess) P.getLauncherAccess().then(renderLauncherAccess).catch(function(){});
+  if (P && P.onShowUpdateSettings) P.onShowUpdateSettings(function(){ openConfigPanel(null); });
 </script>
 </body>
 </html>

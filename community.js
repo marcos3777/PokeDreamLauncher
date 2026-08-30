@@ -1,5 +1,7 @@
 'use strict';
 
+const { createLauncherAccess } = require('./launcher-access');
+
 const SUPABASE_URL = 'https://ddjhptkpndopbondgvlv.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_yTCUuFkmqnOSf3OmHYJZXA_FMnaPmpB';
 const COMMUNITY_SCHEMA_VERSION = 3;
@@ -497,6 +499,8 @@ function parsePokemonHub(payload, species) {
 }
 
 function createCommunityClient(options = {}) {
+  const appVersion = String(options.appVersion || require('./package.json').version);
+  const access = options.access || createLauncherAccess({ appVersion, onBlocked:options.onUpdateRequired });
   const baseUrl = String(options.baseUrl || SUPABASE_URL).replace(/\/+$/, '');
   const publishableKey = String(options.publishableKey || SUPABASE_PUBLISHABLE_KEY);
   const fetchImpl = options.fetchImpl || globalThis.fetch;
@@ -510,14 +514,20 @@ function createCommunityClient(options = {}) {
   let cacheGeneration = 0;
 
   async function requestJson(url, init, suppliedController) {
+    access.assertAllowed();
     const controller = suppliedController || new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
     if (timer && typeof timer.unref === 'function') timer.unref();
     let response;
     try {
-      response = await fetchImpl(url, { ...init, signal: controller.signal });
+      response = await fetchImpl(url, {
+        ...init,
+        headers:{ ...init.headers, 'x-launcher-version':appVersion },
+        cache:'no-store', signal:controller.signal,
+      });
     } catch (error) {
+      access.assertAllowed();
       const aborted = controller.signal.aborted || (error && error.name === 'AbortError');
       const code = timedOut ? 'timeout' : (aborted ? 'aborted' : 'network_error');
       const message = timedOut ? 'request timed out' : (aborted ? 'request aborted' : 'network request failed');
@@ -528,6 +538,8 @@ function createCommunityClient(options = {}) {
 
     let data = null;
     try { data = await response.json(); } catch {}
+    if (response.status === 426) throw access.block(data);
+    access.assertAllowed();
     if (!response.ok) {
       const code = isRecord(data) && typeof data.error === 'string' ? data.error : 'http_error';
       throw new CommunityHttpError(code, response.status, code, data);
@@ -536,6 +548,7 @@ function createCommunityClient(options = {}) {
   }
 
   async function submitStats(input) {
+    access.assertAllowed();
     const payload = buildSubmitPayload(input);
     const controller = new AbortController();
     activeSubmitControllers.add(controller);
@@ -557,6 +570,7 @@ function createCommunityClient(options = {}) {
   }
 
   async function submitPerformance(input) {
+    access.assertAllowed();
     const payload = buildPerformancePayload(input);
     if (!payload.records.length) return { ok:true, saved:0, skipped:true };
     const controller = new AbortController();
@@ -575,6 +589,7 @@ function createCommunityClient(options = {}) {
   }
 
   function getSpeciesStats(species) {
+    if (access.error()) return Promise.reject(access.error());
     if (typeof species !== 'string' || !SPECIES_RE.test(species)) return Promise.reject(new TypeError('invalid species'));
     const cached = cache.get(species);
     const time = now();
@@ -607,6 +622,7 @@ function createCommunityClient(options = {}) {
   }
 
   function getPerformanceLeaderboard(species) {
+    if (access.error()) return Promise.reject(access.error());
     if (typeof species !== 'string' || !SPECIES_RE.test(species)) return Promise.reject(new TypeError('invalid species'));
     const cacheKey = `performance:${species}`;
     const cached = cache.get(cacheKey);
@@ -632,6 +648,7 @@ function createCommunityClient(options = {}) {
   }
 
   function getPokemonHubCatalog() {
+    if (access.error()) return Promise.reject(access.error());
     const cacheKey = 'pokemon-hub:catalog';
     const cached = cache.get(cacheKey);
     const time = now();
@@ -662,6 +679,7 @@ function createCommunityClient(options = {}) {
   }
 
   function getPokemonCombatCatalog(cachedVersion) {
+    if (access.error()) return Promise.reject(access.error());
     const version = typeof cachedVersion === 'string' && COMBAT_VERSION_RE.test(cachedVersion) ? cachedVersion : '';
     const cacheKey = `pokemon-combat:catalog:${version || 'empty'}`;
     const cached = cache.get(cacheKey);
@@ -694,6 +712,7 @@ function createCommunityClient(options = {}) {
   }
 
   function getPokemonHub(species) {
+    if (access.error()) return Promise.reject(access.error());
     if (typeof species !== 'string' || !SPECIES_RE.test(species)) return Promise.reject(new TypeError('invalid species'));
     const cacheKey = `pokemon-hub:${species}`;
     const cached = cache.get(cacheKey);
@@ -734,7 +753,16 @@ function createCommunityClient(options = {}) {
     for (const controller of activeSubmitControllers) controller.abort();
   }
 
-  return { submitStats, submitPerformance, getSpeciesStats, getPerformanceLeaderboard, getPokemonHubCatalog, getPokemonCombatCatalog, getPokemonHub, clearCache, abortSubmissions };
+  async function checkLauncherVersion() {
+    const data = await requestJson(`${baseUrl}/functions/v1/launcher-status`, {
+      method:'GET', headers:{ apikey:publishableKey, accept:'application/json' },
+    });
+    if (!isRecord(data) || data.ok !== true) throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    return data;
+  }
+
+  access.subscribe(() => { clearCache(); abortSubmissions(); });
+  return { submitStats, submitPerformance, getSpeciesStats, getPerformanceLeaderboard, getPokemonHubCatalog, getPokemonCombatCatalog, getPokemonHub, clearCache, abortSubmissions, checkLauncherVersion };
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@1.4.1";
+import { withLauncherVersion } from "../_shared/launcher-version.mjs";
 
 const SPECIES_PATTERN = /^[A-Z][A-Za-z0-9]{0,31}$/;
 
@@ -19,7 +20,7 @@ function jsonResponse(
 }
 
 export default {
-  fetch: withSupabase({ auth: "publishable:default" }, async (req, ctx) => {
+  fetch: withSupabase({ auth: "publishable:default" }, withLauncherVersion(async (req, ctx) => {
     if (req.method !== "GET") {
       return jsonResponse({ error: "method_not_allowed" }, 405, { allow: "GET" });
     }
@@ -53,5 +54,5 @@ export default {
 
     const result = Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
     return jsonResponse({ data: result });
-  }),
+  })),
 };

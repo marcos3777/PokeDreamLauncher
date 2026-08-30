@@ -1,8 +1,8 @@
 import { withSupabase } from "npm:@supabase/server@1.4.1";
+import { withLauncherVersion, launcherVersionError, isSupportedAppVersion as supportedVersion } from "../_shared/launcher-version.mjs";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_RECORDS = 1000;
-const MIN_APP_VERSION = [1, 10, 0] as const;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
 const TRAINER_NAME_PATTERN = /^[^\u0000-\u001f\u007f]{1,40}$/u;
@@ -25,15 +25,6 @@ function exactKeys(value: Record<string, unknown>, keys: string[]): boolean {
   return actual.length === expected.length && actual.every((key, index) => key === expected[index]);
 }
 
-function supportedVersion(value: string): boolean {
-  const match = /^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/.exec(value);
-  if (!match) return false;
-  const actual = match.slice(1, 4).map(Number);
-  for (let index = 0; index < 3; index++) {
-    if (actual[index] !== MIN_APP_VERSION[index]) return actual[index] > MIN_APP_VERSION[index];
-  }
-  return true;
-}
 
 async function readJson(req: Request): Promise<unknown> {
   const length = req.headers.get("content-length");
@@ -64,13 +55,15 @@ async function sha256(value: string): Promise<string> {
 }
 
 export default {
-  fetch: withSupabase({ auth:"publishable:default" }, async (req, ctx) => {
+  fetch: withSupabase({ auth:"publishable:default" }, withLauncherVersion(async (req, ctx) => {
     if (req.method !== "POST") return response({ error:"method_not_allowed" }, 405, { allow:"POST" });
     if (req.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase() !== "application/json") {
       return response({ error:"unsupported_media_type" }, 415);
     }
     try {
       const body = await readJson(req);
+      const versionError = launcherVersionError(req, isRecord(body) ? (body.app_version ?? null) : null);
+      if (versionError) return versionError;
       if (!isRecord(body) || !exactKeys(body, ["schema_version", "app_version", "client_id", "client_token", "records"])) {
         throw new RequestError(400, "invalid_submission");
       }
@@ -116,5 +109,5 @@ export default {
       console.error("submit-performance failed", error);
       return response({ error:"server_error" }, 500);
     }
-  }),
+  })),
 };

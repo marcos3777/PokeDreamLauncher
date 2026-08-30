@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@1.4.1";
+import { withLauncherVersion, launcherVersionError, isSupportedAppVersion } from "../_shared/launcher-version.mjs";
 
 const MAX_BODY_BYTES = 512 * 1024;
 const MAX_SPECIES = 300;
@@ -6,7 +7,6 @@ const MAX_ACCOUNTS = 32;
 const MAX_COUNTER = 1_000_000_000;
 const MAX_HUNT_MS = 630_720_000_000;
 const MAX_BROKE_SUM = Number.MAX_SAFE_INTEGER;
-const MIN_APP_VERSION = [1, 8, 2] as const;
 const SPECIES_PATTERN = /^[A-Z][A-Za-z0-9]{0,31}$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43,128}$/;
@@ -81,17 +81,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isSupportedAppVersion(value: string): boolean {
-  const match = /^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/.exec(value);
-  if (!match) return false;
-  const actual = match.slice(1, 4).map(Number);
-  for (let index = 0; index < MIN_APP_VERSION.length; index++) {
-    if (actual[index] !== MIN_APP_VERSION[index]) {
-      return actual[index] > MIN_APP_VERSION[index];
-    }
-  }
-  return true;
-}
 
 function hasExactKeys(value: Record<string, unknown>, expected: readonly string[]): boolean {
   const actual = Object.keys(value).sort();
@@ -405,7 +394,7 @@ async function registrationSourceHash(req: Request): Promise<string> {
 }
 
 export default {
-  fetch: withSupabase({ auth: "publishable:default" }, async (req, ctx) => {
+  fetch: withSupabase({ auth: "publishable:default" }, withLauncherVersion(async (req, ctx) => {
     if (req.method !== "POST") {
       return jsonResponse({ error: "method_not_allowed" }, 405, { allow: "POST" });
     }
@@ -416,7 +405,10 @@ export default {
     }
 
     try {
-      const payload = validatePayload(await readLimitedJson(req));
+      const body = await readLimitedJson(req);
+      const versionError = launcherVersionError(req, isRecord(body) ? (body.app_version ?? null) : null);
+      if (versionError) return versionError;
+      const payload = validatePayload(body);
       const tokenHash = await sha256Hex(payload.clientToken);
       const sourceHash = await registrationSourceHash(req);
       const rpcName = payload.schemaVersion === 3 ? "replace_hunt_stats_v3" : "replace_hunt_stats";
@@ -495,5 +487,5 @@ export default {
       console.error("submit-stats failed", error);
       return jsonResponse({ error: "server_error" }, 500);
     }
-  }),
+  })),
 };

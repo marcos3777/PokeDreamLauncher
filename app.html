@@ -914,6 +914,10 @@
     .task-notify{ width:100%; }
   }
 </style>
+<style>
+  .required-update{ -webkit-app-region:no-drag; flex-shrink:0; max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid #a9772e; background:#382a14; color:#ffdc92; border-radius:6px; padding:4px 9px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+  .required-update[hidden]{ display:none; }
+</style>
 </head>
 <body>
 <div class="app">
@@ -921,6 +925,7 @@
     <div class="tabs" id="tabs"></div>
     <button class="new-tab" id="btn-new-tab" title="Abrir outro site">+</button>
     <span class="sp"></span>
+    <button class="required-update" id="required-update" hidden aria-live="polite">Atualização necessária</button>
     <button class="ico" id="btn-cfg" title="Configurações / Atualização">⚙</button>
     <button class="ico" id="btn-min" title="Minimizar">—</button>
     <button class="ico" id="btn-max" title="Maximizar">□</button>
@@ -965,6 +970,19 @@
 <script src="pokemon-effectiveness.js"></script>
 <script>
   const P = window.poke || null;
+  function renderLauncherAccess(state){
+    const button = document.getElementById('required-update');
+    button.hidden = !state || !state.updateRequired;
+    if (button.hidden) return;
+    const update = state.update || {};
+    button.textContent = update.state === 'downloaded' ? 'Atualização pronta · instalar'
+      : update.state === 'downloading' ? 'Atualização · '+(update.percent || 0)+'%'
+      : 'Atualização necessária';
+    button.title = (state.message || 'Atualize o launcher.')+' O jogo e os dados locais continuam disponíveis.';
+  }
+  document.getElementById('required-update').onclick = function(){ if (P && P.openUpdateSettings) P.openUpdateSettings(); };
+  if (P && P.onLauncherAccess) P.onLauncherAccess(renderLauncherAccess);
+  if (P && P.getLauncherAccess) P.getLauncherAccess().then(renderLauncherAccess).catch(function(){});
   let accounts = [];
   let selected = null;
   let mode = 'grid';

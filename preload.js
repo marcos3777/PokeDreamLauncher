@@ -67,6 +67,10 @@ contextBridge.exposeInMainWorld('poke', {
   onTaskOverview: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('task-overview', h); return () => ipcRenderer.removeListener('task-overview', h); },
   openDumpFolder: () => ipcRenderer.invoke('openDumpFolder'),
   getVersion: () => ipcRenderer.invoke('getVersion'),
+  getLauncherAccess: () => ipcRenderer.invoke('getLauncherAccess'),
+  openUpdateSettings: () => ipcRenderer.invoke('openUpdateSettings'),
+  onLauncherAccess: (cb) => { const h = (_e, p) => { try { cb(p); } catch {} }; ipcRenderer.on('launcher-access', h); return () => ipcRenderer.removeListener('launcher-access', h); },
+  onShowUpdateSettings: (cb) => { const h = () => { try { cb(); } catch {} }; ipcRenderer.on('show-update-settings', h); return () => ipcRenderer.removeListener('show-update-settings', h); },
   checkForUpdate: () => ipcRenderer.invoke('checkForUpdate'),
   installUpdate: () => ipcRenderer.invoke('installUpdate'),
   onAccounts: (cb) => {

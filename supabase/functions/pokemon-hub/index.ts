@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@1.4.1";
+import { withLauncherVersion } from "../_shared/launcher-version.mjs";
 
 const SPECIES_PATTERN = /^[A-Z][A-Za-z0-9]{0,31}$/;
 const COMBAT_CATALOG_VERSION = "20260829192538";
@@ -54,7 +55,7 @@ function serverError(error: any): Response {
 }
 
 export default {
-  fetch: withSupabase({ auth: "publishable:default" }, async (req, ctx) => {
+  fetch: withSupabase({ auth: "publishable:default" }, withLauncherVersion(async (req, ctx) => {
     if (req.method !== "GET") return response({ error: "method_not_allowed" }, 405, { allow: "GET" });
 
     const url = new URL(req.url);
@@ -104,5 +105,5 @@ export default {
       data: catalog.data ?? [],
       combat: combatCatalog.combat,
     });
-  }),
+  })),
 };

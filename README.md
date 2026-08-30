@@ -148,6 +148,38 @@ Sessoes e logins ficam **somente no seu computador**, em `%APPDATA%/poke-dream-l
 
 O login e persistido de forma **orientada a eventos** (reage a navegacao/redirect do login), e o backup do storage so e regravado quando algo muda.
 
+## Versão mínima dos recursos online
+
+O Supabase exige um launcher estável **2.0.20 ou superior** e o cabeçalho
+`x-launcher-version` em todas as chamadas. Esse cabeçalho é enviado pelo launcher
+a partir da **2.0.22**; instalações anteriores sem o cabeçalho precisam atualizar
+mesmo quando a versão numérica já atende ao mínimo. Nos envios, `app_version`
+também precisa corresponder ao cabeçalho. Versões ausentes, inválidas, antigas ou
+de pré-lançamento recebem HTTP `426` com `error: update_required` e `min_version`.
+
+A regra está em `supabase/functions/_shared/launcher-version.mjs`. Ao mudar
+`MIN_LAUNCHER_VERSION`, publique todas as sete funções: `launcher-status`,
+`species-stats`, `performance-leaderboard`, `pokemon-hub`, `submit-stats`,
+`submit-performance` e `discord-notification`. Inclua o módulo compartilhado no
+deploy e disponibilize primeiro o instalador compatível. As tabelas e funções
+internas permanecem inacessíveis diretamente para `anon` e `authenticated`.
+
+O launcher consulta `launcher-status` ao iniciar. Qualquer resposta `426` pausa
+as consultas, o envio automático e a fila de notificações pelo Supabase até
+reiniciar com uma versão compatível. O aviso abre as configurações de atualização.
+O atualizador, o jogo, o histórico local e os alertas pelo webhook pessoal
+continuam independentes. Falhas de conexão não são tratadas como versão antiga.
+Os dados comunitários em memória são invalidados no bloqueio; nenhum histórico
+local é apagado. Dados já baixados por clientes antigos não podem ser recolhidos.
+
+Essa verificação controla compatibilidade, não autentica o executável: um cliente
+modificado pode declarar outra versão. Nenhuma chave administrativa deve ser
+incluída no launcher.
+
+Os testes de `test/launcher-version.test.js` executam os handlers reais com o
+acesso ao banco substituído, verificam o corte de versão, a invalidação de cache,
+requisições simultâneas e a suspensão dos envios. Execute com Node.js 24 ou superior.
+
 ## Licenca
 
 MIT. Projeto comunitario, sem vinculo oficial com o PokeDream.

@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { autoUpdater } = require('electron-updater');
+const { createLauncherAccess } = require('./launcher-access');
 const { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, createCommunityClient, huntLogToAccountStats, parsePokemonCombatSnapshot } = require('./community');
 const { describeBroke, describeSequences, huntBaseline, huntDelta, huntSpeciesFromId, recordObservation } = require('./hunt-metrics');
 const { acceptWorldFrame, activeUidFromParty, applyActiveProgress, applyKeyedDelta, applyObjectDelta, applyPartyDelta, parseWorldFrame, parseWorldMessage } = require('./world-frame');
@@ -103,11 +104,13 @@ let communityQuitFlushed = false;
 let pokemonCombatCache = null;
 let pokemonCombatChecked = false;
 let pokemonCombatCheckInFlight = null;
-const communityClient = createCommunityClient();
+let launcherUpdateStatus = { state:'idle' };
+const launcherAccess = createLauncherAccess({ appVersion:app.getVersion(), onBlocked:handleLauncherUpdateRequired });
+const communityClient = createCommunityClient({ appVersion:app.getVersion(), access:launcherAccess });
 const discordRelayNotifier = createDiscordRelayNotifier(
   () => discordNotifications,
   () => ({ clientId, clientToken:communityToken, appVersion:app.getVersion() }),
-  { baseUrl:SUPABASE_URL, publishableKey:SUPABASE_PUBLISHABLE_KEY },
+  { baseUrl:SUPABASE_URL, publishableKey:SUPABASE_PUBLISHABLE_KEY, access:launcherAccess },
 );
 const criticalDiscordNotifier = createDiscordNotifier(() => discordNotifications);
 let diagLines = 0;
@@ -1842,10 +1845,26 @@ function discordSettingsPayload() {
 function pushItemConfig() { if (dashView) send(dashView, 'item-config', { vis: itemVis, alert: itemAlert }); }
 
 // ---- sincronização com o banco comunitário ----
+function launcherAccessPayload() { return { ...launcherAccess.status(), update:{ ...launcherUpdateStatus } }; }
+function pushLauncherAccess() {
+  const payload = launcherAccessPayload();
+  send(dashView, 'launcher-access', payload);
+  send(cfgView, 'launcher-access', payload);
+}
+function handleLauncherUpdateRequired(state) {
+  communityLastError = state.message;
+  if (communityTimer) clearTimeout(communityTimer);
+  communityTimer = null;
+  communityNextSyncAt = 0;
+  pokemonCombatCache = null;
+  pokemonCombatChecked = false;
+  pushLauncherAccess();
+}
 function communityStatus() {
   return {
-    available: true,
+    available: !launcherAccess.status().updateRequired,
     enabled: true,
+    ...launcherAccess.status(),
     clientId,
     lastSuccessAt: communityLastSuccessAt || null,
     nextSyncAt: communityNextSyncAt || null,
@@ -1854,6 +1873,7 @@ function communityStatus() {
 }
 function friendlyCommunityError(error) {
   const status = Number(error && error.status);
+  if (status === 426 || launcherAccess.status().updateRequired) return launcherAccess.status().message || 'Atualize o launcher para usar os recursos online.';
   if (error && error.code === 'local_persistence') return 'Não foi possível salvar o histórico local; o envio foi cancelado para não perder números.';
   if (error && error.code === 'invalid_local_snapshot') {
     const species = error.species ? ' de ' + error.species : '';
@@ -1869,6 +1889,7 @@ function communityAccountId(accountKey) {
     .digest('hex');
 }
 async function submitCommunityStats() {
+  launcherAccess.assertAllowed();
   if (!persistentStateLoaded) return { skipped: true };
   if (communitySubmitInFlight) return communitySubmitInFlight;
 
@@ -1923,6 +1944,9 @@ async function submitCommunityStats() {
 }
 function scheduleCommunitySync(delayMs) {
   if (communityTimer) clearTimeout(communityTimer);
+  communityTimer = null;
+  communityNextSyncAt = 0;
+  if (launcherAccess.status().updateRequired) return;
   const requestedDelay = Math.max(0, Number(delayMs) || 0);
   const rateLimitDelay = communityLastSuccessAt
     ? Math.max(0, communityLastSuccessAt + COMMUNITY_SEND_INTERVAL_MS - Date.now())
@@ -2470,6 +2494,7 @@ async function communityPokemonHub(species) {
   try {
     return await communityHubTimeout(communityClient.getPokemonHub(species), 'pokemon_hub_timeout');
   } catch (hubError) {
+    if (launcherAccess.status().updateRequired) throw hubError;
     // Compatibilidade enquanto o novo endpoint ainda não chegou ao projeto hospedado.
     const [capture, performance] = await Promise.allSettled([
       communityHubTimeout(communityClient.getSpeciesStats(species), 'species_stats_timeout'),
@@ -2485,6 +2510,7 @@ async function communityPokemonHub(species) {
 }
 
 async function pokemonCombatCatalogPayload() {
+  if (launcherAccess.status().updateRequired) return { combat:emptyPokemonCombatCatalog(), cached:false, remoteError:true };
   if (pokemonCombatChecked) {
     return { combat:pokemonCombatCache ? pokemonCombatCache.combat : emptyPokemonCombatCatalog(), cached:!!pokemonCombatCache };
   }
@@ -2507,6 +2533,7 @@ async function pokemonCombatCatalogPayload() {
         return { combat:remote.combat, cached:false };
       }
     } catch {
+      if (launcherAccess.status().updateRequired) return { combat:emptyPokemonCombatCatalog(), cached:false, remoteError:true };
       // Compatibilidade: a versão anterior do servidor entregava combate junto do catálogo.
       try {
         const legacy = await communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout');
@@ -2598,9 +2625,15 @@ ipcMain.handle('testSound', () => { if (dashView) send(dashView, 'play-sound', {
 
 // ---- auto-update (via GitHub Releases) ----
 ipcMain.handle('getVersion', () => app.getVersion());
+ipcMain.handle('getLauncherAccess', () => launcherAccessPayload());
+ipcMain.handle('openUpdateSettings', () => {
+  setConfigOpen(true);
+  send(cfgView, 'show-update-settings');
+  pushLauncherAccess();
+});
 ipcMain.handle('checkForUpdate', () => {
   if (!app.isPackaged) { sendUpdate('error', { message: 'atualização só funciona no app instalado (não no npm start)' }); return; }
-  try { autoUpdater.checkForUpdates(); } catch (e) { sendUpdate('error', { message: e && e.message }); }
+  try { autoUpdater.checkForUpdates().catch((e) => sendUpdate('error', { message:e && e.message })); } catch (e) { sendUpdate('error', { message: e && e.message }); }
 });
 ipcMain.handle('installUpdate', () => quitAndInstallSafely());
 
@@ -2613,7 +2646,11 @@ app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
 
 // avisa a UI do andamento da atualização (o menu de config mostra o status)
-function sendUpdate(state, extra) { send(cfgView, 'update-status', Object.assign({ state }, extra || {})); }
+function sendUpdate(state, extra) {
+  launcherUpdateStatus = Object.assign({ state }, extra || {});
+  send(cfgView, 'update-status', launcherUpdateStatus);
+  pushLauncherAccess();
+}
 
 // Ao abrir, checa se há versão nova no repo; baixa em segundo plano; a UI/config mostra o progresso
 // e oferece "reiniciar e instalar". (No `npm start` de dev o autoUpdater nem tenta.)
@@ -2640,8 +2677,8 @@ function setupAutoUpdate() {
     });
     autoUpdater.on('error', (e) => sendUpdate('error', { message: e && e.message }));
     if (app.isPackaged) {
-      autoUpdater.checkForUpdates();
-      setInterval(() => { try { autoUpdater.checkForUpdates(); } catch {} }, 12 * 60 * 60 * 1000);   // re-checa a cada 12h
+      autoUpdater.checkForUpdates().catch(() => {});
+      setInterval(() => { try { autoUpdater.checkForUpdates().catch(() => {}); } catch {} }, 12 * 60 * 60 * 1000);   // re-checa a cada 12h
     }
   } catch (e) { console.error('[updater] falha ao iniciar:', e && e.message); }
 }
@@ -2649,7 +2686,11 @@ function setupAutoUpdate() {
 app.whenReady().then(() => {
   createWindow();
   // espera a UI carregar antes de checar (pra não perder os eventos de status)
-  dashView.webContents.once('did-finish-load', () => { setTimeout(setupAutoUpdate, 1500); pushSoundConfig(); pushItemConfig(); pushAccounts(); pushBrowserState(); });
+  dashView.webContents.once('did-finish-load', () => {
+    setTimeout(setupAutoUpdate, 1500); pushSoundConfig(); pushItemConfig(); pushAccounts(); pushBrowserState(); pushLauncherAccess();
+    // A falha de rede não vira bloqueio de versão; cada operação também é conferida no servidor.
+    communityClient.checkLauncherVersion().catch(() => {});
+  });
   cfgView.webContents.once('did-finish-load', () => send(cfgView, 'config-context', buildConfigContext()));
   app.on('activate', () => { if (BaseWindow.getAllWindows().length === 0) createWindow(); });
 });

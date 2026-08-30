@@ -153,5 +153,6 @@ test('launcher preserva o canal principal e aceita webhook local apenas para ale
   assert.match(config, /id="notifications-discord-user-id"/);
   assert.match(config, /id="notifications-tasks"/);
   assert.doesNotMatch(config, /id="notifications-critical-enabled"|id="notifications-enabled"|id="notifications-rare-drops"|id="notifications-mythic"|id="notifications-shiny"/);
-  assert.doesNotMatch(config + main, /notifications-test|testDiscordNotifications|allowDiscordTest/);
+  assert.doesNotMatch(config + main, /notifications-test|allowDiscordTest/);
+  assert.match(main, /ipcMain\.handle\('testDiscordNotifications',[\s\S]*?if \(!discordNotifications\.criticalWebhookUrl\) throw[\s\S]*?criticalDiscordNotifier\.notify\(\{ kind:'test'/);
 });
