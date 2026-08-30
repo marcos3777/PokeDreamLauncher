@@ -311,12 +311,26 @@
   .dex-browser{ display:flex; flex-direction:column; padding:14px; overflow:hidden; }
   .dex-head{ display:flex; align-items:center; flex-wrap:wrap; gap:9px; min-height:42px; padding-bottom:12px; border-bottom:1px solid var(--line); }
   .dex-title{ display:flex; align-items:center; gap:8px; font-size:17px; font-weight:800; letter-spacing:-.015em; }
+  .dex-combat-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-top:10px; padding:9px; border:1px solid var(--line); border-radius:var(--r-md); background:rgba(7,13,19,.58); }
+  .dex-combat-picker{ display:flex; align-items:center; gap:7px; min-width:250px; }
+  .dex-combat-picker > span{ color:var(--accent); font-size:8px; font-weight:900; letter-spacing:.55px; text-transform:uppercase; white-space:nowrap; }
+  .dex-combat-picker input{ width:150px; height:29px; padding:0 9px; border:1px solid var(--line2); border-radius:8px; outline:none; background:#091017; color:var(--txt); font:inherit; font-size:9px; }
+  .dex-combat-picker input:focus{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(89,216,196,.09); }
+  .dex-combat-picker input[aria-invalid="true"]{ border-color:var(--bad); }
+  .dex-combat-meta{ flex:1 1 160px; color:var(--mut); font-size:8px; }
+  .dex-combat-meta b{ color:var(--accent); }
+  .dex-combat-bar .sbtn:disabled,.dex-order .sbtn:disabled{ opacity:.38; cursor:not-allowed; }
   .dex-toolbar{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; padding:10px 0 7px; }
   .dex-region,.dex-mode,.dex-order{ display:flex; align-items:center; gap:5px; }
   .dex-toolbar .lbl{ margin:0 2px 0 5px; color:var(--dim); font-size:8.5px; font-weight:850; letter-spacing:.65px; text-transform:uppercase; }
   .dex-toolbar .lbl:first-child{ margin-left:0; }
   .dex-scroll{ flex:1 1 auto; min-height:0; overflow:auto; padding:2px 3px 12px 0; }
   .dex-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:9px; align-content:start; }
+  .dex-grid.grouped{ display:block; }
+  .dex-level-group + .dex-level-group{ margin-top:14px; }
+  .dex-level-head{ position:sticky; top:0; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; padding:6px 9px; border:1px solid var(--info-line); border-radius:8px; background:rgba(12,24,35,.96); color:var(--info); font-size:9px; font-weight:900; letter-spacing:.45px; text-transform:uppercase; backdrop-filter:blur(8px); }
+  .dex-level-head small{ color:var(--mut); font-size:7px; letter-spacing:0; text-transform:none; }
+  .dex-level-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:9px; }
   .dex-cell{ width:auto; height:112px; min-width:0; padding:9px; display:grid; grid-template-columns:72px minmax(0,1fr); gap:9px; position:relative; overflow:hidden;
     border:1px solid #253646; border-radius:var(--r-md); background:linear-gradient(155deg,#121c27,#0b121a); color:var(--txt); text-align:left;
     transition:opacity .14s,transform .14s var(--ease),border-color .14s var(--ease),box-shadow .14s var(--ease); }
@@ -346,6 +360,13 @@
   .dex-info{ width:12px; height:12px; display:inline-flex!important; align-items:center; justify-content:center; flex:0 0 12px; border:1px solid rgba(255,206,86,.48); border-radius:50%; color:var(--gold)!important; font-size:7px!important; font-style:normal; font-weight:900!important; line-height:1; letter-spacing:0!important; text-transform:none!important; cursor:help; }
   .dex-mini b{ display:block; margin-top:2px; color:var(--txt2); font-size:10px; font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .dex-mini.xp b{ color:var(--gold); }
+  .dex-mini.damage b{ color:var(--txt2); }
+  .dex-mini.damage.good{ border-color:var(--accent-line); background:var(--accent-soft); }
+  .dex-mini.damage.good b{ color:var(--accent); }
+  .dex-mini.damage.bad{ border-color:var(--bad-line); background:var(--bad-soft); }
+  .dex-mini.damage.bad b{ color:var(--bad); }
+  .dex-cell.damage-good{ border-color:var(--accent-line); }
+  .dex-cell.damage-bad{ border-color:rgba(255,102,120,.24); }
   .dex-card-foot{ min-width:0; margin-top:5px; display:flex; align-items:center; justify-content:space-between; gap:5px; color:var(--mut); font-size:7.5px; white-space:nowrap; }
   .dex-card-foot span{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
   .dex-card-foot b{ color:var(--txt2); font-size:7.8px; font-weight:900; }
@@ -366,6 +387,9 @@
   .dex-detail-badge{ padding:3px 7px; border:1px solid var(--line2); border-radius:999px; background:rgba(8,14,20,.64); color:var(--mut); font-size:7.5px; font-weight:850; }
   .dex-detail-badge.on{ color:var(--accent); border-color:var(--accent-line); }
   .dex-detail-badge.gold{ color:var(--gold); border-color:var(--gold-line); }
+  .dex-detail-badge.type{ color:var(--info); border-color:var(--info-line); background:var(--info-soft); }
+  .dex-detail-badge.attack{ color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft); }
+  .dex-detail-badge.damage{ color:var(--gold); border-color:var(--gold-line); background:var(--gold-soft); }
   .dex-section{ margin-top:13px; }
   .dex-section-title{ display:flex; align-items:center; gap:7px; margin:0 1px 7px; color:var(--mut); font-size:8px; font-weight:850; letter-spacing:.7px; text-transform:uppercase; }
   .dex-section-title:after{ content:""; flex:1; height:1px; background:var(--line); }
@@ -905,6 +929,7 @@
   </form>
 </div>
 <script src="hunt-metrics.js"></script>
+<script src="pokemon-effectiveness.js"></script>
 <script>
   const P = window.poke || null;
   let accounts = [];
@@ -1210,8 +1235,18 @@
   // ---- PokéData: catálogo + detalhe persistente, alimentados pelo hub unificado por espécie ----
   const DEX_LIST = Object.keys(DEX_MAP).map(function(n){ return { species: n, dex: DEX_MAP[n] }; }).sort(function(a,b){ return a.dex - b.dex; });
   let dexOpen = false, dexRegion = 'all', dexShiny = false, dexQuery = '', dexSort = 'dex', dexDir = 1;
+  let dexAttackerSpecies = '', dexCombatXp = false, dexGroupLevel = false;
   let dexCatalog = {}, dexCatalogError = false, dexSelectedSpecies = null;
+  let dexCombat = { types:{}, pokemon:{}, matchups:[] }, dexMatchupIndex = {};
   const dexDetailCache = new Map(), dexDetailLoading = new Set();
+  const DEX_COMBAT = window.PokemonEffectiveness || null;
+  try {
+    const savedAttacker = localStorage.getItem('dexAttackerSpecies') || '';
+    dexAttackerSpecies = DEX_MAP[savedAttacker] ? savedAttacker : '';
+    if (dexAttackerSpecies) dexSort = 'effectiveness';
+    dexCombatXp = localStorage.getItem('dexCombatXp') === 'true';
+    dexGroupLevel = localStorage.getItem('dexGroupLevel') === 'true';
+  } catch {}
 
   function dexCounts(){
     const cnt = {}, shiny = {};
@@ -1227,6 +1262,64 @@
     catch { return fmtInt(Math.round(number)); }
   }
   function dexCatalogRow(species){ return dexCatalog[species] || {}; }
+  function dexCombatPokemon(species){ return dexCombat && dexCombat.pokemon ? dexCombat.pokemon[species] || null : null; }
+  function dexTypeName(typeCode){
+    const type = dexCombat && dexCombat.types ? dexCombat.types[typeCode] : null;
+    return type && type.namePt ? type.namePt : titce(typeCode);
+  }
+  function dexFindSpecies(value){
+    const wanted = String(value || '').trim().toLowerCase();
+    return wanted ? DEX_LIST.find(function(entry){ return entry.species.toLowerCase() === wanted; }) || null : null;
+  }
+  function dexAttacker(){
+    const combat = dexCombatPokemon(dexAttackerSpecies);
+    return combat ? { species:dexAttackerSpecies, attackType:combat.attackType, types:combat.types } : null;
+  }
+  function dexEffectiveness(species){
+    const attacker = dexAttacker(), defender = dexCombatPokemon(species);
+    if (!attacker || !defender || !DEX_COMBAT || !DEX_COMBAT.effectivenessFor) return null;
+    return DEX_COMBAT.effectivenessFor(attacker.attackType, defender.types, dexMatchupIndex);
+  }
+  function dexMultiplier(value){
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '—';
+    return String(number).replace('.', ',')+'×';
+  }
+  function dexDamageClass(effect){
+    if (!effect) return '';
+    return effect.multiplier > 1 ? 'good' : (effect.multiplier < 1 ? 'bad' : 'neutral');
+  }
+  function saveDexCombatPreferences(){
+    try {
+      localStorage.setItem('dexAttackerSpecies', dexAttackerSpecies || '');
+      localStorage.setItem('dexCombatXp', String(dexCombatXp));
+      localStorage.setItem('dexGroupLevel', String(dexGroupLevel));
+    } catch {}
+  }
+  function setDexAttacker(species){
+    dexAttackerSpecies = species && DEX_MAP[species] ? species : '';
+    if (dexAttackerSpecies) { dexSort = 'effectiveness'; dexDir = 1; }
+    else if (dexSort === 'effectiveness') { dexSort = 'dex'; dexDir = 1; }
+    saveDexCombatPreferences();
+    setDexSortActive();
+    syncDexCombatControls();
+    renderDexGrid();
+  }
+  function syncDexCombatControls(){
+    const input = document.getElementById('dex-attacker');
+    const attacker = dexAttacker();
+    if (input && document.activeElement !== input) input.value = dexAttackerSpecies;
+    const meta = document.getElementById('dex-attacker-meta');
+    if (meta) meta.innerHTML = attacker
+      ? esc(attacker.species)+' ataca com <b>'+esc(dexTypeName(attacker.attackType))+'</b>'
+      : (dexAttackerSpecies ? 'Tipos indisponíveis agora.' : 'Escolha seu Pokémon para comparar o dano nas hunts.');
+    const xp = document.getElementById('dex-combat-xp');
+    if (xp) { xp.classList.toggle('on', dexCombatXp); xp.disabled = !attacker; xp.setAttribute('aria-pressed', dexCombatXp ? 'true' : 'false'); }
+    const group = document.getElementById('dex-group-level');
+    if (group) { group.classList.toggle('on', dexGroupLevel); group.setAttribute('aria-pressed', dexGroupLevel ? 'true' : 'false'); }
+    const damageSort = document.querySelector('[data-dsort="effectiveness"]');
+    if (damageSort) damageSort.disabled = !attacker;
+  }
   function dexHasInfo(row){
     if (!row || typeof row !== 'object') return false;
     if (row.capture || row.communityCapture || Number(row.lootCount) > 0) return true;
@@ -1279,6 +1372,7 @@
     const catalog = dexCatalogRow(species), dex = DEX_MAP[species] || catalog.dexNumber || 0;
     const owned = dexOwned(species), shinyMode = dexShiny && owned.shiny > 0;
     const sprite = sprStatic(species, dexShiny);
+    const combat = dexCombatPokemon(species), effectiveness = dexEffectiveness(species);
     const taskLevel = (hub && hub.taskLevel) || catalog.taskLevel;
     const tasks = hub && Array.isArray(hub.tasks) ? hub.tasks : (catalog.tasks || []);
     const loot = hub && Array.isArray(hub.loot) ? hub.loot : [];
@@ -1298,12 +1392,18 @@
     }).join('') : '<div class="dex-note">Nenhum drop desta espécie foi observado pelo launcher ainda.</div>';
     const statusNote = loading ? '<div class="dex-note">Atualizando a amostra comunitária e os recordes…</div>'
       : (loadError || (hub && hub.remoteError) || dexCatalogError ? '<div class="dex-note">Os dados locais continuam disponíveis; a comunidade não respondeu agora.</div>' : '');
+    const combatBadges = combat
+      ? '<span class="dex-detail-badge type">Tipo: '+combat.types.map(function(type){ return esc(dexTypeName(type)); }).join(' / ')+'</span>'
+        + '<span class="dex-detail-badge attack">Ataca: '+esc(dexTypeName(combat.attackType))+'</span>'
+        + (effectiveness ? '<span class="dex-detail-badge damage">Seu dano: '+dexMultiplier(effectiveness.multiplier)+'</span>' : '')
+      : '';
     return '<div class="dex-detail-hero'+(shinyMode ? ' shiny' : '')+'">'
         + '<div class="dex-detail-sprite">'+(sprite ? '<img src="'+sprite+'" alt="" onerror="this.style.display=\'none\'">' : '')+'</div>'
         + '<div class="dex-detail-copy"><div class="num">#'+String(dex).padStart(3,'0')+'</div><h2>'+esc(species)+'</h2><div class="dex-detail-badges">'
           + '<span class="dex-detail-badge'+(owned.normal ? ' on' : '')+'">'+(owned.normal ? owned.normal+' na coleção' : 'não capturado')+'</span>'
           + (owned.shiny ? '<span class="dex-detail-badge gold">✨ '+owned.shiny+' shiny</span>' : '')
           + (taskLevel ? '<span class="dex-detail-badge">Task Nv. '+fmtInt(taskLevel)+'</span>' : '')
+          + combatBadges
         + '</div></div></div>'
       + '<section class="dex-section"><div class="dex-section-title">Rendimento da hunt</div><div class="dex-record-grid">'
         + '<div class="dex-record xp"><div class="label">Melhor XP/h</div><div class="value">'+dexCompact(xp.value)+'</div><div class="meta">'+esc(xp.source)+' · '+esc(xp.meta)+'</div></div>'
@@ -1348,54 +1448,81 @@
     loadDexDetail(species);
   }
 
+  function dexSortEntries(a,b){
+    if (dexSort === 'name') return a.species.localeCompare(b.species) * dexDir;
+    if (dexSort === 'status') {
+      const status = Number(dexHasInfo(b.row)) - Number(dexHasInfo(a.row));
+      return status ? status * dexDir : (a.dex - b.dex);
+    }
+    if (dexSort === 'performance') return (b.xpPerHour - a.xpPerHour) * dexDir || (a.dex - b.dex);
+    if (dexSort === 'effectiveness' && DEX_COMBAT && DEX_COMBAT.compareCombatRows) {
+      return DEX_COMBAT.compareCombatRows(
+        { multiplier:a.effectiveness && a.effectiveness.multiplier, xpPerHour:a.xpPerHour, dex:a.dex },
+        { multiplier:b.effectiveness && b.effectiveness.multiplier, xpPerHour:b.xpPerHour, dex:b.dex },
+        dexCombatXp
+      ) * dexDir;
+    }
+    return (a.dex - b.dex) * dexDir;
+  }
+  function dexCardHTML(entry, own){
+    const species = entry.species, row = entry.row, taskLevel = entry.taskLevel;
+    const n = Number(own[species] || 0), has = n > 0;
+    const sprite = sprStatic(species, dexShiny), num = '#' + String(entry.dex).padStart(3, '0');
+    const effect = entry.effectiveness, damageClass = dexDamageClass(effect);
+    const hasInfo = dexHasInfo(row) || !!effect;
+    const catchValue = row.communityCapture && row.communityCapture.catchPct != null ? row.communityCapture.catchPct
+      : (row.capture && Number(row.capture.kills) > 0 ? Number(row.capture.caught || 0) / Number(row.capture.kills) * 100 : null);
+    const communityBrokeAvg = dexCommunityBroke(row.communityCapture);
+    const footer = '<span class="capture">Captura <b>'+(catchValue != null ? dexPercent(catchValue) : '—')+'</b></span>'
+      + '<span class="shiny">Broke shiny <b>'+(communityBrokeAvg != null ? huntDec(communityBrokeAvg,1) : '--')+'</b></span>';
+    const xpKpi = '<span class="dex-mini xp"><span class="dex-mini-label">XP/h <i class="dex-info" aria-label="XP por hora sem bônus" title="XP/h base: não considera VIP, Poção, Tasks nem Runa">i</i></span><b>'+dexCompact(row.bestXpPerHour)+'</b></span>';
+    const secondKpi = effect
+      ? '<span class="dex-mini damage '+damageClass+'"><span>Dano</span><b>'+dexMultiplier(effect.multiplier)+'</b></span>'
+      : '<span class="dex-mini"><span>mobs/h</span><b>'+dexCompact(row.bestMobsPerHour)+'</b></span>';
+    const damageAria = effect ? ' · dano '+dexMultiplier(effect.multiplier) : '';
+    return '<button type="button" class="dex-cell'+(has?' has':'')+(hasInfo?' has-info':'')+(has && dexShiny ? ' is-shiny':'')+(damageClass ? ' damage-'+damageClass : '')+(dexSelectedSpecies === species ? ' selected':'')+'" data-sp="'+esc(species)+'" aria-label="Ver detalhes de '+esc(species)+damageAria+'">'
+      + '<span class="dex-sprite"><span class="dex-number">'+num+'</span>'+(sprite ? '<img src="'+sprite+'" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '')+(n ? '<span class="dex-owned">×'+n+'</span>' : '')+'</span>'
+      + '<span class="dex-card-body"><span class="dex-card-name"><span>'+esc(species)+'</span>'+(has && dexShiny ? '<span class="spark">✨</span>' : '')+'</span>'
+        + '<span class="dex-card-tags">'+(taskLevel ? '<span class="dex-tag task">task nv. '+fmtInt(taskLevel)+'</span>' : '')+'</span>'
+        + '<span class="dex-card-kpis">'+(effect ? secondKpi+xpKpi : xpKpi+secondKpi)+'</span>'
+        + '<span class="dex-card-foot">'+footer+'</span>'
+      + '</span></button>';
+  }
   function renderDexGrid(){
     const grid = document.getElementById('dex-grid'); if (!grid) return;
-    const { cnt, shiny } = dexCounts();
-    const own = dexShiny ? shiny : cnt;
-    const list = DEX_LIST.filter(function(e){ return inDexRegion(e.dex); });
+    const { cnt, shiny } = dexCounts(), own = dexShiny ? shiny : cnt;
+    const list = DEX_LIST.filter(function(entry){ return inDexRegion(entry.dex); });
     const q = dexQuery.trim().toLowerCase();
-    const vis = list.filter(function(e){
+    const visible = list.filter(function(entry){
       if (!q) return true;
-      return e.species.toLowerCase().indexOf(q) >= 0 || String(e.dex).padStart(3, '0').indexOf(q) >= 0;
-    }).sort(function(a,b){
-      if (dexSort === 'name') return a.species.localeCompare(b.species) * dexDir;
-      if (dexSort === 'status') {
-        const status = Number(dexHasInfo(dexCatalogRow(b.species))) - Number(dexHasInfo(dexCatalogRow(a.species)));
-        return status ? status * dexDir : (a.dex - b.dex);
-      }
-      if (dexSort === 'performance') {
-        const av = Number(dexCatalogRow(a.species).bestXpPerHour || 0), bv = Number(dexCatalogRow(b.species).bestXpPerHour || 0);
-        return (bv - av) * dexDir || (a.dex - b.dex);
-      }
-      return (a.dex - b.dex) * dexDir;
-    });
-    if (!vis.some(function(e){ return e.species === dexSelectedSpecies; })) dexSelectedSpecies = vis.length ? vis[0].species : null;
-    grid.innerHTML = vis.length ? vis.map(function(e){
-      const n = Number(own[e.species] || 0);
-      const has = n > 0;
-      const s = sprStatic(e.species, dexShiny);
-      const num = '#' + String(e.dex).padStart(3, '0');
-      const row = dexCatalogRow(e.species), taskLevel = row.taskLevel;
-      const hasInfo = dexHasInfo(row);
-      const catchValue = row.communityCapture && row.communityCapture.catchPct != null ? row.communityCapture.catchPct
-        : (row.capture && Number(row.capture.kills) > 0 ? Number(row.capture.caught || 0) / Number(row.capture.kills) * 100 : null);
-      const communityBrokeAvg = dexCommunityBroke(row.communityCapture);
-      const footer = '<span class="capture">Captura <b>'+(catchValue != null ? dexPercent(catchValue) : '—')+'</b></span>'
-        + '<span class="shiny">Broke shiny <b>'+(communityBrokeAvg != null ? huntDec(communityBrokeAvg,1) : '--')+'</b></span>';
-      return '<button type="button" class="dex-cell'+(has?' has':'')+(hasInfo?' has-info':'')+(has && dexShiny ? ' is-shiny':'')+(dexSelectedSpecies === e.species ? ' selected':'')+'" data-sp="'+esc(e.species)+'" aria-label="Ver detalhes de '+esc(e.species)+'">'
-        + '<span class="dex-sprite"><span class="dex-number">'+num+'</span>'+(s ? '<img src="'+s+'" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '')+(n ? '<span class="dex-owned">×'+n+'</span>' : '')+'</span>'
-        + '<span class="dex-card-body"><span class="dex-card-name"><span>'+esc(e.species)+'</span>'+(has && dexShiny ? '<span class="spark">✨</span>' : '')+'</span>'
-          + '<span class="dex-card-tags">'+(taskLevel ? '<span class="dex-tag task">task nv. '+fmtInt(taskLevel)+'</span>' : '')+'</span>'
-          + '<span class="dex-card-kpis"><span class="dex-mini xp"><span class="dex-mini-label">XP/h <i class="dex-info" aria-label="XP por hora sem bônus" title="XP/h base: não considera VIP, Poção, Tasks nem Runa">i</i></span><b>'+dexCompact(row.bestXpPerHour)+'</b></span><span class="dex-mini"><span>mobs/h</span><b>'+dexCompact(row.bestMobsPerHour)+'</b></span></span>'
-          + '<span class="dex-card-foot">'+footer+'</span>'
-        + '</span></button>';
-    }).join('')
-      : '<div class="panel-empty"><div class="pe-ico">'+(q ? '🔍' : '◫')+'</div>'
+      return entry.species.toLowerCase().indexOf(q) >= 0 || String(entry.dex).padStart(3, '0').indexOf(q) >= 0;
+    }).map(function(entry){
+      const row = dexCatalogRow(entry.species);
+      return Object.assign({},entry,{
+        row,
+        taskLevel:row.taskLevel || null,
+        xpPerHour:Number(row.bestXpPerHour || 0),
+        effectiveness:dexEffectiveness(entry.species),
+      });
+    }).sort(dexSortEntries);
+    if (!visible.some(function(entry){ return entry.species === dexSelectedSpecies; })) dexSelectedSpecies = visible.length ? visible[0].species : null;
+
+    grid.classList.toggle('grouped', dexGroupLevel && visible.length > 0);
+    if (!visible.length) {
+      grid.innerHTML = '<div class="panel-empty"><div class="pe-ico">'+(q ? '🔍' : '◫')+'</div>'
         + '<div class="pe-t">'+(q ? 'Nenhuma espécie encontrada' : 'Sem espécies neste filtro')+'</div>'
         + '<div class="pe-s">'+(q ? 'Tente outro nome ou número.' : 'Troque a região para consultar outras espécies.')+'</div></div>';
-    const informed = list.filter(function(e){ return dexHasInfo(dexCatalogRow(e.species)); }).length, total = list.length;
-    const c = document.getElementById('dex-count');
-    if (c) { c.textContent = informed + ' / ' + total + ' espécies'; c.title = 'Espécies com dados locais ou da comunidade'; }
+    } else if (dexGroupLevel && DEX_COMBAT && DEX_COMBAT.groupByTaskLevel) {
+      grid.innerHTML = DEX_COMBAT.groupByTaskLevel(visible).map(function(group){
+        const label = group.level == null ? 'Sem nível de task' : 'Task Nv. '+fmtInt(group.level);
+        return '<section class="dex-level-group"><div class="dex-level-head"><span>'+label+'</span><small>'+group.rows.length+(group.rows.length === 1 ? ' Pokémon' : ' Pokémon')+'</small></div>'
+          + '<div class="dex-level-grid">'+group.rows.map(function(entry){ return dexCardHTML(entry,own); }).join('')+'</div></section>';
+      }).join('');
+    } else grid.innerHTML = visible.map(function(entry){ return dexCardHTML(entry,own); }).join('');
+
+    const informed = list.filter(function(entry){ return dexHasInfo(dexCatalogRow(entry.species)); }).length, total = list.length;
+    const count = document.getElementById('dex-count');
+    if (count) { count.textContent = informed + ' / ' + total + ' espécies'; count.title = 'Espécies com dados locais ou da comunidade'; }
     grid.onclick = function(event){ const cell = event.target && event.target.closest ? event.target.closest('.dex-cell') : null; if (cell) selectDexSpecies(cell.dataset.sp); };
     renderDexDetail();
     if (dexSelectedSpecies) loadDexDetail(dexSelectedSpecies);
@@ -1405,6 +1532,7 @@
   function setDexModeActive(){ const wrap = document.querySelector('.dex-mode'); if (!wrap) return; wrap.querySelectorAll('.sbtn').forEach(function(b){ b.classList.toggle('on', (b.dataset.dmode === 'shiny') === dexShiny); }); }
   function renderDex(){
     const main = document.getElementById('main');
+    const pokemonOptions = DEX_LIST.map(function(entry){ return '<option value="'+esc(entry.species)+'"></option>'; }).join('');
     main.innerHTML =
       '<div class="dex-shell"><section class="dex-browser">'
         + '<div class="dex-head">'
@@ -1412,6 +1540,13 @@
           + '<span class="box-count" id="dex-count"></span>'
           + '<span class="psearch mclose"><input id="dex-q" type="search" placeholder="Buscar espécie ou nº" value="'+esc(dexQuery)+'" spellcheck="false"></span>'
           + '<button class="tbtn" id="dex-refresh" title="Atualizar coleção e hub">↻</button>'
+        + '</div>'
+        + '<div class="dex-combat-bar">'
+          + '<label class="dex-combat-picker"><span>Meu Pokémon</span><input id="dex-attacker" type="search" list="dex-attacker-options" value="'+esc(dexAttackerSpecies)+'" placeholder="Ex.: Poliwrath" autocomplete="off" spellcheck="false"><datalist id="dex-attacker-options">'+pokemonOptions+'</datalist></label>'
+          + '<span class="dex-combat-meta" id="dex-attacker-meta"></span>'
+          + '<button type="button" class="sbtn" id="dex-combat-xp" aria-pressed="false" title="Mantém o maior dano primeiro e usa XP/h para desempatar">Dano + XP/h</button>'
+          + '<button type="button" class="sbtn" id="dex-group-level" aria-pressed="false" title="Cria grupos fixos pelo nível exigido pela task">Separar por nível</button>'
+          + '<button type="button" class="tbtn" id="dex-clear-attacker" title="Limpar meu Pokémon">×</button>'
         + '</div>'
         + '<div class="dex-toolbar">'
           + '<div class="dex-region"><span class="lbl">Região</span>'
@@ -1425,18 +1560,36 @@
             + '<button class="sbtn" data-dsort="name">Nome</button>'
             + '<button class="sbtn" data-dsort="status">Dados</button>'
             + '<button class="sbtn" data-dsort="performance">XP/h</button>'
+            + '<button class="sbtn" data-dsort="effectiveness">Dano</button>'
           + '</div>'
         + '</div>'
         + '<div class="dex-scroll"><div class="dex-grid" id="dex-grid"></div></div>'
       + '</section><aside class="dex-detail" id="dex-detail"></aside></div>';
     document.getElementById('dex-q').oninput = function(){ dexQuery = this.value || ''; renderDexGrid(); };
     document.getElementById('dex-refresh').onclick = function(){ dexDetailCache.clear(); loadDex(); };
+    const attackerInput = document.getElementById('dex-attacker');
+    attackerInput.oninput = function(){
+      this.setCustomValidity(''); this.setAttribute('aria-invalid','false');
+      const match = dexFindSpecies(this.value);
+      if (match && match.species !== dexAttackerSpecies) setDexAttacker(match.species);
+      else if (!this.value.trim() && dexAttackerSpecies) setDexAttacker('');
+    };
+    attackerInput.onchange = function(){
+      const match = dexFindSpecies(this.value);
+      if (!this.value.trim()) { if (dexAttackerSpecies) setDexAttacker(''); return; }
+      if (!match) { this.setAttribute('aria-invalid','true'); this.setCustomValidity('Escolha um Pokémon da lista.'); this.reportValidity(); return; }
+      this.setCustomValidity(''); setDexAttacker(match.species);
+    };
+    document.getElementById('dex-clear-attacker').onclick = function(){ setDexAttacker(''); const input = document.getElementById('dex-attacker'); if (input) input.focus(); };
+    document.getElementById('dex-combat-xp').onclick = function(){ if (!dexAttacker()) return; dexCombatXp = !dexCombatXp; saveDexCombatPreferences(); syncDexCombatControls(); renderDexGrid(); };
+    document.getElementById('dex-group-level').onclick = function(){ dexGroupLevel = !dexGroupLevel; saveDexCombatPreferences(); syncDexCombatControls(); renderDexGrid(); };
     main.querySelectorAll('.dex-region .sbtn').forEach(function(btn){ btn.onclick = function(){ dexRegion = btn.dataset.r; setDexRegionActive(); renderDexGrid(); }; });
     main.querySelectorAll('.dex-mode .sbtn').forEach(function(btn){ btn.onclick = function(){ dexShiny = btn.dataset.dmode === 'shiny'; setDexModeActive(); renderDexGrid(); }; });
-    main.querySelectorAll('.dex-order .sbtn').forEach(function(btn){ btn.onclick = function(){ const next = btn.dataset.dsort; if (dexSort === next) dexDir *= -1; else { dexSort = next; dexDir = 1; } setDexSortActive(); renderDexGrid(); }; });
+    main.querySelectorAll('.dex-order .sbtn').forEach(function(btn){ btn.onclick = function(){ const next = btn.dataset.dsort; if (next === 'effectiveness' && !dexAttacker()) return; if (dexSort === next) dexDir *= -1; else { dexSort = next; dexDir = 1; } setDexSortActive(); renderDexGrid(); }; });
     setDexRegionActive();
     setDexSortActive();
     setDexModeActive();
+    syncDexCombatControls();
     renderDexGrid();
   }
   function loadDex(){
@@ -1448,6 +1601,8 @@
       boxData = result[0] || []; boxRows = flattenBox(boxData);
       const hub = result[1] || { rows:[] }; dexCatalog = {}; dexCatalogError = hub.remoteError === true;
       (hub.rows || []).forEach(function(row){ if (row && row.species) dexCatalog[row.species] = row; });
+      dexCombat = hub.combat && typeof hub.combat === 'object' ? hub.combat : { types:{}, pokemon:{}, matchups:[] };
+      dexMatchupIndex = DEX_COMBAT && DEX_COMBAT.createMatchupIndex ? DEX_COMBAT.createMatchupIndex(dexCombat.matchups) : {};
       renderDex();
     })
       .catch(function(){ document.getElementById('main').innerHTML = panelState('!','PokéData indisponível','Não foi possível consultar os dados agora.','error'); });

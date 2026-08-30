@@ -2398,12 +2398,16 @@ ipcMain.handle('getPokedexHubCatalog', async () => {
   saveHuntLog();
   saveHuntPerformance();
   let remoteRows = [];
+  let combat = { types:{}, pokemon:{}, matchups:[] };
   let remoteError = false;
   try {
-    remoteRows = await communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout');
+    const remoteCatalog = await communityHubTimeout(communityClient.getPokemonHubCatalog(), 'pokemon_catalog_timeout');
+    remoteRows = remoteCatalog && Array.isArray(remoteCatalog.rows) ? remoteCatalog.rows : [];
+    if (remoteCatalog && remoteCatalog.combat) combat = remoteCatalog.combat;
   } catch { remoteError = true; }
   return {
     rows: buildPokemonCatalog({ huntLog, huntPerformance, itemSources:itemDropSources, remoteRows }),
+    combat,
     remoteError,
   };
 });

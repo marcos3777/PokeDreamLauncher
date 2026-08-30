@@ -111,13 +111,31 @@ function leaderboard(species = 'MrMime') {
   };
 }
 
+function combatCatalog() {
+  return {
+    types:[
+      { code:'psychic', name_pt:'Psíquico', sort_order:11 },
+      { code:'fairy', name_pt:'Fada', sort_order:18 },
+    ],
+    pokemon:[{ species:'MrMime', attack_type_code:'fairy' }],
+    species_types:[
+      { species:'MrMime', type_code:'psychic', slot:1 },
+      { species:'MrMime', type_code:'fairy', slot:2 },
+    ],
+    matchups:[{ attack_type_code:'fairy', defense_type_code:'psychic', relation:'neutral' }],
+  };
+}
+
 test('pokemon hub interpreta catálogo compacto e detalhe unificado', () => {
   const catalog = parsePokemonHubCatalog({ data:[{
     species:'MrMime', dex_number:122, contributors:'2', catch_pct:'15.5', kills_per_shiny:'267',
     broke_avg:'6.5', broke_max:'9', broke_min:'3', best_xp_per_hour:'180000', best_mobs_per_hour:'500',
-  }] });
-  assert.deepEqual(catalog[0].performance, { xpPerHour:180000, mobsPerHour:500 });
-  assert.equal(catalog[0].capture.brokeAvg, 6.5);
+  }], combat:combatCatalog() });
+  assert.deepEqual(catalog.rows[0].performance, { xpPerHour:180000, mobsPerHour:500 });
+  assert.equal(catalog.rows[0].capture.brokeAvg, 6.5);
+  assert.deepEqual(catalog.combat.pokemon.MrMime, { attackType:'fairy', types:['psychic','fairy'] });
+  assert.equal(catalog.combat.types.psychic.namePt, 'Psíquico');
+  assert.equal(catalog.combat.matchups[0].relation, 'neutral');
 
   const hub = parsePokemonHub({ data:{
     species:'MrMime', dex_number:122, capture:aggregate(), performance:leaderboard(),
@@ -135,9 +153,11 @@ test('cliente consulta catálogo e espécie pelo endpoint unificado', async () =
       ? jsonResponse({ data:{ species:'MrMime', dex_number:122, capture:aggregate(), performance:leaderboard() } })
       : jsonResponse({ data:[{ species:'MrMime', dex_number:122, contributors:null, catch_pct:null,
         kills_per_shiny:null, broke_avg:null, broke_max:null, broke_min:null,
-        best_xp_per_hour:'180000', best_mobs_per_hour:'500' }] });
+        best_xp_per_hour:'180000', best_mobs_per_hour:'500' }], combat:combatCatalog() });
   } });
-  assert.equal((await client.getPokemonHubCatalog())[0].performance.xpPerHour, 180000);
+  const catalog = await client.getPokemonHubCatalog();
+  assert.equal(catalog.rows[0].performance.xpPerHour, 180000);
+  assert.equal(catalog.combat.pokemon.MrMime.attackType, 'fairy');
   assert.equal((await client.getPokemonHub('MrMime')).dexNumber, 122);
   assert.equal(urls.length, 2);
 });

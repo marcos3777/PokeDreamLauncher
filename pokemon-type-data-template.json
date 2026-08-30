@@ -1,0 +1,1911 @@
+{
+  "schema_version": 1,
+  "instructions": {
+    "pokemon_types": "Preencha types com um ou dois códigos da lista types. Não altere species nem dex_number.",
+    "attack_type": "Preencha attack_type com exatamente um dos códigos presentes em types para o mesmo Pokémon.",
+    "type_matchups": "Preencha cada célula com 1.75, 1, 0.5 ou 0.25. As linhas são ataque e as colunas são defesa.",
+    "dual_type_note": "Não use 1.5 nem 0.75 na matriz base; esses valores serão calculados pelo launcher para alvos de dois tipos."
+  },
+  "allowed_matchup_values": [
+    1.75,
+    1,
+    0.5,
+    0.25
+  ],
+  "types": [
+    {
+      "code": "normal",
+      "name_pt": "Normal",
+      "sort_order": 1
+    },
+    {
+      "code": "fire",
+      "name_pt": "Fogo",
+      "sort_order": 2
+    },
+    {
+      "code": "water",
+      "name_pt": "Água",
+      "sort_order": 3
+    },
+    {
+      "code": "electric",
+      "name_pt": "Elétrico",
+      "sort_order": 4
+    },
+    {
+      "code": "grass",
+      "name_pt": "Planta",
+      "sort_order": 5
+    },
+    {
+      "code": "ice",
+      "name_pt": "Gelo",
+      "sort_order": 6
+    },
+    {
+      "code": "fighting",
+      "name_pt": "Lutador",
+      "sort_order": 7
+    },
+    {
+      "code": "poison",
+      "name_pt": "Veneno",
+      "sort_order": 8
+    },
+    {
+      "code": "ground",
+      "name_pt": "Terra",
+      "sort_order": 9
+    },
+    {
+      "code": "flying",
+      "name_pt": "Voador",
+      "sort_order": 10
+    },
+    {
+      "code": "psychic",
+      "name_pt": "Psíquico",
+      "sort_order": 11
+    },
+    {
+      "code": "bug",
+      "name_pt": "Inseto",
+      "sort_order": 12
+    },
+    {
+      "code": "rock",
+      "name_pt": "Pedra",
+      "sort_order": 13
+    },
+    {
+      "code": "ghost",
+      "name_pt": "Fantasma",
+      "sort_order": 14
+    },
+    {
+      "code": "dragon",
+      "name_pt": "Dragão",
+      "sort_order": 15
+    },
+    {
+      "code": "dark",
+      "name_pt": "Sombrio",
+      "sort_order": 16
+    },
+    {
+      "code": "steel",
+      "name_pt": "Aço",
+      "sort_order": 17
+    },
+    {
+      "code": "fairy",
+      "name_pt": "Fada",
+      "sort_order": 18
+    }
+  ],
+  "pokemon": [
+    {
+      "species": "Bulbasaur",
+      "dex_number": 1,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ivysaur",
+      "dex_number": 2,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Venusaur",
+      "dex_number": 3,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Charmander",
+      "dex_number": 4,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Charmeleon",
+      "dex_number": 5,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Charizard",
+      "dex_number": 6,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Squirtle",
+      "dex_number": 7,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Wartortle",
+      "dex_number": 8,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Blastoise",
+      "dex_number": 9,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Caterpie",
+      "dex_number": 10,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Metapod",
+      "dex_number": 11,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Butterfree",
+      "dex_number": 12,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Weedle",
+      "dex_number": 13,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kakuna",
+      "dex_number": 14,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Beedrill",
+      "dex_number": 15,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pidgey",
+      "dex_number": 16,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pidgeotto",
+      "dex_number": 17,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pidgeot",
+      "dex_number": 18,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Rattata",
+      "dex_number": 19,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Raticate",
+      "dex_number": 20,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Spearow",
+      "dex_number": 21,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Fearow",
+      "dex_number": 22,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ekans",
+      "dex_number": 23,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Arbok",
+      "dex_number": 24,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pikachu",
+      "dex_number": 25,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Raichu",
+      "dex_number": 26,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sandshrew",
+      "dex_number": 27,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sandslash",
+      "dex_number": 28,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "NidoranF",
+      "dex_number": 29,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Nidorina",
+      "dex_number": 30,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Nidoqueen",
+      "dex_number": 31,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "NidoranM",
+      "dex_number": 32,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Nidorino",
+      "dex_number": 33,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Nidoking",
+      "dex_number": 34,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Clefairy",
+      "dex_number": 35,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Clefable",
+      "dex_number": 36,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Vulpix",
+      "dex_number": 37,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ninetales",
+      "dex_number": 38,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Jigglypuff",
+      "dex_number": 39,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Wigglytuff",
+      "dex_number": 40,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Zubat",
+      "dex_number": 41,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Golbat",
+      "dex_number": 42,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Oddish",
+      "dex_number": 43,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Gloom",
+      "dex_number": 44,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Vileplume",
+      "dex_number": 45,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Paras",
+      "dex_number": 46,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Parasect",
+      "dex_number": 47,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Venonat",
+      "dex_number": 48,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Venomoth",
+      "dex_number": 49,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Diglett",
+      "dex_number": 50,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dugtrio",
+      "dex_number": 51,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Meowth",
+      "dex_number": 52,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Persian",
+      "dex_number": 53,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Psyduck",
+      "dex_number": 54,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Golduck",
+      "dex_number": 55,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Mankey",
+      "dex_number": 56,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Primeape",
+      "dex_number": 57,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Growlithe",
+      "dex_number": 58,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Arcanine",
+      "dex_number": 59,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Poliwag",
+      "dex_number": 60,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Poliwhirl",
+      "dex_number": 61,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Poliwrath",
+      "dex_number": 62,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Abra",
+      "dex_number": 63,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kadabra",
+      "dex_number": 64,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Alakazam",
+      "dex_number": 65,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Machop",
+      "dex_number": 66,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Machoke",
+      "dex_number": 67,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Machamp",
+      "dex_number": 68,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Bellsprout",
+      "dex_number": 69,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Weepinbell",
+      "dex_number": 70,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Victreebel",
+      "dex_number": 71,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tentacool",
+      "dex_number": 72,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tentacruel",
+      "dex_number": 73,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Geodude",
+      "dex_number": 74,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Graveler",
+      "dex_number": 75,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Golem",
+      "dex_number": 76,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ponyta",
+      "dex_number": 77,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Rapidash",
+      "dex_number": 78,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Slowpoke",
+      "dex_number": 79,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Slowbro",
+      "dex_number": 80,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magnemite",
+      "dex_number": 81,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magneton",
+      "dex_number": 82,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Farfetchd",
+      "dex_number": 83,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Doduo",
+      "dex_number": 84,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dodrio",
+      "dex_number": 85,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Seel",
+      "dex_number": 86,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dewgong",
+      "dex_number": 87,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Grimer",
+      "dex_number": 88,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Muk",
+      "dex_number": 89,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Shellder",
+      "dex_number": 90,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Cloyster",
+      "dex_number": 91,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Gastly",
+      "dex_number": 92,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Haunter",
+      "dex_number": 93,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Gengar",
+      "dex_number": 94,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Onix",
+      "dex_number": 95,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Drowzee",
+      "dex_number": 96,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hypno",
+      "dex_number": 97,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Krabby",
+      "dex_number": 98,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kingler",
+      "dex_number": 99,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Voltorb",
+      "dex_number": 100,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Electrode",
+      "dex_number": 101,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Exeggcute",
+      "dex_number": 102,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Exeggutor",
+      "dex_number": 103,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Cubone",
+      "dex_number": 104,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Marowak",
+      "dex_number": 105,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hitmonlee",
+      "dex_number": 106,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hitmonchan",
+      "dex_number": 107,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Lickitung",
+      "dex_number": 108,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Koffing",
+      "dex_number": 109,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Weezing",
+      "dex_number": 110,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Rhyhorn",
+      "dex_number": 111,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Rhydon",
+      "dex_number": 112,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Chansey",
+      "dex_number": 113,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tangela",
+      "dex_number": 114,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kangaskhan",
+      "dex_number": 115,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Horsea",
+      "dex_number": 116,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Seadra",
+      "dex_number": 117,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Goldeen",
+      "dex_number": 118,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Seaking",
+      "dex_number": 119,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Staryu",
+      "dex_number": 120,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Starmie",
+      "dex_number": 121,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "MrMime",
+      "dex_number": 122,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Scyther",
+      "dex_number": 123,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Jynx",
+      "dex_number": 124,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Electabuzz",
+      "dex_number": 125,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magmar",
+      "dex_number": 126,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pinsir",
+      "dex_number": 127,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tauros",
+      "dex_number": 128,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magikarp",
+      "dex_number": 129,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Gyarados",
+      "dex_number": 130,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Lapras",
+      "dex_number": 131,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ditto",
+      "dex_number": 132,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Eevee",
+      "dex_number": 133,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Vaporeon",
+      "dex_number": 134,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Jolteon",
+      "dex_number": 135,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Flareon",
+      "dex_number": 136,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Porygon",
+      "dex_number": 137,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Omanyte",
+      "dex_number": 138,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Omastar",
+      "dex_number": 139,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kabuto",
+      "dex_number": 140,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kabutops",
+      "dex_number": 141,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Aerodactyl",
+      "dex_number": 142,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Snorlax",
+      "dex_number": 143,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dratini",
+      "dex_number": 147,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dragonair",
+      "dex_number": 148,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dragonite",
+      "dex_number": 149,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Chikorita",
+      "dex_number": 152,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Bayleef",
+      "dex_number": 153,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Meganium",
+      "dex_number": 154,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Cyndaquil",
+      "dex_number": 155,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Quilava",
+      "dex_number": 156,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Typhlosion",
+      "dex_number": 157,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Totodile",
+      "dex_number": 158,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Croconaw",
+      "dex_number": 159,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Feraligatr",
+      "dex_number": 160,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sentret",
+      "dex_number": 161,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Furret",
+      "dex_number": 162,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hoothoot",
+      "dex_number": 163,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Noctowl",
+      "dex_number": 164,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ledyba",
+      "dex_number": 165,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ledian",
+      "dex_number": 166,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Spinarak",
+      "dex_number": 167,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ariados",
+      "dex_number": 168,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Crobat",
+      "dex_number": 169,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Chinchou",
+      "dex_number": 170,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Lanturn",
+      "dex_number": 171,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pichu",
+      "dex_number": 172,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Cleffa",
+      "dex_number": 173,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Igglybuff",
+      "dex_number": 174,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Togepi",
+      "dex_number": 175,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Togetic",
+      "dex_number": 176,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Natu",
+      "dex_number": 177,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Xatu",
+      "dex_number": 178,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Mareep",
+      "dex_number": 179,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Flaaffy",
+      "dex_number": 180,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ampharos",
+      "dex_number": 181,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Bellossom",
+      "dex_number": 182,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Marill",
+      "dex_number": 183,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Azumarill",
+      "dex_number": 184,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sudowoodo",
+      "dex_number": 185,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Politoed",
+      "dex_number": 186,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hoppip",
+      "dex_number": 187,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Skiploom",
+      "dex_number": 188,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Jumpluff",
+      "dex_number": 189,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Aipom",
+      "dex_number": 190,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sunkern",
+      "dex_number": 191,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sunflora",
+      "dex_number": 192,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Yanma",
+      "dex_number": 193,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Wooper",
+      "dex_number": 194,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Quagsire",
+      "dex_number": 195,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Espeon",
+      "dex_number": 196,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Umbreon",
+      "dex_number": 197,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Murkrow",
+      "dex_number": 198,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Slowking",
+      "dex_number": 199,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Misdreavus",
+      "dex_number": 200,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Unown",
+      "dex_number": 201,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Wobbuffet",
+      "dex_number": 202,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Girafarig",
+      "dex_number": 203,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pineco",
+      "dex_number": 204,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Forretress",
+      "dex_number": 205,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Dunsparce",
+      "dex_number": 206,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Gligar",
+      "dex_number": 207,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Steelix",
+      "dex_number": 208,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Snubbull",
+      "dex_number": 209,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Granbull",
+      "dex_number": 210,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Qwilfish",
+      "dex_number": 211,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Scizor",
+      "dex_number": 212,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Shuckle",
+      "dex_number": 213,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Heracross",
+      "dex_number": 214,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Sneasel",
+      "dex_number": 215,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Teddiursa",
+      "dex_number": 216,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Ursaring",
+      "dex_number": 217,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Slugma",
+      "dex_number": 218,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magcargo",
+      "dex_number": 219,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Swinub",
+      "dex_number": 220,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Piloswine",
+      "dex_number": 221,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Corsola",
+      "dex_number": 222,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Remoraid",
+      "dex_number": 223,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Octillery",
+      "dex_number": 224,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Delibird",
+      "dex_number": 225,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Mantine",
+      "dex_number": 226,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Skarmory",
+      "dex_number": 227,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Houndour",
+      "dex_number": 228,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Houndoom",
+      "dex_number": 229,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Kingdra",
+      "dex_number": 230,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Phanpy",
+      "dex_number": 231,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Donphan",
+      "dex_number": 232,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Porygon2",
+      "dex_number": 233,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Stantler",
+      "dex_number": 234,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Smeargle",
+      "dex_number": 235,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tyrogue",
+      "dex_number": 236,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Hitmontop",
+      "dex_number": 237,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Smoochum",
+      "dex_number": 238,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Elekid",
+      "dex_number": 239,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Magby",
+      "dex_number": 240,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Miltank",
+      "dex_number": 241,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Blissey",
+      "dex_number": 242,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Larvitar",
+      "dex_number": 246,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Pupitar",
+      "dex_number": 247,
+      "types": [],
+      "attack_type": null
+    },
+    {
+      "species": "Tyranitar",
+      "dex_number": 248,
+      "types": [],
+      "attack_type": null
+    }
+  ],
+  "type_matchups": {
+    "normal": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "fire": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "water": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "electric": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "grass": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "ice": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "fighting": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "poison": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "ground": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "flying": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "psychic": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "bug": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "rock": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "ghost": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "dragon": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "dark": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "steel": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    },
+    "fairy": {
+      "normal": null,
+      "fire": null,
+      "water": null,
+      "electric": null,
+      "grass": null,
+      "ice": null,
+      "fighting": null,
+      "poison": null,
+      "ground": null,
+      "flying": null,
+      "psychic": null,
+      "bug": null,
+      "rock": null,
+      "ghost": null,
+      "dragon": null,
+      "dark": null,
+      "steel": null,
+      "fairy": null
+    }
+  }
+}

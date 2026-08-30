@@ -25,11 +25,31 @@ export default {
     }
 
     const detail = speciesValues.length === 1;
-    const { data, error } = detail
-      ? await ctx.supabaseAdmin.rpc("get_pokemon_hub", { p_species: speciesValues[0] })
-      : await ctx.supabaseAdmin.rpc("get_pokemon_hub_catalog");
+    if (detail) {
+      const { data, error } = await ctx.supabaseAdmin.rpc("get_pokemon_hub", { p_species: speciesValues[0] });
+      if (error) {
+        console.error("pokemon-hub rpc failed", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+        });
+        return response({ error: "server_error" }, 500);
+      }
+      return response({ data: data ?? null });
+    }
 
-    if (error) {
+    const [catalog, types, pokemon, speciesTypes, matchups] = await Promise.all([
+      ctx.supabaseAdmin.rpc("get_pokemon_hub_catalog"),
+      ctx.supabaseAdmin.from("types").select("code,name_pt,sort_order").order("sort_order"),
+      ctx.supabaseAdmin.from("community_species").select("species,attack_type_code").order("dex_number"),
+      ctx.supabaseAdmin.from("community_species_types").select("species,type_code,slot").order("species").order("slot"),
+      ctx.supabaseAdmin.from("type_matchups").select("attack_type_code,defense_type_code,relation")
+        .order("attack_type_code").order("defense_type_code"),
+    ]);
+    const failed = [catalog, types, pokemon, speciesTypes, matchups].find((result) => result.error);
+
+    if (failed?.error) {
+      const error = failed.error;
       console.error("pokemon-hub rpc failed", {
         code: error.code,
         message: error.message,
@@ -38,6 +58,14 @@ export default {
       return response({ error: "server_error" }, 500);
     }
 
-    return response({ data: data ?? (detail ? null : []) });
+    return response({
+      data: catalog.data ?? [],
+      combat: {
+        types: types.data ?? [],
+        pokemon: pokemon.data ?? [],
+        species_types: speciesTypes.data ?? [],
+        matchups: matchups.data ?? [],
+      },
+    });
   }),
 };

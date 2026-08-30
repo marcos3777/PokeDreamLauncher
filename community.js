@@ -11,6 +11,8 @@ const MAX_BROKE_SUM = Number.MAX_SAFE_INTEGER;
 const MAX_HUNT_MS = 630_720_000_000;
 const MAX_ACCOUNTS = 32;
 const SPECIES_RE = /^[A-Z][A-Za-z0-9]{0,31}$/;
+const TYPE_CODE_RE = /^[a-z][a-z0-9_]{1,31}$/;
+const MATCHUP_RELATIONS = new Set(['super_effective', 'neutral', 'resisted', 'immune']);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TOKEN_RE = /^[A-Za-z0-9_-]{43,128}$/;
 const VERSION_RE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,31}$/;
@@ -343,13 +345,77 @@ function parseAggregate(payload, species) {
   return result;
 }
 
+function parsePokemonCombatCatalog(value) {
+  const empty = { types:{}, pokemon:{}, matchups:[] };
+  if (value == null) return empty;
+  if (!isRecord(value)) throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+
+  const typeRows = value.types;
+  const pokemonRows = value.pokemon;
+  const speciesTypeRows = value.species_types;
+  const matchupRows = value.matchups;
+  if (!Array.isArray(typeRows) || typeRows.length > 32
+    || !Array.isArray(pokemonRows) || pokemonRows.length > 1000
+    || !Array.isArray(speciesTypeRows) || speciesTypeRows.length > 2000
+    || !Array.isArray(matchupRows) || matchupRows.length > 1024) {
+    throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+  }
+
+  const types = {};
+  for (const row of typeRows) {
+    const sortOrder = row && safeInteger(row.sort_order, 1, 32);
+    if (!isRecord(row) || typeof row.code !== 'string' || !TYPE_CODE_RE.test(row.code)
+      || typeof row.name_pt !== 'string' || !row.name_pt.trim() || row.name_pt.length > 32
+      || sortOrder == null || types[row.code]) {
+      throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    }
+    types[row.code] = { code:row.code, namePt:row.name_pt.trim(), sortOrder };
+  }
+
+  const pokemon = {};
+  for (const row of pokemonRows) {
+    if (!isRecord(row) || typeof row.species !== 'string' || !SPECIES_RE.test(row.species)
+      || typeof row.attack_type_code !== 'string' || !types[row.attack_type_code] || pokemon[row.species]) {
+      throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    }
+    pokemon[row.species] = { attackType:row.attack_type_code, types:[] };
+  }
+
+  for (const row of speciesTypeRows) {
+    const slot = row && safeInteger(row.slot, 1, 2);
+    const target = row && pokemon[row.species];
+    if (!isRecord(row) || !target || typeof row.type_code !== 'string' || !types[row.type_code]
+      || slot == null || target.types[slot - 1]) {
+      throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    }
+    target.types[slot - 1] = row.type_code;
+  }
+  if (Object.values(pokemon).some((row) => !row.types.length || row.types.some((type) => !type))) {
+    throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+  }
+
+  const matchupKeys = new Set();
+  const matchups = matchupRows.map((row) => {
+    if (!isRecord(row) || typeof row.attack_type_code !== 'string' || !types[row.attack_type_code]
+      || typeof row.defense_type_code !== 'string' || !types[row.defense_type_code]
+      || !MATCHUP_RELATIONS.has(row.relation)) {
+      throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    }
+    const key = `${row.attack_type_code}:${row.defense_type_code}`;
+    if (matchupKeys.has(key)) throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
+    matchupKeys.add(key);
+    return { attackType:row.attack_type_code, defenseType:row.defense_type_code, relation:row.relation };
+  });
+  return { types, pokemon, matchups };
+}
+
 function parsePokemonHubCatalog(payload) {
   const value = isRecord(payload) && Object.prototype.hasOwnProperty.call(payload, 'data') ? payload.data : payload;
   if (!Array.isArray(value) || value.length > 1000) {
     throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
   }
   const seen = new Set();
-  return value.map((row) => {
+  const rows = value.map((row) => {
     if (!isRecord(row) || typeof row.species !== 'string' || !SPECIES_RE.test(row.species) || seen.has(row.species)) {
       throw new CommunityHttpError('invalid server response', 0, 'invalid_response');
     }
@@ -398,6 +464,8 @@ function parsePokemonHubCatalog(payload) {
       },
     };
   });
+  const combat = isRecord(payload) ? parsePokemonCombatCatalog(payload.combat) : parsePokemonCombatCatalog(null);
+  return { rows, combat };
 }
 
 function parsePokemonHub(payload, species) {
@@ -630,6 +698,7 @@ module.exports = {
   buildSubmitPayload,
   buildPerformancePayload,
   parsePerformanceLeaderboard,
+  parsePokemonCombatCatalog,
   parsePokemonHubCatalog,
   parsePokemonHub,
   createCommunityClient,

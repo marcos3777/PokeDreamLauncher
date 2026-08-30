@@ -70,6 +70,10 @@ test('read model do banco permanece privado e é servido por uma única Edge Fun
   assert.match(taskBonusMigration, /completed_task_types smallint not null default 0/i);
   assert.match(edge, /rpc\("get_pokemon_hub_catalog"\)/);
   assert.match(edge, /rpc\("get_pokemon_hub"/);
+  assert.match(edge, /from\("types"\)\.select\("code,name_pt,sort_order"\)/);
+  assert.match(edge, /from\("community_species_types"\)\.select\("species,type_code,slot"\)/);
+  assert.match(edge, /from\("type_matchups"\)\.select\("attack_type_code,defense_type_code,relation"\)/);
+  assert.match(edge, /combat:\s*\{[\s\S]*species_types:/);
   assert.match(config, /\[functions\.pokemon-hub\][\s\S]*?verify_jwt = false/);
 });
 
@@ -96,5 +100,11 @@ test('PokéData prioriza espécies informadas e expõe o hub persistente', () =>
   assert.doesNotMatch(app, /id="dex-summary"|id="dex-missing"|>capturados<|>faltando</);
   assert.match(app, /Drops observados/);
   assert.match(app, /getPokedexHubCatalog/);
+  assert.match(app, /Meu Pokémon[\s\S]*id="dex-attacker"/);
+  assert.match(app, /id="dex-combat-xp"[\s\S]*Dano \+ XP\/h/);
+  assert.match(app, /id="dex-group-level"[\s\S]*Separar por nível/);
+  assert.match(app, /Ataca: ['"]?\+esc\(dexTypeName\(combat\.attackType\)\)/);
+  assert.match(app, /DEX_COMBAT\.groupByTaskLevel/);
+  assert.match(app, /DEX_COMBAT\.effectivenessFor/);
   assert.match(preload, /getPokemonHub: \(species\) => ipcRenderer\.invoke\('getPokemonHub', species\)/);
 });
