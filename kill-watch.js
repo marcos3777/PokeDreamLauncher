@@ -1,6 +1,6 @@
 'use strict';
 
-const KILL_STALL_TIMEOUT_MS = 30 * 1000;
+const KILL_STALL_TIMEOUT_MS = 2 * 60 * 1000;
 const KILL_STALL_MIN_SECONDS = 10;
 const KILL_STALL_MAX_SECONDS = 10 * 60;
 

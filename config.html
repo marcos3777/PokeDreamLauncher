@@ -630,8 +630,8 @@
     if (!s) { failsafeStatus.textContent = 'Configuracao indisponivel nesta versao.'; return; }
     failsafeSeconds.min = s.minSeconds != null ? s.minSeconds : 10;
     failsafeSeconds.max = s.maxSeconds != null ? s.maxSeconds : 600;
-    failsafeSeconds.value = s.timeoutSeconds != null ? s.timeoutSeconds : 30;
-    failsafeStatus.textContent = 'A tela sera recarregada apos ' + failsafeSeconds.value + ' segundos sem novas kills.';
+    failsafeSeconds.value = s.timeoutSeconds != null ? s.timeoutSeconds : 120;
+    failsafeStatus.textContent = 'A tela sera recarregada apos ' + failsafeSeconds.value + ' segundos sem novas kills, com intervalo de 15 segundos entre os recarregamentos das telas.';
   }
   function refreshFailsafe(){
     if (!P || !P.getKillWatchSettings) { renderFailsafe(null); return; }

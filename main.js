@@ -796,6 +796,8 @@ function pushAccounts() {
 }
 
 const STALL_RECOVERY_STABLE_MS = 5 * 60 * 1000;
+const KILL_STALL_RELOAD_COOLDOWN_MS = 15 * 1000;
+let nextKillStallReloadAt = 0;
 
 function resetStallRecovery(g) {
   if (g) g._stallRecovery = null;
@@ -825,10 +827,14 @@ function checkKillStalls() {
   for (const g of games) {
     const recovery = g._stallRecovery;
     if (recovery && recovery.recoveredAt && now - recovery.recoveredAt >= STALL_RECOVERY_STABLE_MS) resetStallRecovery(g);
+    if (now < nextKillStallReloadAt) return;
     const stalledAfterKill = shouldReloadForKillStall(g._killWatch, now, timeoutMs);
     const stillStalledAfterReload = recovery && recovery.attempts === 1 && !recovery.recoveredAt
       && now - recovery.lastReloadAt >= timeoutMs;
-    if (stalledAfterKill || stillStalledAfterReload) reloadForKillStall(g, now);
+    if ((stalledAfterKill || stillStalledAfterReload) && reloadForKillStall(g, now)) {
+      nextKillStallReloadAt = now + KILL_STALL_RELOAD_COOLDOWN_MS;
+      return;
+    }
   }
 }
 
